@@ -1,9 +1,9 @@
 import { emptyCard, PLAY_ROWS, type Card, type Faction } from './card'
 
 /**
- * La carta se guarda como JSON plano. La imagen viaja adentro como data URL,
- * así que el archivo es autocontenido: se puede pasar a otra máquina y abre
- * igual, sin adjuntos sueltos.
+ * El mazo se guarda como JSON plano. Las imágenes viajan adentro como data
+ * URL, así que el archivo es autocontenido: se puede pasar a otra máquina y
+ * abre igual, sin adjuntos sueltos.
  */
 export const FILE_EXTENSION = '.dune.json'
 
@@ -11,12 +11,15 @@ const AUTOSAVE_KEY = 'dune-card-generator:card'
 
 type SavedFile = {
   format: 'dune-imperium-card'
-  version: 1
-  card: Card
+  version: 2
+  cards: Card[]
 }
 
-export function serializeCard(card: Card): string {
-  const file: SavedFile = { format: 'dune-imperium-card', version: 1, card }
+/** La versión 1 guardaba una sola carta. */
+type LegacyFile = { format: string; version?: number; card?: Card }
+
+export function serializeDeck(cards: Card[]): string {
+  const file: SavedFile = { format: 'dune-imperium-card', version: 2, cards }
   return JSON.stringify(file, null, 2)
 }
 
@@ -25,7 +28,7 @@ export function serializeCard(card: Card): string {
  * archivos guardados con versiones viejas siguen abriendo cuando el modelo
  * crece.
  */
-export function parseCard(json: string): Card {
+export function parseDeck(json: string): Card[] {
   const parsed: unknown = JSON.parse(json)
 
   if (
@@ -36,7 +39,11 @@ export function parseCard(json: string): Card {
     throw new Error('El archivo no es una carta de Dune: Imperium.')
   }
 
-  return migrate({ ...emptyCard(), ...(parsed as SavedFile).card })
+  const file = parsed as SavedFile & LegacyFile
+  const cards = file.cards ?? (file.card ? [file.card] : [])
+  if (!cards.length) throw new Error('El archivo no tiene ninguna carta.')
+
+  return cards.map((card) => migrate({ ...emptyCard(), ...card }))
 }
 
 /**
@@ -55,9 +62,11 @@ function migrate(card: LegacyCard): Card {
   return card
 }
 
-export function downloadCard(card: Card) {
-  const name = card.title.trim() || 'carta'
-  const blob = new Blob([serializeCard(card)], { type: 'application/json' })
+export function downloadDeck(cards: Card[]) {
+  // Un mazo de una sola carta se guarda con el nombre de esa carta; varios,
+  // con un nombre genérico, porque no hay uno mejor que elegir.
+  const name = cards.length === 1 ? cards[0].title.trim() || 'carta' : 'mazo'
+  const blob = new Blob([serializeDeck(cards)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
@@ -68,23 +77,23 @@ export function downloadCard(card: Card) {
 }
 
 /** Nombre de archivo sin caracteres que Windows rechaza. */
-function fileSafe(name: string) {
+export function fileSafe(name: string) {
   return name.replace(/[\\/:*?"<>|]/g, '-')
 }
 
-export function saveAutosave(card: Card) {
+export function saveAutosave(cards: Card[]) {
   try {
-    localStorage.setItem(AUTOSAVE_KEY, serializeCard(card))
+    localStorage.setItem(AUTOSAVE_KEY, serializeDeck(cards))
   } catch {
     // Se llenó la cuota (imágenes grandes). No es motivo para romper la app.
   }
 }
 
-export function loadAutosave(): Card | null {
+export function loadAutosave(): Card[] | null {
   const json = localStorage.getItem(AUTOSAVE_KEY)
   if (!json) return null
   try {
-    return parseCard(json)
+    return parseDeck(json)
   } catch {
     return null
   }

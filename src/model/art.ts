@@ -1,19 +1,59 @@
 import { ART_RECT } from '../render/constants'
 import type { ArtTransform, CardArt } from './card'
 
-export const MIN_ART_SCALE = 0.05
 export const MAX_ART_SCALE = 8
-
-export const clampArtScale = (scale: number) =>
-  Math.min(MAX_ART_SCALE, Math.max(MIN_ART_SCALE, scale))
 
 /**
  * Escala mínima para que la imagen cubra todo el Card Art Container
- * (equivalente a `object-fit: cover`), centrada en el recorte.
+ * (equivalente a `object-fit: cover`). Es también el piso del zoom: por
+ * debajo de acá el fondo del contenedor asoma por algún lado.
  */
+export const coverScale = (imageWidth: number, imageHeight: number) =>
+  Math.max(ART_RECT.width / imageWidth, ART_RECT.height / imageHeight)
+
+/**
+ * Techo del zoom. Una imagen muy chica necesita más de `MAX_ART_SCALE` sólo
+ * para cubrir el recorte, así que el techo nunca queda por debajo del piso.
+ */
+export const maxArtScale = (imageWidth: number, imageHeight: number) =>
+  Math.max(MAX_ART_SCALE, coverScale(imageWidth, imageHeight))
+
+export const clampArtScale = (scale: number, imageWidth: number, imageHeight: number) =>
+  Math.min(
+    maxArtScale(imageWidth, imageHeight),
+    Math.max(coverScale(imageWidth, imageHeight), scale),
+  )
+
+/**
+ * Encierra el encuadre dentro del recorte: la escala nunca baja del cover y la
+ * posición nunca deja entrar un borde de la imagen. Así el fondo gris del
+ * contenedor no se ve nunca, ni al hacer zoom ni al arrastrar.
+ */
+export function clampArtTransform(
+  transform: ArtTransform,
+  imageWidth: number,
+  imageHeight: number,
+): ArtTransform {
+  const scale = clampArtScale(transform.scale, imageWidth, imageHeight)
+  return {
+    scale,
+    x: clampAxis(transform.x, imageWidth * scale, ART_RECT.x, ART_RECT.width),
+    y: clampAxis(transform.y, imageHeight * scale, ART_RECT.y, ART_RECT.height),
+  }
+}
+
+/**
+ * Deja el tramo de imagen que sobra libre para moverse, pero no más. Si la
+ * imagen no llega a cubrir el eje (sólo pasa con transforms viejos o cargados
+ * de un archivo), la centra: es lo menos feo posible.
+ */
+function clampAxis(value: number, size: number, start: number, extent: number) {
+  if (size <= extent) return start + (extent - size) / 2
+  return Math.min(start, Math.max(start + extent - size, value))
+}
+
 export function fitCover(imageWidth: number, imageHeight: number): ArtTransform {
-  const scale = Math.max(ART_RECT.width / imageWidth, ART_RECT.height / imageHeight)
-  return centerAt(imageWidth, imageHeight, scale)
+  return centerAt(imageWidth, imageHeight, coverScale(imageWidth, imageHeight))
 }
 
 export function centerAt(

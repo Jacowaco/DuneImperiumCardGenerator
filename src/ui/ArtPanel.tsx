@@ -1,4 +1,11 @@
-import { centerAt, clampArtScale, fitCover, MAX_ART_SCALE, MIN_ART_SCALE } from '../model/art'
+import {
+  centerAt,
+  clampArtScale,
+  clampArtTransform,
+  coverScale,
+  fitCover,
+  maxArtScale,
+} from '../model/art'
 import type { ArtTransform, CardArt } from '../model/card'
 import { Button, Hint, Section } from './controls'
 
@@ -9,11 +16,15 @@ type Props = {
   onClear: () => void
 }
 
-// El zoom se mueve en escala logarítmica para que el slider se sienta parejo
-// entre 5% y 800%.
-const RANGE = Math.log(MAX_ART_SCALE / MIN_ART_SCALE)
-const toSlider = (scale: number) => Math.log(scale / MIN_ART_SCALE) / RANGE
-const fromSlider = (value: number) => MIN_ART_SCALE * Math.exp(value * RANGE)
+// El zoom se mueve en escala logarítmica para que el slider se sienta parejo.
+// El extremo izquierdo es el encuadre que cubre justo el recorte: más lejos no
+// se puede ir sin destapar el fondo del contenedor.
+const range = (art: CardArt) =>
+  Math.log(maxArtScale(art.width, art.height) / coverScale(art.width, art.height))
+const toSlider = (art: CardArt, scale: number) =>
+  Math.log(scale / coverScale(art.width, art.height)) / range(art)
+const fromSlider = (art: CardArt, value: number) =>
+  coverScale(art.width, art.height) * Math.exp(value * range(art))
 
 export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
   return (
@@ -48,19 +59,29 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
             max={1}
             step={0.001}
             disabled={!art}
-            value={art ? toSlider(art.transform.scale) : 0}
+            value={art ? toSlider(art, art.transform.scale) : 0}
             onChange={(event) => {
               if (!art) return
-              const scale = clampArtScale(fromSlider(Number(event.target.value)))
+              const scale = clampArtScale(
+                fromSlider(art, Number(event.target.value)),
+                art.width,
+                art.height,
+              )
               // Zoom desde el centro del recorte, no desde la esquina de la imagen.
               const { x, y, scale: current } = art.transform
               const cx = art.width / 2
               const cy = art.height / 2
-              onTransform({
-                scale,
-                x: x + cx * current - cx * scale,
-                y: y + cy * current - cy * scale,
-              })
+              onTransform(
+                clampArtTransform(
+                  {
+                    scale,
+                    x: x + cx * current - cx * scale,
+                    y: y + cy * current - cy * scale,
+                  },
+                  art.width,
+                  art.height,
+                ),
+              )
             }}
             className="accent-sand-500"
           />

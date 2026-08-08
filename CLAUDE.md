@@ -50,6 +50,24 @@ render de referencia, no estimadas):
 - `TITLE` — línea de base 76, inicial de 37 px y resto de 26 (versalitas).
 - `COST` — rombo centrado en (676, 93), número de 71 px de alto.
 
+### Encuadre de la imagen
+
+El encuadre **nunca puede destapar el fondo del contenedor**: `ART_RECT` siempre
+queda cubierto por la imagen. `clampArtTransform` (`src/model/art.ts`) es el
+único lugar donde se decide eso, y por ahí pasan las tres formas de mover la
+imagen — rueda, arrastre y slider de zoom.
+
+Son dos límites: el zoom no baja de `coverScale` (la escala que cubre justo el
+recorte, o sea `object-fit: cover`) y el desplazamiento sólo llega hasta donde
+la imagen sobra. Por eso el slider arranca en el cover de *esa* imagen y no en
+un porcentaje fijo. Una imagen más chica que el recorte necesita más de
+`MAX_ART_SCALE` sólo para cubrirlo, así que el techo también se calcula por
+imagen (`maxArtScale`).
+
+El arrastre además necesita `dragBoundFunc`: Konva mueve el nodo por su cuenta
+mientras se arrastra, sin pasar por el estado de React, así que limitarlo sólo
+al guardar el transform dejaría ver el borde durante el movimiento.
+
 ### Geometría de las cajas de contenido
 
 | Caja | y |
@@ -156,5 +174,19 @@ punto que le corresponde y nada más cambia.
   - [x] cajas de play (3 alturas) y banda de reveal
   - [x] filas de iconos dentro de esas cajas, con cantidad
 - [ ] Fase 4 — pulido de UI
-- [ ] Fase 5 — biblioteca de cartas, export en lote, hoja de impresión 3×3
+- [ ] Fase 5 — mazo
+  - [x] galería de cartas, guardar y abrir el mazo entero, autoguardado
+  - [ ] export en lote
+  - [ ] hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio
+
+## La galería
+
+El archivo guardado pasó a tener un **mazo** (`version: 2`, con `cards[]`).
+`parseDeck` sigue abriendo los de `version: 1`, que tenían una sola carta en
+`card`, envolviéndola en un array.
+
+Las miniaturas son el mismo `CardStage` que el preview grande, a escala chica
+y sin `onArtChange` — ese prop es lo que decide si la carta es interactiva. Se
+hace así, y no con una imagen aparte, para que una carta en la galería nunca
+pueda verse distinta de como se va a exportar.

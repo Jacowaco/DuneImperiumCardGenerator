@@ -8,7 +8,7 @@ import backgroundUrl from '../assets/layers/background.png'
 import blackBorderUrl from '../assets/layers/black-border.png'
 import cardArtContainerUrl from '../assets/layers/card-art-container.png'
 import { NO_EXPORT } from '../export/exportPng'
-import { clampArtScale } from '../model/art'
+import { clampArtScale, clampArtTransform } from '../model/art'
 import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
 import { AgentIcons } from './layers/AgentIcons'
@@ -23,8 +23,12 @@ type Props = {
   card: Card
   /** Escala del preview. El export siempre sale al tamaño real del template. */
   scale: number
-  stageRef: RefObject<Konva.Stage | null>
-  onArtChange: (transform: ArtTransform) => void
+  stageRef?: RefObject<Konva.Stage | null>
+  /**
+   * Sin esto la carta se dibuja pero no se puede tocar: es el modo que usan
+   * las miniaturas de la galería.
+   */
+  onArtChange?: (transform: ArtTransform) => void
 }
 
 const ZOOM_SPEED = 0.0015
@@ -41,7 +45,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
   useFontsReady()
 
   const handleWheel = (event: KonvaEventObject<WheelEvent>) => {
-    if (!card.art) return
+    if (!card.art || !onArtChange) return
     event.evt.preventDefault()
 
     const stage = event.target.getStage()
@@ -53,19 +57,37 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
     const py = pointer.y / scale
 
     const { x, y, scale: current } = card.art.transform
-    const next = clampArtScale(current * Math.exp(-event.evt.deltaY * ZOOM_SPEED))
+    const { width, height } = card.art
+    const next = clampArtScale(
+      current * Math.exp(-event.evt.deltaY * ZOOM_SPEED),
+      width,
+      height,
+    )
 
-    // Mantiene fijo el punto bajo el cursor mientras se hace zoom.
-    onArtChange({
-      scale: next,
-      x: px - ((px - x) / current) * next,
-      y: py - ((py - y) / current) * next,
-    })
+    // Mantiene fijo el punto bajo el cursor mientras se hace zoom; el clamp
+    // después lo empuja de vuelta adentro si el zoom destapó un borde.
+    onArtChange(
+      clampArtTransform(
+        {
+          scale: next,
+          x: px - ((px - x) / current) * next,
+          y: py - ((py - y) / current) * next,
+        },
+        width,
+        height,
+      ),
+    )
   }
 
   const handleDrag = (event: KonvaEventObject<DragEvent>) => {
-    if (!card.art) return
-    onArtChange({ ...card.art.transform, x: event.target.x(), y: event.target.y() })
+    if (!card.art || !onArtChange) return
+    onArtChange(
+      clampArtTransform(
+        { ...card.art.transform, x: event.target.x(), y: event.target.y() },
+        card.art.width,
+        card.art.height,
+      ),
+    )
   }
 
   return (
@@ -85,10 +107,17 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
 
         {/* Imagen del jugador, recortada al contenedor */}
         <Group clip={{ ...ART_RECT }}>
-          {card.art && <ArtImage art={card.art} onDrag={handleDrag} />}
+          {card.art && (
+            <ArtImage
+              art={card.art}
+              stageScale={scale}
+              draggable={Boolean(onArtChange)}
+              onDrag={handleDrag}
+            />
+          )}
         </Group>
 
-        {!card.art && <ArtPlaceholder />}
+        {!card.art && onArtChange && <ArtPlaceholder />}
 
         <ContentBoxes card={card} />
         <ContentIcons card={card} />
@@ -106,9 +135,13 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
 
 function ArtImage({
   art,
+  stageScale,
+  draggable,
   onDrag,
 }: {
   art: NonNullable<Card['art']>
+  stageScale: number
+  draggable: boolean
   onDrag: (event: KonvaEventObject<DragEvent>) => void
 }) {
   const [image] = useImage(art.src)
@@ -121,7 +154,19 @@ function ArtImage({
       y={art.transform.y}
       scaleX={art.transform.scale}
       scaleY={art.transform.scale}
-      draggable
+      draggable={draggable}
+      // Konva mueve el nodo por su cuenta durante el arrastre, así que el
+      // límite tiene que aplicarse acá y no sólo al guardar el transform.
+      // La posición viene en píxeles de pantalla; el modelo está en píxeles
+      // de carta.
+      dragBoundFunc={(pos) => {
+        const clamped = clampArtTransform(
+          { ...art.transform, x: pos.x / stageScale, y: pos.y / stageScale },
+          art.width,
+          art.height,
+        )
+        return { x: clamped.x * stageScale, y: clamped.y * stageScale }
+      }}
       onDragMove={onDrag}
       onDragEnd={onDrag}
     />

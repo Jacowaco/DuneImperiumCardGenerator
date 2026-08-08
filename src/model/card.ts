@@ -62,6 +62,11 @@ export type Card = {
   cost: number | null
   /** Icono del beneficio de compra. Si hay uno, se dibuja la cinta larga. */
   purchaseBenefit: IconId | null
+  /**
+   * Cantidad dibujada encima del icono del beneficio. Sólo la usan los iconos
+   * que salen vacíos del PSD (`iconTakesNumber`); para el resto se ignora.
+   */
+  purchaseBenefitAmount: number
   /** Dónde se puede mandar el agente. Se apilan en la columna izquierda. */
   agentIcons: AgentIcon[]
   agentIconStyle: AgentIconStyle
@@ -83,6 +88,7 @@ export const emptyCard = (): Card => ({
   faction: null,
   cost: null,
   purchaseBenefit: null,
+  purchaseBenefitAmount: 1,
   agentIcons: [],
   agentIconStyle: 'locations',
   playRows: 1,

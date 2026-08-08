@@ -1,7 +1,7 @@
 import { Image as KonvaImage } from 'react-konva'
 import useImage from 'use-image'
 
-import { ICONS, type IconId } from '../../assets/icons'
+import { ICON_NUMBER_COLORS, ICONS, type IconId } from '../../assets/icons'
 import costBenefitUrl from '../../assets/layers/card-cost-benefit.png'
 import costUrl from '../../assets/layers/card-cost.png'
 import type { Card } from '../../model/card'
@@ -23,7 +23,9 @@ export function CostBadge({ card }: { card: Card }) {
     <>
       <KonvaImage image={card.purchaseBenefit ? withBenefit : plain} listening={false} />
 
-      {card.purchaseBenefit && <BenefitIcon icon={card.purchaseBenefit} />}
+      {card.purchaseBenefit && (
+        <BenefitIcon icon={card.purchaseBenefit} amount={card.purchaseBenefitAmount} />
+      )}
 
       <TextShape
         glyphs={[{ char: text, x: 0, size }]}
@@ -36,8 +38,11 @@ export function CostBadge({ card }: { card: Card }) {
   )
 }
 
-/** Encaja el icono en el hueco de la cinta sin deformarlo. */
-function BenefitIcon({ icon }: { icon: IconId }) {
+/**
+ * Encaja el icono en el hueco de la cinta sin deformarlo, y le dibuja la
+ * cantidad centrada encima si es de los que salen vacíos del PSD.
+ */
+function BenefitIcon({ icon, amount }: { icon: IconId; amount: number }) {
   const [image] = useImage(ICONS[icon].url)
   if (!image) return null
 
@@ -48,14 +53,30 @@ function BenefitIcon({ icon }: { icon: IconId }) {
   const width = image.width * scale
   const height = image.height * scale
 
+  const numberColor = ICON_NUMBER_COLORS[icon]
+  const text = String(amount)
+  const size = fontSizeForCapHeight(COST.benefit.digitHeight, COST.weight)
+
   return (
-    <KonvaImage
-      image={image}
-      x={COST.benefit.x - width / 2}
-      y={COST.benefit.y - height / 2}
-      width={width}
-      height={height}
-      listening={false}
-    />
+    <>
+      <KonvaImage
+        image={image}
+        x={COST.benefit.x - width / 2}
+        y={COST.benefit.y - height / 2}
+        width={width}
+        height={height}
+        listening={false}
+      />
+
+      {numberColor && (
+        <TextShape
+          glyphs={[{ char: text, x: 0, size }]}
+          x={COST.benefit.x - textWidth(text, size, COST.weight) / 2}
+          baseline={COST.benefit.y + COST.benefit.digitHeight / 2}
+          fill={numberColor}
+          weight={COST.weight}
+        />
+      )}
+    </>
   )
 }

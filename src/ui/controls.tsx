@@ -80,7 +80,11 @@ export function Toggle({
   )
 }
 
-/** Igual que Choice pero se pueden elegir varias a la vez. */
+/**
+ * Igual que Choice pero se pueden elegir varias a la vez. Una opción con
+ * `icon` (url de imagen) lo muestra antes del texto, que es lo que termina
+ * identificando al botón cuando el nombre no entra entero.
+ */
 export function MultiChoice<T extends string>({
   values,
   options,
@@ -88,7 +92,7 @@ export function MultiChoice<T extends string>({
   onChange,
 }: {
   values: T[]
-  options: { value: T; label: string }[]
+  options: { value: T; label: string; icon?: string }[]
   columns?: number
   onChange: (values: T[]) => void
 }) {
@@ -107,13 +111,20 @@ export function MultiChoice<T extends string>({
                   : [...values, option.value],
               )
             }
-            className={`truncate rounded-md px-2.5 py-2 text-xs transition-colors ${
+            className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-xs transition-colors ${
               selected
                 ? 'bg-sand-500 font-medium text-zinc-950'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
             }`}
           >
-            {option.label}
+            {option.icon && (
+              <img
+                src={option.icon}
+                alt=""
+                className={`h-5 w-auto shrink-0 transition-opacity ${selected ? '' : 'opacity-70'}`}
+              />
+            )}
+            <span className="truncate">{option.label}</span>
           </button>
         )
       })}

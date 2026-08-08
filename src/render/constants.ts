@@ -62,5 +62,10 @@ export const COST = {
   digitHeight: 71,
   weight: 500,
   color: '#e3eaef',
-  benefit: { x: 679, y: 280, size: 70 },
+  /**
+   * Hueco del icono de beneficio en la cinta. `digitHeight` es el alto del
+   * número que la app dibuja centrado encima de los iconos que salen vacíos
+   * del PSD (solari, especia, persuasión).
+   */
+  benefit: { x: 679, y: 280, size: 70, digitHeight: 34 },
 } as const

@@ -45,3 +45,17 @@ export const ICONS = {
 export type IconId = keyof typeof ICONS
 
 export const ICON_IDS = Object.keys(ICONS) as IconId[]
+
+/**
+ * Los iconos que vienen vacíos necesitan que la app les dibuje la cantidad
+ * encima. El valor es el color del número, elegido para contrastar con el
+ * fondo del icono: el solari es plateado, la especia naranja y la persuasión
+ * azul.
+ */
+export const ICON_NUMBER_COLORS: Partial<Record<IconId, string>> = {
+  solari: '#2b2b2b',
+  spice: '#ffffff',
+  persuasion: '#ffffff',
+}
+
+export const iconTakesNumber = (icon: IconId) => icon in ICON_NUMBER_COLORS

@@ -1,8 +1,9 @@
-import { ICON_IDS, ICONS, type IconId } from '../assets/icons'
+import { ICON_IDS, ICONS, iconTakesNumber, type IconId } from '../assets/icons'
 import {
   AGENT_ICON_IDS,
   AGENT_ICON_STYLE_IDS,
   AGENT_ICON_STYLES,
+  AGENT_ICON_URLS,
   AGENT_ICONS,
   type AgentIconStyle,
 } from '../assets/icons/agents'
@@ -60,7 +61,13 @@ export function CardPanel({ card, onChange }: Props) {
         <MultiChoice
           values={card.agentIcons}
           onChange={(agentIcons) => onChange({ agentIcons })}
-          options={AGENT_ICON_IDS.map((id) => ({ value: id, label: AGENT_ICONS[id] }))}
+          options={AGENT_ICON_IDS.map((id) => ({
+            value: id,
+            label: AGENT_ICONS[id],
+            // El botón muestra el icono del estilo elegido, así se ve en el
+            // panel qué va a salir en la carta sin tener que probar.
+            icon: AGENT_ICON_URLS[card.agentIconStyle][id],
+          }))}
         />
         <Field label="Estilo">
           <Choice<AgentIconStyle>
@@ -135,6 +142,25 @@ export function CardPanel({ card, onChange }: Props) {
                 ))}
               </Select>
             </Field>
+
+            {card.purchaseBenefit && iconTakesNumber(card.purchaseBenefit) && (
+              <Field label="Cantidad">
+                <TextInput
+                  type="number"
+                  min={0}
+                  max={99}
+                  value={card.purchaseBenefitAmount}
+                  onChange={(event) =>
+                    onChange({
+                      purchaseBenefitAmount: Math.max(
+                        0,
+                        Math.min(99, Number(event.target.value)),
+                      ),
+                    })
+                  }
+                />
+              </Field>
+            )}
           </>
         )}
       </Section>

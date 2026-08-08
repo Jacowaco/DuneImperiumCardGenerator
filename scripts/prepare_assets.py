@@ -77,6 +77,9 @@ AGENT_ICONS = [
 COLUMN_SHEETS = {
     'location symbols.png': 'locations',
     'infiltrate symbols.png': 'infiltrate',
+    # Los mismos siete emblemas pero sueltos, sin el tab de fondo. Son la
+    # materia prima para armar los rombos de influencia por facción.
+    'iconos faltantes.png': 'emblems',
 }
 
 

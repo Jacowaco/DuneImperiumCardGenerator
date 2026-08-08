@@ -1,4 +1,5 @@
-import { emptyCard, PLAY_ROWS, type Card, type Faction } from './card'
+import type { IconId } from '../assets/icons'
+import { emptyCard, PLAY_ROWS, type Card, type ContentPart, type Faction } from './card'
 
 /**
  * El mazo se guarda como JSON plano. Las imágenes viajan adentro como data
@@ -11,7 +12,7 @@ const AUTOSAVE_KEY = 'dune-card-generator:card'
 
 type SavedFile = {
   format: 'dune-imperium-card'
-  version: 2
+  version: 3
   cards: Card[]
 }
 
@@ -19,7 +20,7 @@ type SavedFile = {
 type LegacyFile = { format: string; version?: number; card?: Card }
 
 export function serializeDeck(cards: Card[]): string {
-  const file: SavedFile = { format: 'dune-imperium-card', version: 2, cards }
+  const file: SavedFile = { format: 'dune-imperium-card', version: 3, cards }
   return JSON.stringify(file, null, 2)
 }
 
@@ -47,10 +48,16 @@ export function parseDeck(json: string): Card[] {
 }
 
 /**
- * Antes la carta tenía una sola facción, en singular, y las cajas de contenido
- * se podían sacar (`playRows: 0`, `revealBox: false`).
+ * Antes la carta tenía una sola facción en singular, las cajas de contenido se
+ * podían sacar (`playRows: 0`, `revealBox: false`), y el contenido era una
+ * lista de iconos sueltos en vez de piezas mezcladas con texto.
  */
-type LegacyCard = Card & { faction?: Faction | null; revealBox?: boolean }
+type LegacyCard = Card & {
+  faction?: Faction | null
+  revealBox?: boolean
+  playIcons?: { icon: IconId; amount: number }[]
+  revealIcons?: { icon: IconId; amount: number }[]
+}
 
 function migrate(card: LegacyCard): Card {
   if (!card.factions.length && card.faction) card.factions = [card.faction]
@@ -58,6 +65,15 @@ function migrate(card: LegacyCard): Card {
 
   if (!PLAY_ROWS.includes(card.playRows)) card.playRows = 1
   delete card.revealBox
+
+  const toParts = (icons: { icon: IconId; amount: number }[]): ContentPart[] =>
+    icons.map(({ icon, amount }) => ({ type: 'icon', icon, amount }))
+
+  if (!card.playContent.length && card.playIcons) card.playContent = toParts(card.playIcons)
+  if (!card.revealContent.length && card.revealIcons)
+    card.revealContent = toParts(card.revealIcons)
+  delete card.playIcons
+  delete card.revealIcons
 
   return card
 }

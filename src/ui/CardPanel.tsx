@@ -18,7 +18,7 @@ import {
   type PlayRows,
 } from '../model/card'
 import { Choice, Field, Hint, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
-import { IconRowEditor } from './IconRowEditor'
+import { ContentEditor } from './ContentEditor'
 
 type Props = {
   card: Card
@@ -107,13 +107,13 @@ export function CardPanel({ card, onChange }: Props) {
       </Section>
 
       <Section title="Iconos del turno de agente">
-        <IconRowEditor entries={card.playIcons} onChange={(playIcons) => onChange({ playIcons })} />
+        <ContentEditor parts={card.playContent} onChange={(playContent) => onChange({ playContent })} />
       </Section>
 
       <Section title="Iconos de revelación">
-        <IconRowEditor
-          entries={card.revealIcons}
-          onChange={(revealIcons) => onChange({ revealIcons })}
+        <ContentEditor
+          parts={card.revealContent}
+          onChange={(revealContent) => onChange({ revealContent })}
         />
       </Section>
 

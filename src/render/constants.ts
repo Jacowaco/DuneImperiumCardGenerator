@@ -90,7 +90,28 @@ export const CONTENT = {
   reveal: { top: 810, bottom: 1007 },
   /** Alto de referencia de los iconos de las hojas del PSD. */
   nominalIconHeight: 99,
+  /**
+   * Texto mezclado con los iconos. Las tres medidas están en la misma escala
+   * que `nominalIconHeight` y se achican juntas cuando el contenido no entra.
+   *
+   * Salen de medir una carta impresa (`reference/cards/appropriate.png`): ahí
+   * el bloque está al 66% porque tiene tres renglones, y a tamaño completo dan
+   * icono 99 / mayúscula 33 / interlineado 62.
+   */
+  text: {
+    capHeight: 33,
+    lineHeight: 62,
+    weight: 400,
+    /** La caja de play es clara y la banda de reveal oscura. */
+    playColor: '#26241f',
+    revealColor: '#d9dad8',
+  },
   padding: 8,
+  /**
+   * Margen a los costados. El borde interior de la caja es el límite duro,
+   * pero el texto pegado a la línea se lee mal, así que corta antes.
+   */
+  paddingX: 24,
   gap: 12,
   /** Alto del número respecto del icono, para los que salen vacíos. */
   numberHeightRatio: 0.48,

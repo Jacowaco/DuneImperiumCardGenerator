@@ -112,18 +112,29 @@ de la facción (`icons/emblems/`), y salen las 16 combinaciones a
 El centro del rombo se calcula por saturación, no por la fila más ancha: los
 chevrones son igual de anchos que el rombo y correrían el centro.
 
-### Deuda pendiente: texto en las cajas de contenido
+### Texto en las cajas de contenido
 
-Las cajas de play y reveal también pueden llevar **texto**, no sólo iconos
-(las cartas reales tienen cosas como "Gana 1 influencia con una facción donde
-un oponente tenga más que vos"). Todavía no está hecho.
+El contenido de cada caja es una lista de `ContentPart` (`src/model/card.ts`):
+iconos, texto y cortes de renglón mezclados en el mismo orden en que se
+dibujan. `layoutContent` (`src/render/contentLayout.ts`) los acomoda.
 
-Cuando se haga, `ContentEntry` (`src/model/card.ts`) tiene que pasar de ser
-sólo `{ icon, amount }` a una unión discriminada — `{ type: 'icon', … }` |
-`{ type: 'text', … }` — y `layoutIconRow` va a tener que medir texto además de
-iconos. Eso rompe los archivos ya guardados, así que hay que subir el
-`version` en `src/model/storage.ts` y migrar al abrir; el formato ya tiene el
-campo previsto.
+Cómo funciona el acomodo:
+
+- Las piezas se miden en una **escala nominal** (icono = 99 px) y después todo
+  se achica junto. La escala se busca probando: al achicar entra más texto por
+  renglón, así que el corte de línea cambia y hay que rehacerlo. Se arranca a
+  tamaño completo y se baja de a 2% hasta que el bloque entra a lo alto.
+- La separación entre piezas contiguas la decide `separation()`: un espacio
+  normal entre palabras, y el hueco grande en cuanto hay un icono de por medio.
+  **El corte de renglón y el posicionado tienen que usar la misma cuenta**; si
+  difieren, el renglón queda descentrado.
+- Todo va centrado, horizontal y verticalmente — confirmado contra las cartas
+  de `reference/cards/`.
+
+Las medidas de `CONTENT.text` salen de medir una carta impresa
+(`reference/cards/appropriate.png`): ahí el bloque está al 66% porque tiene
+tres renglones, y a tamaño completo dan icono 99 / mayúscula 33 /
+interlineado 62.
 
 ### Falta exportar
 
@@ -133,8 +144,10 @@ Iconos del juego base que todavía no están:
   horizontal.
 - Espadachín (el rombo con "+"), Mentat, Control (la banderita), Robar intriga
   a oponentes, y Maker (el gusano).
-- Puede que estos sean texto con icono en vez de icono suelto: Alianza,
-  Fremen Bond, y el requisito de influencia tipo "2 Influence".
+
+Alianza, Fremen Bond y el requisito de influencia tipo "2 Influence" **no son
+iconos sueltos**: en las cartas reales son texto con un icono al lado, dentro
+de la caja de contenido. Ya se pueden armar con el editor.
 
 De las expansiones falta conectar `unload.png`, que ya está en `layers/` pero
 sin usar (es el Unload de Rise of Ix: una caja de revelación que además se
@@ -173,6 +186,7 @@ punto que le corresponde y nada más cambia.
   - [x] fondo negro y columna de iconos de agente (dos estilos)
   - [x] cajas de play (3 alturas) y banda de reveal
   - [x] filas de iconos dentro de esas cajas, con cantidad
+  - [x] texto mezclado con los iconos, con corte de renglón automático
 - [ ] Fase 4 — pulido de UI
 - [ ] Fase 5 — mazo
   - [x] galería de cartas, guardar y abrir el mazo entero, autoguardado
@@ -201,9 +215,11 @@ y el estado de los botones; el diálogo en sí hay que probarlo a mano.
 
 ## La galería
 
-El archivo guardado pasó a tener un **mazo** (`version: 2`, con `cards[]`).
-`parseDeck` sigue abriendo los de `version: 1`, que tenían una sola carta en
-`card`, envolviéndola en un array.
+El archivo guardado pasó a tener un **mazo** (`version: 3`, con `cards[]`).
+`migrate()` en `src/model/storage.ts` sube los archivos viejos al abrirlos:
+la versión 1 tenía una sola carta en `card`, y la 2 guardaba el contenido de
+las cajas como listas de iconos sueltos (`playIcons` / `revealIcons`) en vez
+de piezas mezcladas con texto.
 
 Las miniaturas son el mismo `CardStage` que el preview grande, a escala chica
 y sin `onArtChange` — ese prop es lo que decide si la carta es interactiva. Se

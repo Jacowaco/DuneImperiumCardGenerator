@@ -35,13 +35,19 @@ export const FACTIONS = {
 export type Faction = keyof typeof FACTIONS
 
 /**
- * Un icono dentro de una caja de contenido. `amount` sólo lo usan los iconos
- * que salen vacíos del PSD (solari, especia, persuasión); el resto lo ignora.
+ * Una pieza del contenido de una caja. Los iconos y el texto van mezclados en
+ * la misma línea, como en las cartas reales ("<icono> 2 Influence : <icono>"),
+ * y el layout los va acomodando en renglones.
  */
-export type ContentEntry = {
-  icon: IconId
-  amount: number
-}
+export type ContentPart =
+  /** `amount` sólo lo usan los iconos que salen vacíos del PSD; el resto lo ignora. */
+  | { type: 'icon'; icon: IconId; amount: number }
+  | { type: 'text'; text: string }
+  /** Corta el renglón a mano, para cuando el acomodo automático no alcanza. */
+  | { type: 'break' }
+
+export const iconPart = (icon: IconId): ContentPart => ({ type: 'icon', icon, amount: 1 })
+export const textPart = (text = ''): ContentPart => ({ type: 'text', text })
 
 /**
  * Alturas disponibles de la caja del turno de agente, en filas de iconos.
@@ -111,8 +117,8 @@ export type Card = {
   /** La silueta negra del agente, al costado izquierdo de la caja de play. */
   agentSilhouette: boolean
   /** Iconos dentro de cada caja, en el orden en que se dibujan. */
-  playIcons: ContentEntry[]
-  revealIcons: ContentEntry[]
+  playContent: ContentPart[]
+  revealContent: ContentPart[]
   art: CardArt | null
 }
 
@@ -127,7 +133,7 @@ export const emptyCard = (): Card => ({
   agentIconStyle: 'locations',
   playRows: 1,
   agentSilhouette: true,
-  playIcons: [],
-  revealIcons: [],
+  playContent: [],
+  revealContent: [],
   art: null,
 })

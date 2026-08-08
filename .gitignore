@@ -2,3 +2,7 @@ node_modules
 dist
 *.local
 .DS_Store
+
+# Cartas del juego bajadas de duneimperiumassets.com. Sirven de referencia de
+# layout, pero son arte de Dire Wolf: se quedan en el disco, no en el repo.
+reference/cards/

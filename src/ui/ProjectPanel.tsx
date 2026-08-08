@@ -1,38 +1,61 @@
 import { useRef } from 'react'
 import type { Card } from '../model/card'
-import { FILE_EXTENSION, parseDeck } from '../model/storage'
+import { supportsFileSystem } from '../model/files'
 import { Button, Hint, Section } from './controls'
 
 type Props = {
   cards: Card[]
+  /** Nombre del archivo abierto, o null si el mazo todavía no se guardó. */
+  fileName: string | null
+  dirty: boolean
   onSave: () => void
-  onOpen: (cards: Card[]) => void
-  onError: (message: string) => void
+  onSaveAs: () => void
+  onOpen: () => void
+  onOpenFile: (file: File) => void
 }
 
-export function ProjectPanel({ cards, onSave, onOpen, onError }: Props) {
+export function ProjectPanel({
+  cards,
+  fileName,
+  dirty,
+  onSave,
+  onSaveAs,
+  onOpen,
+  onOpenFile,
+}: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
-
-  const handleFile = async (file: File | undefined) => {
-    if (!file) return
-    try {
-      onOpen(parseDeck(await file.text()))
-    } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo abrir el archivo.')
-    }
-  }
+  const native = supportsFileSystem()
 
   return (
     <Section title="Mazo">
       <div className="grid grid-cols-2 gap-2">
-        <Button onClick={onSave}>Guardar</Button>
-        <Button onClick={() => inputRef.current?.click()}>Abrir…</Button>
+        <Button onClick={onSave} disabled={!dirty && fileName !== null}>
+          Guardar
+        </Button>
+        <Button onClick={onSaveAs}>Guardar como…</Button>
       </div>
+
+      <Button onClick={() => (native ? onOpen() : inputRef.current?.click())}>Abrir…</Button>
+
       <Hint>
-        {cards.length === 1 ? '1 carta' : `${cards.length} cartas`}. Se guarda un archivo{' '}
-        {FILE_EXTENSION} con las imágenes adentro, así que se puede pasar a otra máquina y
-        abre igual.
+        {fileName ? (
+          <>
+            {fileName}
+            {dirty && ' · sin guardar'}
+          </>
+        ) : (
+          'Sin guardar todavía'
+        )}
+        {' · '}
+        {cards.length === 1 ? '1 carta' : `${cards.length} cartas`}
       </Hint>
+
+      {!native && (
+        <Hint>
+          Este navegador no deja sobrescribir archivos, así que las dos opciones bajan una
+          copia nueva. En Chrome o Edge sí guarda sobre el archivo abierto.
+        </Hint>
+      )}
 
       <input
         ref={inputRef}
@@ -40,7 +63,8 @@ export function ProjectPanel({ cards, onSave, onOpen, onError }: Props) {
         accept=".json"
         hidden
         onChange={(event) => {
-          void handleFile(event.target.files?.[0])
+          const file = event.target.files?.[0]
+          if (file) onOpenFile(file)
           event.target.value = ''
         }}
       />

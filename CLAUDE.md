@@ -180,6 +180,25 @@ punto que le corresponde y nada más cambia.
   - [ ] hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio
 
+## Guardar
+
+`src/model/files.ts` implementa Guardar / Guardar como con la File System
+Access API. El navegador no puede sobrescribir un archivo salvo que el usuario
+lo haya elegido en un diálogo nativo: de ahí sale un *handle* que la app se
+guarda y reusa, y eso es exactamente lo que separa "Guardar" de "Guardar
+como". Sin handle, "Guardar" se comporta como "Guardar como".
+
+La API sólo está en Chrome y Edge. Donde no está, las dos opciones bajan una
+copia (el comportamiento viejo) y el panel lo avisa.
+
+El estado "sin guardar" se marca en `mutate()` (`src/App.tsx`), que es el único
+lugar por donde pasan los cambios del mazo — comparar el mazo serializado
+contra el último guardado sería carísimo con las imágenes embebidas.
+
+El diálogo nativo no se puede automatizar con Playwright, así que las pruebas
+end-to-end cubren el camino de respaldo (borrando `window.showSaveFilePicker`)
+y el estado de los botones; el diálogo en sí hay que probarlo a mano.
+
 ## La galería
 
 El archivo guardado pasó a tener un **mazo** (`version: 2`, con `cards[]`).

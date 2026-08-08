@@ -4,7 +4,16 @@ import { useEffect, useRef, useState, type DragEvent } from 'react'
 import { exportCardPng } from './export/exportPng'
 import { loadArtFromFile } from './model/art'
 import { emptyCard, type ArtTransform, type Card } from './model/card'
-import { downloadDeck, loadAutosave, saveAutosave } from './model/storage'
+import {
+  isCancelled,
+  openDeck,
+  openDeckFromFile,
+  saveDeck,
+  saveDeckAs,
+  suggestedName,
+  type OpenedDeck,
+} from './model/files'
+import { loadAutosave, saveAutosave } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
@@ -19,6 +28,11 @@ export function App() {
   const [exporting, setExporting] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Archivo abierto: el handle es lo que permite sobrescribirlo sin volver a
+  // preguntar dónde. Sin handle, "Guardar" se comporta como "Guardar como".
+  const [file, setFile] = useState<Pick<OpenedDeck, 'handle' | 'name'> | null>(null)
+  const [dirty, setDirty] = useState(false)
 
   // El índice puede quedar fuera de rango al abrir un mazo más corto.
   const index = Math.min(selected, cards.length - 1)
@@ -35,26 +49,63 @@ export function App() {
   const previewRef = useRef<HTMLDivElement | null>(null)
   const previewScale = useFitScale(previewRef)
 
-  /** Aplica un cambio sólo a la carta abierta. */
-  const patchCard = (patch: Partial<Card>) =>
-    setCards((current) =>
-      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    )
-
-  const openDeck = (opened: Card[]) => {
-    setCards(opened)
-    setSelected(0)
+  /** Todo cambio del mazo pasa por acá, para no olvidarse de marcar sin guardar. */
+  const mutate = (update: (current: Card[]) => Card[]) => {
+    setCards(update)
+    setDirty(true)
   }
 
+  /** Aplica un cambio sólo a la carta abierta. */
+  const patchCard = (patch: Partial<Card>) =>
+    mutate((current) => current.map((item, i) => (i === index ? { ...item, ...patch } : item)))
+
   const addCard = (newCard: Card) => {
-    setCards((current) => [...current, newCard])
+    mutate((current) => [...current, newCard])
     setSelected(cards.length)
   }
 
   const removeCard = (target: number) => {
-    setCards((current) => current.filter((_, i) => i !== target))
+    mutate((current) => current.filter((_, i) => i !== target))
     setSelected((current) => (target < current ? current - 1 : current))
   }
+
+  const loadDeck = (opened: OpenedDeck) => {
+    setCards(opened.cards)
+    setSelected(0)
+    setFile({ handle: opened.handle, name: opened.name })
+    setDirty(false)
+  }
+
+  /** Cancelar el diálogo no es un error que valga la pena mostrar. */
+  const run = async (action: () => Promise<void>) => {
+    try {
+      await action()
+    } catch (cause) {
+      if (isCancelled(cause)) return
+      setError(cause instanceof Error ? cause.message : 'No se pudo abrir el archivo.')
+    }
+  }
+
+  const handleSaveAs = () =>
+    run(async () => {
+      const saved = await saveDeckAs(cards, suggestedName(cards))
+      setFile(saved)
+      setDirty(false)
+    })
+
+  const handleSave = () =>
+    file?.handle
+      ? run(async () => {
+          await saveDeck(cards, file.handle!)
+          setDirty(false)
+        })
+      : handleSaveAs()
+
+  const handleOpen = () =>
+    run(async () => {
+      const opened = await openDeck()
+      if (opened) loadDeck(opened)
+    })
 
   const setArtFromFile = async (file: File | undefined) => {
     if (!file?.type.startsWith('image/')) return
@@ -112,9 +163,12 @@ export function App() {
 
         <ProjectPanel
           cards={cards}
-          onSave={() => downloadDeck(cards)}
-          onOpen={openDeck}
-          onError={setError}
+          fileName={file?.name ?? null}
+          dirty={dirty}
+          onSave={handleSave}
+          onSaveAs={handleSaveAs}
+          onOpen={handleOpen}
+          onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
         />
       </aside>
 

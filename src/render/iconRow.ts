@@ -61,9 +61,10 @@ export const playBox = (rows: number): Box => ({
 
 /**
  * Área útil de la banda de revelación: lo que queda debajo de la caja de play.
- * Si no hay caja de play, la banda se usa entera.
+ * Con una sola fila la caja termina antes de que empiece la banda, así que ahí
+ * manda el tope de la banda.
  */
 export const revealBox = (rows: number): Box => ({
-  top: rows > 0 ? CONTENT.play.bottoms[rows] : CONTENT.reveal.top,
+  top: Math.max(CONTENT.play.bottoms[rows], CONTENT.reveal.top),
   bottom: CONTENT.reveal.bottom,
 })

@@ -64,6 +64,10 @@ en y=696 y crece hacia abajo, tapándola — por eso hay tres alturas de play y
 una sola de reveal. El orden de dibujo (reveal abajo, play encima) es lo que
 hace que funcione, y es el mismo del PSD.
 
+Las dos cajas van **siempre**: toda carta tiene turno de agente y banda de
+revelación, aunque queden vacías. Lo único que se elige es el alto de la de
+play (1, 2 o 3 filas).
+
 La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
 carta terminada queda casi tapada por los iconos de contenido; sola se ve más
 marcada de lo que se va a ver después.

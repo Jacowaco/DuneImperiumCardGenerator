@@ -10,8 +10,8 @@ import { TextShape } from './TextShape'
 
 /** Las filas de iconos de las dos cajas de contenido. */
 export function ContentIcons({ card }: { card: Card }) {
-  const play = card.playRows > 0 ? layoutIconRow(card.playIcons, playBox(card.playRows)) : []
-  const reveal = card.revealBox ? layoutIconRow(card.revealIcons, revealBox(card.playRows)) : []
+  const play = layoutIconRow(card.playIcons, playBox(card.playRows))
+  const reveal = layoutIconRow(card.revealIcons, revealBox(card.playRows))
 
   return (
     <>

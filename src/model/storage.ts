@@ -1,4 +1,4 @@
-import { emptyCard, type Card, type Faction } from './card'
+import { emptyCard, PLAY_ROWS, type Card, type Faction } from './card'
 
 /**
  * La carta se guarda como JSON plano. La imagen viaja adentro como data URL,
@@ -39,12 +39,19 @@ export function parseCard(json: string): Card {
   return migrate({ ...emptyCard(), ...(parsed as SavedFile).card })
 }
 
-/** Antes la carta tenía una sola facción, en singular. */
-type LegacyCard = Card & { faction?: Faction | null }
+/**
+ * Antes la carta tenía una sola facción, en singular, y las cajas de contenido
+ * se podían sacar (`playRows: 0`, `revealBox: false`).
+ */
+type LegacyCard = Card & { faction?: Faction | null; revealBox?: boolean }
 
 function migrate(card: LegacyCard): Card {
   if (!card.factions.length && card.faction) card.factions = [card.faction]
   delete card.faction
+
+  if (!PLAY_ROWS.includes(card.playRows)) card.playRows = 1
+  delete card.revealBox
+
   return card
 }
 

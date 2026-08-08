@@ -8,14 +8,15 @@ import playBox3Url from '../../assets/layers/play-box-3.png'
 import revealBoxUrl from '../../assets/layers/reveal-box.png'
 import type { Card, PlayRows } from '../../model/card'
 
-const PLAY_BOXES: Record<Exclude<PlayRows, 0>, string> = {
+const PLAY_BOXES: Record<PlayRows, string> = {
   1: playBox1Url,
   2: playBox2Url,
   3: playBox3Url,
 }
 
 /**
- * Las dos cajas de contenido de la mitad de abajo.
+ * Las dos cajas de contenido de la mitad de abajo. Las dos van siempre: toda
+ * carta tiene turno de agente y banda de revelación, aunque queden vacías.
  *
  * La banda de reveal es única y va fija; la caja de play arranca siempre en
  * y=696 y crece hacia abajo, tapándola. Por eso el orden importa: reveal
@@ -24,9 +25,9 @@ const PLAY_BOXES: Record<Exclude<PlayRows, 0>, string> = {
 export function ContentBoxes({ card }: { card: Card }) {
   return (
     <>
-      {card.revealBox && <Layer url={revealBoxUrl} />}
-      {card.playRows > 0 && <Layer url={PLAY_BOXES[card.playRows as Exclude<PlayRows, 0>]} />}
-      {card.agentSilhouette && card.playRows > 0 && <Layer url={agentSilhouetteUrl} />}
+      <Layer url={revealBoxUrl} />
+      <Layer url={PLAY_BOXES[card.playRows]} />
+      {card.agentSilhouette && <Layer url={agentSilhouetteUrl} />}
     </>
   )
 }

@@ -45,6 +45,16 @@ export type ContentEntry = {
 export const PLAY_ROWS = [1, 2, 3] as const
 export type PlayRows = (typeof PLAY_ROWS)[number]
 
+/**
+ * Cómo se llaman esas alturas en la UI. El número de filas es cómo está hecha
+ * la caja, no cómo se elige: lo que se ve es una caja más chica o más grande.
+ */
+export const PLAY_ROWS_LABELS: Record<PlayRows, string> = {
+  1: 'Chica',
+  2: 'Media',
+  3: 'Grande',
+}
+
 export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]
 
 /**
@@ -88,14 +98,13 @@ export type Card = {
   agentIcons: AgentIcon[]
   agentIconStyle: AgentIconStyle
   /**
-   * Alto de la caja del turno de agente, en filas de iconos. 0 la saca.
-   * Arranca siempre en y=696 y crece hacia abajo, tapando la banda de reveal
-   * que tiene debajo — por eso no hace falta una banda de reveal por altura.
+   * Alto de la caja del turno de agente, en filas de iconos. La caja siempre
+   * está: arranca en y=696 y crece hacia abajo, tapando la banda de reveal que
+   * tiene debajo — por eso no hace falta una banda de reveal por altura.
    */
   playRows: PlayRows
   /** La silueta negra del agente, al costado izquierdo de la caja de play. */
   agentSilhouette: boolean
-  revealBox: boolean
   /** Iconos dentro de cada caja, en el orden en que se dibujan. */
   playIcons: ContentEntry[]
   revealIcons: ContentEntry[]
@@ -113,7 +122,6 @@ export const emptyCard = (): Card => ({
   agentIconStyle: 'locations',
   playRows: 1,
   agentSilhouette: true,
-  revealBox: true,
   playIcons: [],
   revealIcons: [],
   art: null,

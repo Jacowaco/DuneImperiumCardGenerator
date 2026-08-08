@@ -12,6 +12,7 @@ import {
   FACTION_IDS,
   FACTIONS,
   PLAY_ROWS,
+  PLAY_ROWS_LABELS,
   type Card,
   type Faction,
   type PlayRows,
@@ -83,47 +84,38 @@ export function CardPanel({ card, onChange }: Props) {
       </Section>
 
       <Section title="Cajas de contenido">
-        <Field label="Turno de agente">
+        <Field label="Caja del turno de agente">
           <Choice
             value={String(card.playRows)}
-            columns={4}
-            onChange={(rows) => onChange({ playRows: Number(rows ?? 0) as PlayRows })}
+            columns={3}
+            onChange={(rows) => onChange({ playRows: Number(rows ?? 1) as PlayRows })}
             options={PLAY_ROWS.map((rows) => ({
               value: String(rows),
-              label: rows === 0 ? 'Sin caja' : `${rows} fila${rows > 1 ? 's' : ''}`,
+              label: PLAY_ROWS_LABELS[rows],
             }))}
           />
         </Field>
+        <Hint>
+          La caja de turno de agente y la banda de revelación van siempre, aunque queden vacías.
+        </Hint>
 
         <Toggle
           label="Silueta del agente"
           checked={card.agentSilhouette}
           onChange={(agentSilhouette) => onChange({ agentSilhouette })}
         />
-        <Toggle
-          label="Banda de revelación"
-          checked={card.revealBox}
-          onChange={(revealBox) => onChange({ revealBox })}
-        />
       </Section>
 
-      {card.playRows > 0 && (
-        <Section title="Iconos del turno de agente">
-          <IconRowEditor
-            entries={card.playIcons}
-            onChange={(playIcons) => onChange({ playIcons })}
-          />
-        </Section>
-      )}
+      <Section title="Iconos del turno de agente">
+        <IconRowEditor entries={card.playIcons} onChange={(playIcons) => onChange({ playIcons })} />
+      </Section>
 
-      {card.revealBox && (
-        <Section title="Iconos de revelación">
-          <IconRowEditor
-            entries={card.revealIcons}
-            onChange={(revealIcons) => onChange({ revealIcons })}
-          />
-        </Section>
-      )}
+      <Section title="Iconos de revelación">
+        <IconRowEditor
+          entries={card.revealIcons}
+          onChange={(revealIcons) => onChange({ revealIcons })}
+        />
+      </Section>
 
       <Section title="Costo de compra">
         <Toggle

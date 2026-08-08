@@ -10,8 +10,12 @@ import {
 import { AGENT_COLUMN } from '../constants'
 
 /**
- * Apila los iconos elegidos desde el tope de la columna, siempre en el orden
- * canónico del reglamento (no en el orden en que los eligió el usuario).
+ * Apila los iconos elegidos siempre en el orden canónico del reglamento (no en
+ * el orden en que los eligió el usuario).
+ *
+ * La columna tiene una ranura por icono del reglamento y se llena desde abajo:
+ * el último queda pegado a la caja de contenido y los demás crecen hacia
+ * arriba, así que el hueco que sobra queda del lado del arte.
  */
 export function AgentIcons({
   icons,
@@ -22,6 +26,7 @@ export function AgentIcons({
 }) {
   const column = AGENT_COLUMN[style]
   const ordered = AGENT_ICON_IDS.filter((id) => icons.includes(id))
+  const firstSlot = AGENT_ICON_IDS.length - ordered.length
 
   return (
     <>
@@ -30,7 +35,7 @@ export function AgentIcons({
           key={id}
           url={AGENT_ICON_URLS[style][id]}
           x={column.x}
-          y={column.top + index * column.pitch}
+          y={column.top + (firstSlot + index) * column.pitch}
         />
       ))}
     </>

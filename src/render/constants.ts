@@ -7,6 +7,8 @@
  * Los números de abajo salen de medir los PNG del PSD y el render de
  * referencia, no de estimar a ojo. Si cambia el template, se remiden.
  */
+import type { Faction } from '../model/card'
+
 export const CARD_WIDTH = 750
 export const CARD_HEIGHT = 1039
 
@@ -41,18 +43,29 @@ export const TITLE = {
 } as const
 
 /**
- * Las bandas de facción salen del script ya alineadas al tope de la ranura
- * (FACTION_BAND_TOP en `prepare_assets.py`). Una carta de varias facciones
- * apila una banda debajo de la otra con este paso, que es el alto exacto de
- * la banda: no queda aire entre una y la siguiente.
+ * Borde superior e inferior útil de cada banda de facción, medido del alpha
+ * del PNG con precisión sub-píxel.
+ *
+ * El PSD las exporta con el borde antialiaseado: el alto real es 43,27 px —no
+ * entero— y `prepare_assets.py` las alinea por la primera fila con algo de
+ * tinta, así que cada banda queda apoyada en una fracción de píxel distinta.
+ * Apilarlas con un paso fijo dejaba una línea de fondo de 1 px entre algunos
+ * pares. Con estos números cada banda se apoya exactamente sobre el borde
+ * inferior de la anterior, sea cual sea la combinación elegida.
  */
-export const FACTION_BAND_PITCH = 44
+export const FACTION_BAND_EDGES: Record<Faction, { top: number; bottom: number }> = {
+  'bene-gesserit': { top: 90.839, bottom: 134.102 },
+  'spacing-guild': { top: 90.098, bottom: 133.369 },
+  emperor: { top: 90.365, bottom: 133.631 },
+  fremen: { top: 90.627, bottom: 133.894 },
+}
 
 /**
- * Columna de iconos de agente, arriba a la izquierda debajo de la banda de
- * facción. Los iconos elegidos se apilan desde arriba con este paso; el resto
- * de la columna queda vacío. Cada estilo tiene su propio origen porque los
- * recortes del PSD tienen bordes distintos.
+ * Columna de iconos de agente, sobre el borde izquierdo del arte. `top` es la
+ * primera de las siete ranuras del reglamento, pero la columna se llena desde
+ * la última hacia arriba: los iconos terminan pegados a la caja de contenido y
+ * lo que sobra queda vacío del lado del arte. Cada estilo tiene su propio
+ * origen porque los recortes del PSD tienen bordes distintos.
  */
 export const AGENT_COLUMN = {
   locations: { x: 29, top: 143, pitch: 78.8 },

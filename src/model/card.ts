@@ -20,10 +20,15 @@ export type CardArt = {
   transform: ArtTransform
 }
 
+/**
+ * El orden de este objeto **es** el orden canónico de las facciones: en él se
+ * apilan las bandas de una carta de varias facciones y en él se muestran los
+ * botones del panel. Es el mismo orden en que venían apiladas en el PSD.
+ */
 export const FACTIONS = {
-  emperor: 'Emperador',
-  'spacing-guild': 'Cofradía Espacial',
   'bene-gesserit': 'Bene Gesserit',
+  'spacing-guild': 'Cofradía Espacial',
+  emperor: 'Emperador',
   fremen: 'Fremen',
 } as const
 
@@ -64,9 +69,9 @@ export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]
  * carta el color viene dentro del PNG.
  */
 export const FACTION_COLORS: Record<Faction, string> = {
-  emperor: '#636363',
-  'spacing-guild': '#CD3A3D',
   'bene-gesserit': '#77588B',
+  'spacing-guild': '#CD3A3D',
+  emperor: '#636363',
   fremen: '#6A81B9',
 }
 

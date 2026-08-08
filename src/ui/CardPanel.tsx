@@ -6,7 +6,15 @@ import {
   AGENT_ICONS,
   type AgentIconStyle,
 } from '../assets/icons/agents'
-import { FACTION_COLORS, FACTION_IDS, FACTIONS, type Card, type Faction } from '../model/card'
+import {
+  FACTION_COLORS,
+  FACTION_IDS,
+  FACTIONS,
+  PLAY_ROWS,
+  type Card,
+  type Faction,
+  type PlayRows,
+} from '../model/card'
 import { Choice, Field, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
 
 type Props = {
@@ -64,6 +72,31 @@ export function CardPanel({ card, onChange }: Props) {
             }))}
           />
         </Field>
+      </Section>
+
+      <Section title="Cajas de contenido">
+        <Field label="Turno de agente">
+          <Choice
+            value={String(card.playRows)}
+            columns={4}
+            onChange={(rows) => onChange({ playRows: Number(rows ?? 0) as PlayRows })}
+            options={PLAY_ROWS.map((rows) => ({
+              value: String(rows),
+              label: rows === 0 ? 'Sin caja' : `${rows} fila${rows > 1 ? 's' : ''}`,
+            }))}
+          />
+        </Field>
+
+        <Toggle
+          label="Silueta del agente"
+          checked={card.agentSilhouette}
+          onChange={(agentSilhouette) => onChange({ agentSilhouette })}
+        />
+        <Toggle
+          label="Banda de revelación"
+          checked={card.revealBox}
+          onChange={(revealBox) => onChange({ revealBox })}
+        />
       </Section>
 
       <Section title="Costo de compra">

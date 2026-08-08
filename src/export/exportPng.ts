@@ -8,22 +8,25 @@ import { CARD_WIDTH } from '../render/constants'
 export const NO_EXPORT = 'no-export'
 
 /**
- * Exporta el stage a PNG al tamaño real del template.
- *
- * `scale` 1 devuelve 750 x 1039 px, que es la carta a 300 DPI y ya sirve
- * para imprimir. El preview puede estar a cualquier escala: se compensa
- * con el pixelRatio.
+ * Escala fija del export: el template mide 750 x 1039 (300 DPI), así que
+ * el PNG sale a 1500 x 2078 — 600 DPI, con margen de sobra para imprimir.
+ */
+export const EXPORT_SCALE = 2
+
+/**
+ * Exporta el stage a PNG. El preview puede estar a cualquier escala: se
+ * compensa con el pixelRatio.
  */
 export async function exportCardPng(
   stage: Konva.Stage,
-  { scale = 1, filename = 'carta.png' } = {},
+  { filename = 'carta.png' } = {},
 ): Promise<void> {
   const helpers = stage.find(`.${NO_EXPORT}`)
   helpers.forEach((node) => node.hide())
 
   try {
     const blob = (await stage.toBlob({
-      pixelRatio: (CARD_WIDTH * scale) / stage.width(),
+      pixelRatio: (CARD_WIDTH * EXPORT_SCALE) / stage.width(),
       mimeType: 'image/png',
     })) as Blob
 

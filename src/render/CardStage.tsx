@@ -13,6 +13,7 @@ import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
 import { AgentIcons } from './layers/AgentIcons'
 import { CardTitle } from './layers/CardTitle'
+import { ContentBoxes } from './layers/ContentBoxes'
 import { CostBadge } from './layers/CostBadge'
 import { FactionBand } from './layers/FactionBand'
 import { useFontsReady } from './useFontsReady'
@@ -88,6 +89,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
 
         {!card.art && <ArtPlaceholder />}
 
+        <ContentBoxes card={card} />
         <AgentIcons icons={card.agentIcons} style={card.agentIconStyle} />
         <FactionBand faction={card.faction} />
         <CardTitle card={card} />

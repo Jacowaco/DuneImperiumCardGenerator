@@ -52,27 +52,27 @@ render de referencia, no estimadas):
 
 ### Geometría de las cajas de contenido
 
-Medido de los PNG y del render de referencia:
-
 | Caja | y |
 |---|---|
 | `play-box-1` | 696 – 812 |
 | `play-box-2` | 696 – 851 |
 | `play-box-3` | 696 – 887 |
-| `reveal-box` (el exportado) | 810 – 1007 |
-| banda reveal en el render de referencia | 852 – 1004 |
+| `reveal-box` | 810 – 1007 |
 
-La caja de play arranca siempre en y=696 y crece hacia abajo; la banda de
-reveal empieza donde termina la de play y llega hasta ~1005. O sea que
-**cada altura de play necesita su propia banda de reveal**: la exportada
-(810) es la que hace juego con `play-box-1` (termina en 812), y el render de
-referencia usa `play-box-2` (termina en 851) con una banda que arranca en 852.
-Faltan las bandas de reveal para `play-box-2` y `play-box-3`.
+**La banda de reveal es una sola y va fija.** La caja de play arranca siempre
+en y=696 y crece hacia abajo, tapándola — por eso hay tres alturas de play y
+una sola de reveal. El orden de dibujo (reveal abajo, play encima) es lo que
+hace que funcione, y es el mismo del PSD.
+
+La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
+carta terminada queda casi tapada por los iconos de contenido; sola se ve más
+marcada de lo que se va a ver después.
 
 ### Falta exportar
 
-- Las **bandas de reveal** para las alturas 2 y 3 (ver tabla arriba).
 - Las hojas de iconos `Base Game Icons`, `Ix Icons`, `Immortality Icons`.
+- `unload.png` ya está en `layers/` pero sin usar: es de la expansión y se
+  hace más adelante.
 
 ## Arquitectura
 
@@ -92,7 +92,8 @@ punto que le corresponde y nada más cambia.
       reemplazo libre hasta saber cuál usa el PSD.
 - [ ] Fase 3 — sistema de iconos
   - [x] fondo negro y columna de iconos de agente (dos estilos)
-  - [ ] filas de contenido de las cajas de play y reveal
+  - [x] cajas de play (3 alturas) y banda de reveal
+  - [ ] filas de iconos dentro de esas cajas
 - [ ] Fase 4 — pulido de UI
 - [ ] Fase 5 — biblioteca de cartas, export en lote, hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio

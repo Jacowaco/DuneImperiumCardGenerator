@@ -29,6 +29,10 @@ export const FACTIONS = {
 
 export type Faction = keyof typeof FACTIONS
 
+/** Alturas disponibles de la caja del turno de agente. 0 = sin caja. */
+export const PLAY_ROWS = [0, 1, 2, 3] as const
+export type PlayRows = (typeof PLAY_ROWS)[number]
+
 export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]
 
 /**
@@ -61,6 +65,15 @@ export type Card = {
   /** Dónde se puede mandar el agente. Se apilan en la columna izquierda. */
   agentIcons: AgentIcon[]
   agentIconStyle: AgentIconStyle
+  /**
+   * Alto de la caja del turno de agente, en filas de iconos. 0 la saca.
+   * Arranca siempre en y=696 y crece hacia abajo, tapando la banda de reveal
+   * que tiene debajo — por eso no hace falta una banda de reveal por altura.
+   */
+  playRows: PlayRows
+  /** La silueta negra del agente, al costado izquierdo de la caja de play. */
+  agentSilhouette: boolean
+  revealBox: boolean
   art: CardArt | null
 }
 
@@ -72,5 +85,8 @@ export const emptyCard = (): Card => ({
   purchaseBenefit: null,
   agentIcons: [],
   agentIconStyle: 'locations',
+  playRows: 1,
+  agentSilhouette: true,
+  revealBox: true,
   art: null,
 })

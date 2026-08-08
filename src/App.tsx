@@ -8,11 +8,10 @@ import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
 import { CardPanel } from './ui/CardPanel'
-import { ExportPanel, type ExportScale } from './ui/ExportPanel'
+import { ExportPanel } from './ui/ExportPanel'
 
 export function App() {
   const [card, setCard] = useState<Card>(emptyCard)
-  const [exportScale, setExportScale] = useState<ExportScale>(1)
   const [exporting, setExporting] = useState(false)
   const [dragging, setDragging] = useState(false)
 
@@ -46,7 +45,7 @@ export function App() {
     if (!stage) return
     setExporting(true)
     try {
-      await exportCardPng(stage, { scale: exportScale, filename: 'dune-card.png' })
+      await exportCardPng(stage, { filename: 'dune-card.png' })
     } finally {
       setExporting(false)
     }
@@ -82,12 +81,7 @@ export function App() {
           onClear={clearArt}
         />
 
-        <ExportPanel
-          scale={exportScale}
-          busy={exporting}
-          onScaleChange={setExportScale}
-          onExport={handleExport}
-        />
+        <ExportPanel busy={exporting} onExport={handleExport} />
       </aside>
 
       <main

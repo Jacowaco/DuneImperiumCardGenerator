@@ -10,6 +10,10 @@ import { NO_EXPORT } from '../export/exportPng'
 import { clampArtScale } from '../model/art'
 import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
+import { CardTitle } from './layers/CardTitle'
+import { CostBadge } from './layers/CostBadge'
+import { FactionBand } from './layers/FactionBand'
+import { useFontsReady } from './useFontsReady'
 
 type Props = {
   card: Card
@@ -29,7 +33,7 @@ const ZOOM_SPEED = 0.0015
 export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
   const [artContainer] = useImage(cardArtContainerUrl)
   const [blackBorder] = useImage(blackBorderUrl)
-  const [artImage] = useImage(card.art?.src ?? '')
+  useFontsReady()
 
   const handleWheel = (event: KonvaEventObject<WheelEvent>) => {
     if (!card.art) return
@@ -74,26 +78,43 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
 
         {/* Imagen del jugador, recortada al contenedor */}
         <Group clip={{ ...ART_RECT }}>
-          {card.art && artImage && (
-            <KonvaImage
-              image={artImage}
-              x={card.art.transform.x}
-              y={card.art.transform.y}
-              scaleX={card.art.transform.scale}
-              scaleY={card.art.transform.scale}
-              draggable
-              onDragMove={handleDrag}
-              onDragEnd={handleDrag}
-            />
-          )}
+          {card.art && <ArtImage art={card.art} onDrag={handleDrag} />}
         </Group>
 
         {!card.art && <ArtPlaceholder />}
+
+        <FactionBand faction={card.faction} />
+        <CardTitle card={card} />
+        <CostBadge card={card} />
 
         {/* Borde negro: siempre la última capa, tapa lo que se desborde */}
         <KonvaImage image={blackBorder} listening={false} />
       </Layer>
     </Stage>
+  )
+}
+
+function ArtImage({
+  art,
+  onDrag,
+}: {
+  art: NonNullable<Card['art']>
+  onDrag: (event: KonvaEventObject<DragEvent>) => void
+}) {
+  const [image] = useImage(art.src)
+  if (!image) return null
+
+  return (
+    <KonvaImage
+      image={image}
+      x={art.transform.x}
+      y={art.transform.y}
+      scaleX={art.transform.scale}
+      scaleY={art.transform.scale}
+      draggable
+      onDragMove={onDrag}
+      onDragEnd={onDrag}
+    />
   )
 }
 

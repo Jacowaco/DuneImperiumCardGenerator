@@ -7,6 +7,7 @@ import { emptyCard, type ArtTransform, type Card } from './model/card'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
+import { CardPanel } from './ui/CardPanel'
 import { ExportPanel, type ExportScale } from './ui/ExportPanel'
 
 export function App() {
@@ -69,6 +70,11 @@ export function App() {
           </p>
         </header>
 
+        <CardPanel
+          card={card}
+          onChange={(patch) => setCard((current) => ({ ...current, ...patch }))}
+        />
+
         <ArtPanel
           art={card.art}
           onPick={() => fileInputRef.current?.click()}
@@ -96,7 +102,7 @@ export function App() {
           dragging ? 'bg-zinc-800' : ''
         }`}
       >
-        <div className="shadow-2xl shadow-black/60">
+        <div className="transparency-grid shadow-2xl shadow-black/60">
           <CardStage
             card={card}
             scale={previewScale}

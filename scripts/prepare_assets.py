@@ -98,6 +98,16 @@ BLANK_SYMBOLS = [
     'blank-gain-two', 'blank-lose-two',
 ]
 
+# Iconos de Rise of Ix e Immortality, en orden de lectura de la hoja. Los
+# nombres salen del glosario de cada reglamento (`reference/*.pdf`).
+EXPANSION_SYMBOLS = [
+    'research', 'combat',
+    'tleilaxu', 'genetic-marker-two', 'genetic-marker-one', 'specimen',
+    'trash-intrigue',
+    'discard-card', 'dreadnought', 'unit', 'acquire-tech',
+    'acquire-tech-discount-one',
+]
+
 INFLUENCE_VARIANTS = ['gain-one', 'lose-one', 'gain-two', 'lose-two']
 INFLUENCE_FACTIONS = ['emperor', 'spacing-guild', 'bene-gesserit', 'fremen']
 
@@ -307,6 +317,7 @@ def main():
         align_faction_band(source, target)
 
     slice_rows_and_columns('symbols corrected.png', SYMBOLS, ICONS_OUT)
+    slice_rows_and_columns('expansion icons.png', EXPANSION_SYMBOLS, ICONS_OUT)
     slice_rows_and_columns(
         'simbolos sin fondo.png', BLANK_SYMBOLS, ICONS_OUT / 'blanks', region=BLANK_ROW
     )

@@ -118,8 +118,22 @@ Iconos del juego base que todavía no están:
 - Puede que estos sean texto con icono en vez de icono suelto: Alianza,
   Fremen Bond, y el requisito de influencia tipo "2 Influence".
 
-Y para las expansiones: `Ix Icons`, `Immortality Icons` y el uso de
-`unload.png`, que ya está en `layers/` sin conectar.
+De las expansiones falta conectar `unload.png`, que ya está en `layers/` pero
+sin usar (es el Unload de Rise of Ix: una caja de revelación que además se
+dispara al descartar o destruir la carta).
+
+## Expansiones
+
+Los reglamentos de Rise of Ix e Immortality están en `reference/`, y de ahí
+salen los nombres de los iconos de `expansion icons.png`.
+
+Dos cosas que aclara el reglamento de Ix y conviene no volver a deducir:
+
+- Los iconos de la carpeta `icons/infiltrate/` son la **Infiltración** de Rise
+  of Ix, no un estilo alternativo: dejan mandar un agente a un espacio que ya
+  ocupa un rival. Por eso son los mismos siete iconos con otro marco.
+- `unit` es "tropa o dreadnought" — por eso el icono es un cubo fusionado con
+  el casco de un dreadnought.
 
 ## Arquitectura
 

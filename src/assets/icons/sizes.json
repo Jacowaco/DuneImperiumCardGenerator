@@ -3,9 +3,25 @@
     65,
     98
   ],
+  "acquire-tech": [
+    64,
+    87
+  ],
+  "acquire-tech-discount-one": [
+    146,
+    88
+  ],
+  "combat": [
+    69,
+    88
+  ],
   "cost-arrow": [
     61,
     55
+  ],
+  "discard-card": [
+    64,
+    99
   ],
   "draw-card": [
     64,
@@ -14,6 +30,18 @@
   "draw-intrigue": [
     65,
     98
+  ],
+  "dreadnought": [
+    80,
+    91
+  ],
+  "genetic-marker-one": [
+    70,
+    97
+  ],
+  "genetic-marker-two": [
+    114,
+    99
   ],
   "influence-bene-gesserit-gain-one": [
     87,
@@ -99,6 +127,10 @@
     99,
     98
   ],
+  "research": [
+    93,
+    69
+  ],
   "signet-ring": [
     112,
     99
@@ -106,6 +138,10 @@
   "solari": [
     100,
     99
+  ],
+  "specimen": [
+    92,
+    101
   ],
   "spice": [
     111,
@@ -115,13 +151,25 @@
     71,
     95
   ],
+  "tleilaxu": [
+    86,
+    79
+  ],
   "trash": [
     65,
+    98
+  ],
+  "trash-intrigue": [
+    64,
     98
   ],
   "troop": [
     91,
     100
+  ],
+  "unit": [
+    99,
+    91
   ],
   "victory-point": [
     100,

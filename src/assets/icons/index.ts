@@ -1,4 +1,16 @@
 import acquireFoldspace from './acquire-foldspace.png'
+import acquireTech from './acquire-tech.png'
+import acquireTechDiscountOne from './acquire-tech-discount-one.png'
+import combat from './combat.png'
+import discardCard from './discard-card.png'
+import dreadnought from './dreadnought.png'
+import geneticMarkerOne from './genetic-marker-one.png'
+import geneticMarkerTwo from './genetic-marker-two.png'
+import research from './research.png'
+import specimen from './specimen.png'
+import tleilaxu from './tleilaxu.png'
+import trashIntrigue from './trash-intrigue.png'
+import unit from './unit.png'
 import costArrow from './cost-arrow.png'
 import drawCard from './draw-card.png'
 import drawIntrigue from './draw-intrigue.png'
@@ -45,6 +57,31 @@ const BASE_ICONS = {
   'influence-lose-one': { url: influenceLoseOne, label: 'Perder 1 influencia' },
   'influence-lose-two': { url: influenceLoseTwo, label: 'Perder 2 influencia' },
   'cost-arrow': { url: costArrow, label: 'Flecha de costo' },
+
+  // Rise of Ix
+  'acquire-tech': { url: acquireTech, label: 'Ix · Adquirir tecnología' },
+  'acquire-tech-discount-one': {
+    url: acquireTechDiscountOne,
+    label: 'Ix · Adquirir tecnología (−1 especia)',
+  },
+  dreadnought: { url: dreadnought, label: 'Ix · Dreadnought' },
+  unit: { url: unit, label: 'Ix · Unidad (tropa o dreadnought)' },
+  'discard-card': { url: discardCard, label: 'Ix · Descartar una carta' },
+
+  // Immortality
+  research: { url: research, label: 'Immortality · Investigación' },
+  tleilaxu: { url: tleilaxu, label: 'Immortality · Tleilaxu' },
+  specimen: { url: specimen, label: 'Immortality · Espécimen' },
+  combat: { url: combat, label: 'Immortality · Combate' },
+  'trash-intrigue': { url: trashIntrigue, label: 'Immortality · Descartar intriga' },
+  'genetic-marker-one': {
+    url: geneticMarkerOne,
+    label: 'Immortality · Marcador genético 1',
+  },
+  'genetic-marker-two': {
+    url: geneticMarkerTwo,
+    label: 'Immortality · Marcador genético 2',
+  },
 } as const
 
 export const ICONS: Record<IconId, { url: string; label: string }> = {

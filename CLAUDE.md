@@ -205,6 +205,23 @@ como". Sin handle, "Guardar" se comporta como "Guardar como".
 La API sólo está en Chrome y Edge. Donde no está, las dos opciones bajan una
 copia (el comportamiento viejo) y el panel lo avisa.
 
+Que la función exista no alcanza: la **vista previa embebida de VSCode** da el
+diálogo pero después `createWritable` falla con `NotAllowedError`. No hay forma
+de detectarlo sin intentar escribir, así que `files.ts` anota el fallo en
+`writesBlocked` y de ahí en más se comporta como Firefox. Probar la app ahí es
+engañoso: hay que abrirla en una ventana de Chrome.
+
+El handle **sobrevive a recargar la página**: va a IndexedDB
+(`src/model/recentFile.ts`), porque es clonable pero no serializable a texto,
+así que no entra en el localStorage del autoguardado. Sólo se recupera si el
+mazo también viene del autoguardado — arrancar con una carta vacía y que
+"Guardar" pise el mazo de ayer sería peor que preguntar.
+
+El permiso de escritura sí se pierde al recargar, y pedirlo necesita un click
+reciente: por eso se pide dentro de `saveDeck` y no al recuperar el handle. Si
+el permiso se niega o el archivo ya no está, `saveDeck` devuelve `false` y la
+app cae en "Guardar como" en vez de dejar al usuario sin guardar.
+
 El estado "sin guardar" se marca en `mutate()` (`src/App.tsx`), que es el único
 lugar por donde pasan los cambios del mazo — comparar el mazo serializado
 contra el último guardado sería carísimo con las imágenes embebidas.

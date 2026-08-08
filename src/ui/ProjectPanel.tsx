@@ -52,8 +52,9 @@ export function ProjectPanel({
 
       {!native && (
         <Hint>
-          Este navegador no deja sobrescribir archivos, así que las dos opciones bajan una
-          copia nueva. En Chrome o Edge sí guarda sobre el archivo abierto.
+          Acá no se pueden sobrescribir archivos, así que las dos opciones bajan una copia
+          nueva. Abriendo la app en Chrome o Edge —la ventana del navegador, no la vista
+          previa del editor— «Guardar» escribe sobre el archivo abierto sin preguntar.
         </Hint>
       )}
 

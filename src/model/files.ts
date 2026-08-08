@@ -19,7 +19,7 @@ type FilePickerOptions = {
 
 type PermissionState = 'granted' | 'denied' | 'prompt'
 
-type Handle = FileSystemFileHandle & {
+export type Handle = FileSystemFileHandle & {
   queryPermission?: (options: { mode: string }) => Promise<PermissionState>
   requestPermission?: (options: { mode: string }) => Promise<PermissionState>
 }
@@ -31,8 +31,20 @@ type PickerWindow = Window & {
 
 const picker = () => window as PickerWindow
 
+/**
+ * Hay entornos —la vista previa embebida de VSCode, por ejemplo— que exponen
+ * `showSaveFilePicker` pero después no dejan escribir: el `createWritable` de
+ * un handle recién elegido en el diálogo falla igual. No se puede saber antes
+ * de intentarlo, así que se anota al primer fallo y de ahí en más la app se
+ * comporta como en Firefox: baja una copia y lo avisa en el panel.
+ *
+ * (Elegir una carpeta que el navegador protege da el mismo error; ahí la app
+ * se queda bajando copias hasta recargar, que es preferible a no guardar.)
+ */
+let writesBlocked = false
+
 export const supportsFileSystem = () =>
-  typeof picker().showSaveFilePicker === 'function'
+  typeof picker().showSaveFilePicker === 'function' && !writesBlocked
 
 const FILE_TYPES = [
   {
@@ -70,29 +82,68 @@ export async function saveDeckAs(
   suggestedName: string,
 ): Promise<{ handle: Handle | null; name: string }> {
   const show = picker().showSaveFilePicker
-  if (!show) {
+  if (!show || writesBlocked) {
     downloadDeck(cards)
     return { handle: null, name: suggestedName }
   }
 
   const handle = await show({ suggestedName, types: FILE_TYPES })
-  await write(handle, cards)
+
+  try {
+    await write(handle, cards)
+  } catch (cause) {
+    if (!isUnwritable(cause)) throw cause
+    // El diálogo lo dio pero la escritura no: este entorno no sirve para
+    // sobrescribir. Queda el camino viejo, bajar una copia.
+    writesBlocked = true
+    downloadDeck(cards)
+    return { handle: null, name: suggestedName }
+  }
   return { handle, name: handle.name }
 }
 
-/** Sobrescribe el archivo abierto. */
-export async function saveDeck(cards: Card[], handle: Handle) {
-  await write(handle, cards)
+/**
+ * Sobrescribe el archivo abierto. Devuelve false si ya no se puede — permiso
+ * denegado, o el archivo se movió o se borró — para caer en "Guardar como" en
+ * vez de dejar al usuario sin guardar.
+ */
+export async function saveDeck(cards: Card[], handle: Handle): Promise<boolean> {
+  if (!(await ensureWritable(handle))) return false
+
+  try {
+    await write(handle, cards)
+  } catch (cause) {
+    if (isUnwritable(cause)) return false
+    throw cause
+  }
+  return true
+}
+
+/**
+ * El archivo abierto ya no sirve para escribir: se movió o se borró
+ * (`NotFoundError`), o el navegador no da el permiso en este momento
+ * (`NotAllowedError`, `SecurityError`). Ninguno es un error para mostrar: hay
+ * que volver a preguntar dónde guardar.
+ */
+const isUnwritable = (cause: unknown) =>
+  cause instanceof DOMException &&
+  ['NotFoundError', 'NotAllowedError', 'SecurityError'].includes(cause.name)
+
+/**
+ * El permiso de escritura se pide aparte del de lectura, y no sobrevive a
+ * recargar la página. Se consulta primero para no abrir el diálogo cuando ya
+ * está dado; pedirlo necesita un click reciente, así que esto sólo se llama
+ * desde el botón de guardar.
+ */
+async function ensureWritable(handle: Handle) {
+  const current = (await handle.queryPermission?.({ mode: 'readwrite' })) ?? 'granted'
+  if (current === 'granted') return true
+
+  const asked = (await handle.requestPermission?.({ mode: 'readwrite' })) ?? 'granted'
+  return asked === 'granted'
 }
 
 async function write(handle: Handle, cards: Card[]) {
-  // El permiso de escritura se pide aparte del de lectura, y puede haber
-  // caducado si el handle viene de antes.
-  if (handle.requestPermission) {
-    const granted = await handle.requestPermission({ mode: 'readwrite' })
-    if (granted !== 'granted') throw new Error('No se dio permiso para escribir el archivo.')
-  }
-
   const writable = await handle.createWritable()
   await writable.write(serializeDeck(cards))
   await writable.close()

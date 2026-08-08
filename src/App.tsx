@@ -13,6 +13,7 @@ import {
   suggestedName,
   type OpenedDeck,
 } from './model/files'
+import { recallDeckFile, rememberDeckFile } from './model/recentFile'
 import { loadAutosave, saveAutosave } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
@@ -23,7 +24,15 @@ import { ExportPanel } from './ui/ExportPanel'
 import { ProjectPanel } from './ui/ProjectPanel'
 
 export function App() {
-  const [cards, setCards] = useState<Card[]>(() => loadAutosave() ?? [emptyCard()])
+  // Recuperar el archivo de la sesión anterior sólo tiene sentido si el mazo
+  // también viene de ahí: si arrancamos con una carta vacía, "Guardar" no
+  // debería pisar el mazo que se estaba editando antes.
+  const fromAutosave = useRef(false)
+  const [cards, setCards] = useState<Card[]>(() => {
+    const saved = loadAutosave()
+    fromAutosave.current = saved !== null
+    return saved ?? [emptyCard()]
+  })
   const [selected, setSelected] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [dragging, setDragging] = useState(false)
@@ -43,6 +52,16 @@ export function App() {
     const timer = setTimeout(() => saveAutosave(cards), 500)
     return () => clearTimeout(timer)
   }, [cards])
+
+  // El handle sobrevive a la recarga, así que "Guardar" sigue yendo al mismo
+  // archivo. El permiso de escritura no sobrevive: se vuelve a pedir al
+  // guardar, que es un click y puede abrir el diálogo.
+  useEffect(() => {
+    if (!fromAutosave.current) return
+    void recallDeckFile().then((handle) => {
+      if (handle) setFile({ handle, name: handle.name })
+    })
+  }, [])
 
   const stageRef = useRef<Konva.Stage | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -69,10 +88,16 @@ export function App() {
     setSelected((current) => (target < current ? current - 1 : current))
   }
 
+  /** Todo cambio del archivo abierto pasa por acá, para recordarlo. */
+  const openFile = (next: Pick<OpenedDeck, 'handle' | 'name'> | null) => {
+    setFile(next)
+    void rememberDeckFile(next?.handle ?? null)
+  }
+
   const loadDeck = (opened: OpenedDeck) => {
     setCards(opened.cards)
     setSelected(0)
-    setFile({ handle: opened.handle, name: opened.name })
+    openFile({ handle: opened.handle, name: opened.name })
     setDirty(false)
   }
 
@@ -86,18 +111,21 @@ export function App() {
     }
   }
 
-  const handleSaveAs = () =>
-    run(async () => {
-      const saved = await saveDeckAs(cards, suggestedName(cards))
-      setFile(saved)
-      setDirty(false)
-    })
+  const saveAs = async () => {
+    const saved = await saveDeckAs(cards, suggestedName(cards))
+    openFile(saved)
+    setDirty(false)
+  }
+
+  const handleSaveAs = () => run(saveAs)
 
   const handleSave = () =>
     file?.handle
       ? run(async () => {
-          await saveDeck(cards, file.handle!)
-          setDirty(false)
+          // Si el archivo ya no se puede escribir (permiso denegado, o se
+          // movió), preguntar dónde en vez de dejarlo sin guardar.
+          if (await saveDeck(cards, file.handle!)) setDirty(false)
+          else await saveAs()
         })
       : handleSaveAs()
 

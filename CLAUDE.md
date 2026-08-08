@@ -4,6 +4,11 @@ App de escritorio/web para armar cartas custom de *Dune: Imperium*. Web primero
 (Vite + React + TypeScript + react-konva); la carcasa de escritorio (Tauri) se
 agrega más adelante sin reescribir el render.
 
+Para ubicarse rápido: **"Estado"** dice qué está hecho y qué sigue, y
+**"Cómo trabajar acá"** explica el método y el harness para verificar cambios
+en el navegador. El resto del documento son las decisiones de diseño y las
+medidas, con el porqué de cada una.
+
 ## Cómo correrlo
 
 ```
@@ -166,6 +171,66 @@ Dos cosas que aclara el reglamento de Ix y conviene no volver a deducir:
 - `unit` es "tropa o dreadnought" — por eso el icono es un cubo fusionado con
   el casco de un dreadnought.
 
+## Cómo trabajar acá
+
+Dos costumbres que vienen sosteniendo la calidad de este proyecto y conviene
+mantener:
+
+**Medir, no estimar.** Cada número de `constants.ts` salió de medir un PNG o un
+render de referencia con Pillow, no de mirar a ojo. Cuando algo no encaja, casi
+siempre es porque se dedujo en vez de medirse — pasó con el centro de los
+rombos de influencia (el "?" no está en el centro geométrico) y con las bandas
+de facción (el alto real es 43,27 px, no 44).
+
+**Verificar mirando el resultado, no sólo que compile.** El typecheck no ve que
+un icono quedó pegado al texto ni que un emblema quedó 8 px arriba. Todos los
+bugs de layout de este proyecto se encontraron abriendo la app y mirando.
+
+### Harness de verificación
+
+No hay Playwright instalado en el proyecto ni navegadores descargados. En vez
+de eso se maneja el **Edge que ya está en la máquina** con `playwright-core`
+desde el scratchpad:
+
+```js
+import { chromium } from 'playwright-core'
+const browser = await chromium.launch({
+  executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+})
+```
+
+Con eso se llena el panel, se saca screenshot y se dispara "Exportar PNG"
+capturando el evento `download` — o sea que se puede revisar el PNG exportado
+de verdad, no sólo el preview. Conviene siempre escuchar `pageerror` y
+`console` para no dar por bueno un render que tiró excepciones.
+
+Detalles que hacen perder tiempo si no se saben:
+- Las secciones del panel se ubican mejor con
+  `page.locator('section').filter({ has: page.locator('h2', { hasText: … }) })`.
+- Casi todos los botones necesitan `exact: true`: "Guardar" también matchea
+  "Guardar como…", y "1 fila" matchea el nombre accesible del grupo entero.
+- Conviene `localStorage.clear()` y recargar al empezar, porque el autoguardado
+  arrastra el mazo de la corrida anterior.
+- El diálogo nativo de archivos **no se puede automatizar**. Para probar el
+  camino de respaldo se borra `window.showSaveFilePicker` con `addInitScript`.
+
+### Referencias
+
+- `reference/cards/` — 110 cartas reales bajadas de duneimperiumassets.com,
+  con nombre. **Están en `.gitignore`**: son arte de Dire Wolf, se usan para
+  resolver dudas de layout y no viajan con el repo. Ya sirvieron para confirmar
+  que el contenido va centrado, que la columna de agente se llena desde abajo,
+  y para sacar las medidas del texto.
+- `reference/*.pdf` — los tres reglamentos. De ahí salen los nombres correctos
+  de los iconos; el glosario está en las últimas páginas. Se leen con `pypdf`
+  (no hay renderizador de PDF instalado).
+
+### Cuidado con el watcher
+
+`vite.config.ts` ignora `psd-exports/`, `reference/` y los `*.pdf`. Si Windows
+tiene uno de esos archivos abierto en otro programa, el watcher de Vite se cae
+con `EBUSY` y **se lleva puesto el servidor entero**, no sólo ese archivo.
+
 ## Arquitectura
 
 `Card` (`src/model/card.ts`) es la única fuente de verdad y `CardStage` es una
@@ -182,7 +247,7 @@ punto que le corresponde y nada más cambia.
 - [x] Fase 2 — nombre (versalitas), variante de mazo inicial, banda de facción,
       costo de compra y beneficio de compra. Tipografía: **Jost**, elegida como
       reemplazo libre hasta saber cuál usa el PSD.
-- [ ] Fase 3 — sistema de iconos
+- [x] Fase 3 — sistema de iconos
   - [x] fondo negro y columna de iconos de agente (dos estilos)
   - [x] cajas de play (3 alturas) y banda de reveal
   - [x] filas de iconos dentro de esas cajas, con cantidad
@@ -190,9 +255,24 @@ punto que le corresponde y nada más cambia.
 - [ ] Fase 4 — pulido de UI
 - [ ] Fase 5 — mazo
   - [x] galería de cartas, guardar y abrir el mazo entero, autoguardado
+  - [x] Guardar / Guardar como con diálogo nativo, recordando el archivo
   - [ ] export en lote
   - [ ] hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio
+
+### Lo próximo
+
+En orden de valor, y ninguno depende de exportar nada más del PSD:
+
+1. **Export en lote** — bajar todas las cartas del mazo como PNG de una. El
+   render ya es puro, así que es iterar la galería.
+2. **Hoja de impresión 3×3** — A4 con nueve cartas y marcas de corte. A 300 DPI
+   salen del tamaño real del juego. Es lo que termina con cartas sobre la mesa.
+3. **Conectar `unload.png`** — la banderola roja de Rise of Ix. En las cartas
+   reales lleva texto y un icono adentro, así que se resuelve con el mismo
+   `ContentPart` que ya existe.
+
+Y lo que sigue trabado esperando arte del PSD está en "Falta exportar".
 
 ## Guardar
 

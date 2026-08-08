@@ -1,6 +1,13 @@
 import { ICON_IDS, ICONS, type IconId } from '../assets/icons'
-import { FACTION_IDS, FACTIONS, type Card, type Faction } from '../model/card'
-import { Choice, Field, Section, Select, TextInput, Toggle } from './controls'
+import {
+  AGENT_ICON_IDS,
+  AGENT_ICON_STYLE_IDS,
+  AGENT_ICON_STYLES,
+  AGENT_ICONS,
+  type AgentIconStyle,
+} from '../assets/icons/agents'
+import { FACTION_COLORS, FACTION_IDS, FACTIONS, type Card, type Faction } from '../model/card'
+import { Choice, Field, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
 
 type Props = {
   card: Card
@@ -32,9 +39,31 @@ export function CardPanel({ card, onChange }: Props) {
           onChange={(faction) => onChange({ faction })}
           options={[
             { value: null, label: 'Ninguna' },
-            ...FACTION_IDS.map((id) => ({ value: id, label: FACTIONS[id] })),
+            ...FACTION_IDS.map((id) => ({
+              value: id,
+              label: FACTIONS[id],
+              color: FACTION_COLORS[id],
+            })),
           ]}
         />
+      </Section>
+
+      <Section title="Iconos de agente">
+        <MultiChoice
+          values={card.agentIcons}
+          onChange={(agentIcons) => onChange({ agentIcons })}
+          options={AGENT_ICON_IDS.map((id) => ({ value: id, label: AGENT_ICONS[id] }))}
+        />
+        <Field label="Estilo">
+          <Choice<AgentIconStyle>
+            value={card.agentIconStyle}
+            onChange={(style) => onChange({ agentIconStyle: style ?? 'locations' })}
+            options={AGENT_ICON_STYLE_IDS.map((id) => ({
+              value: id,
+              label: AGENT_ICON_STYLES[id],
+            }))}
+          />
+        </Field>
       </Section>
 
       <Section title="Costo de compra">

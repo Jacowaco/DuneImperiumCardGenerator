@@ -13,16 +13,17 @@ import spice from './spice.png'
 import sword from './sword.png'
 import trash from './trash.png'
 import troop from './troop.png'
+import victoryPoint from './victory-point.png'
 import water from './water.png'
 
 /**
- * Iconos recortados de la hoja `Symbols.png` por `scripts/prepare_assets.py`.
+ * Iconos recortados de la hoja de símbolos por `scripts/prepare_assets.py`.
  *
- * Ojo: `solari`, `spice` y `persuasion` vienen con un número quemado en el
- * arte (3, 1 y 1). Para poder poner cualquier cantidad hacen falta las
- * versiones sin número exportadas del PSD.
+ * `solari`, `spice` y `persuasion` vienen sin número: la cantidad la dibuja
+ * la app encima.
  */
 export const ICONS = {
+  'victory-point': { url: victoryPoint, label: 'Punto de victoria' },
   water: { url: water, label: 'Agua' },
   solari: { url: solari, label: 'Solari' },
   spice: { url: spice, label: 'Especia' },

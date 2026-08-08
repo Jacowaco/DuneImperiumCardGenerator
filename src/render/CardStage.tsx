@@ -4,12 +4,14 @@ import type { RefObject } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Stage, Text } from 'react-konva'
 import useImage from 'use-image'
 
+import backgroundUrl from '../assets/layers/background.png'
 import blackBorderUrl from '../assets/layers/black-border.png'
 import cardArtContainerUrl from '../assets/layers/card-art-container.png'
 import { NO_EXPORT } from '../export/exportPng'
 import { clampArtScale } from '../model/art'
 import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
+import { AgentIcons } from './layers/AgentIcons'
 import { CardTitle } from './layers/CardTitle'
 import { CostBadge } from './layers/CostBadge'
 import { FactionBand } from './layers/FactionBand'
@@ -31,6 +33,7 @@ const ZOOM_SPEED = 0.0015
  * el punto que les corresponde y nada más cambia.
  */
 export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
+  const [background] = useImage(backgroundUrl)
   const [artContainer] = useImage(cardArtContainerUrl)
   const [blackBorder] = useImage(blackBorderUrl)
   useFontsReady()
@@ -73,6 +76,8 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
       onWheel={handleWheel}
     >
       <Layer>
+        <KonvaImage image={background} listening={false} />
+
         {/* Fondo del recorte de arte (capa "Card Art Container" del PSD) */}
         <KonvaImage image={artContainer} listening={false} />
 
@@ -83,6 +88,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
 
         {!card.art && <ArtPlaceholder />}
 
+        <AgentIcons icons={card.agentIcons} style={card.agentIconStyle} />
         <FactionBand faction={card.faction} />
         <CardTitle card={card} />
         <CostBadge card={card} />

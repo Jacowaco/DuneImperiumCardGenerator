@@ -50,17 +50,29 @@ render de referencia, no estimadas):
 - `TITLE` — línea de base 76, inicial de 37 px y resto de 26 (versalitas).
 - `COST` — rombo centrado en (676, 93), número de 71 px de alto.
 
+### Geometría de las cajas de contenido
+
+Medido de los PNG y del render de referencia:
+
+| Caja | y |
+|---|---|
+| `play-box-1` | 696 – 812 |
+| `play-box-2` | 696 – 851 |
+| `play-box-3` | 696 – 887 |
+| `reveal-box` (el exportado) | 810 – 1007 |
+| banda reveal en el render de referencia | 852 – 1004 |
+
+La caja de play arranca siempre en y=696 y crece hacia abajo; la banda de
+reveal empieza donde termina la de play y llega hasta ~1005. O sea que
+**cada altura de play necesita su propia banda de reveal**: la exportada
+(810) es la que hace juego con `play-box-1` (termina en 812), y el render de
+referencia usa `play-box-2` (termina en 851) con una banda que arranca en 852.
+Faltan las bandas de reveal para `play-box-2` y `play-box-3`.
+
 ### Falta exportar
 
-- **`Background`** — la capa de abajo de todo. Sin ella el tercio inferior de
-  la carta queda transparente.
-- **`solari`, `spice` y `persuasion` sin número.** Los iconos actuales tienen
-  un 3, un 1 y un 1 quemados en el arte, así que no se puede poner cualquier
-  cantidad.
-- **Icono de punto de victoria** (el globo dorado). No estaba en `Symbols.png`.
-- Las capas de contenido: `Card Play Phase Content`, `Reveal Phase Content`,
-  `Agent icon`, `Card Location Icons`, y las hojas `Base Game Icons`,
-  `Ix Icons`, `Immortality Icons`.
+- Las **bandas de reveal** para las alturas 2 y 3 (ver tabla arriba).
+- Las hojas de iconos `Base Game Icons`, `Ix Icons`, `Immortality Icons`.
 
 ## Arquitectura
 
@@ -78,7 +90,9 @@ punto que le corresponde y nada más cambia.
 - [x] Fase 2 — nombre (versalitas), variante de mazo inicial, banda de facción,
       costo de compra y beneficio de compra. Tipografía: **Jost**, elegida como
       reemplazo libre hasta saber cuál usa el PSD.
-- [ ] Fase 3 — sistema de iconos (Agent icons, Agent box, Reveal box)
+- [ ] Fase 3 — sistema de iconos
+  - [x] fondo negro y columna de iconos de agente (dos estilos)
+  - [ ] filas de contenido de las cajas de play y reveal
 - [ ] Fase 4 — pulido de UI
 - [ ] Fase 5 — biblioteca de cartas, export en lote, hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio

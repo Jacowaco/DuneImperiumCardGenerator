@@ -41,6 +41,17 @@ export const TITLE = {
 } as const
 
 /**
+ * Columna de iconos de agente, arriba a la izquierda debajo de la banda de
+ * facción. Los iconos elegidos se apilan desde arriba con este paso; el resto
+ * de la columna queda vacío. Cada estilo tiene su propio origen porque los
+ * recortes del PSD tienen bordes distintos.
+ */
+export const AGENT_COLUMN = {
+  locations: { x: 29, top: 143, pitch: 78.8 },
+  infiltrate: { x: 25, top: 141, pitch: 78.8 },
+} as const
+
+/**
  * Costo de compra. El rombo está centrado en (676, 93) y el número mide 71 px
  * de alto. La variante con beneficio de compra suma una cinta hacia abajo con
  * un hueco para un icono.

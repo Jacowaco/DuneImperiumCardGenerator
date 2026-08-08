@@ -34,12 +34,19 @@ FACTION_BAND_TOP = 90
 # "Starting Card Name.png") quedan en psd-exports sólo como referencia: el texto
 # lo dibuja la app.
 LAYERS = {
+    'Black Background.png': 'background.png',
     'Black Border.png': 'black-border.png',
     'Card Art Container.png': 'card-art-container.png',
     'Card Name Empty.png': 'card-name.png',
     'Starting Card Name Empty.png': 'card-name-starting.png',
     'Card Cost.png': 'card-cost.png',
     'Card Cost + Purchase Benefit.png': 'card-cost-benefit.png',
+    'agent icon.png': 'agent-icon.png',
+    'play1.png': 'play-box-1.png',
+    'play2.png': 'play-box-2.png',
+    'play3.png': 'play-box-3.png',
+    'reveal.png': 'reveal-box.png',
+    'unload.png': 'unload.png',
 }
 
 FACTION_LAYERS = {
@@ -49,16 +56,28 @@ FACTION_LAYERS = {
     'Faction_Fremen.png': 'faction-fremen.png',
 }
 
-# En orden de lectura de la hoja: primero la fila suelta, después cada fila de
-# izquierda a derecha. Nombres según el glosario del reglamento.
+# En orden de lectura de la hoja: fila por fila, de izquierda a derecha.
+# Nombres según el glosario del reglamento.
 SYMBOLS = [
-    'cost-arrow',
+    'cost-arrow', 'victory-point',
     'water', 'solari', 'spice', 'troop',
     'draw-card', 'draw-intrigue', 'trash', 'acquire-foldspace',
     'signet-ring', 'persuasion', 'sword',
     'influence-gain-one', 'influence-lose-one',
     'influence-gain-two', 'influence-lose-two',
 ]
+
+# Los siete iconos de agente (dónde se puede mandar el agente), apilados en
+# columna en el PSD. Vienen en dos estilos, cada uno en su propia hoja.
+AGENT_ICONS = [
+    'emperor', 'spacing-guild', 'bene-gesserit', 'fremen',
+    'landsraad', 'city', 'spice-trade',
+]
+
+COLUMN_SHEETS = {
+    'location symbols.png': 'locations',
+    'infiltrate symbols.png': 'infiltrate',
+}
 
 
 def runs(mask, min_gap):
@@ -118,6 +137,39 @@ def slice_symbols(source):
         print(f'  icono   {name}.png  ({box[2] - box[0]}x{box[3] - box[1]})')
 
 
+def slice_column(source, folder):
+    """
+    Rebana una hoja con iconos apilados en columna. Se corta en cualquier fila
+    vacía: los iconos son sólidos, así que no hay huecos internos.
+    """
+    image = Image.open(SRC / source).convert('RGBA')
+    mask = alpha_mask(image)
+    bands = runs(mask.any(axis=1), 1)
+
+    if len(bands) != len(AGENT_ICONS):
+        print(
+            f'\n! {source}: se detectaron {len(bands)} iconos pero AGENT_ICONS '
+            f'tiene {len(AGENT_ICONS)} nombres.',
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    out = ICONS_OUT / folder
+    out.mkdir(parents=True, exist_ok=True)
+
+    # Todos se recortan con el mismo rango horizontal para que compartan el
+    # origen izquierdo y la app pueda dibujarlos en una sola x.
+    columns = np.flatnonzero(mask.any(axis=0))
+    left, right = int(columns[0]), int(columns[-1]) + 1
+
+    for name, (top, bottom) in zip(AGENT_ICONS, bands):
+        image.crop((left, top, right, bottom + 1)).save(out / f'{name}.png')
+
+    pitch = (bands[-1][0] - bands[0][0]) / (len(bands) - 1)
+    print(f'  columna {folder}: {len(bands)} iconos, x={left}, tope y={bands[0][0]}, '
+          f'paso {pitch:.1f} px')
+
+
 def main():
     LAYERS_OUT.mkdir(parents=True, exist_ok=True)
     ICONS_OUT.mkdir(parents=True, exist_ok=True)
@@ -126,7 +178,9 @@ def main():
         copy_layer(source, target)
     for source, target in FACTION_LAYERS.items():
         align_faction_band(source, target)
-    slice_symbols('Symbols.png')
+    slice_symbols('symbols corrected.png')
+    for source, folder in COLUMN_SHEETS.items():
+        slice_column(source, folder)
 
     print('\nListo.')
 

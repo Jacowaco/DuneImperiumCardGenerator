@@ -1,4 +1,5 @@
 import type { IconId } from '../assets/icons'
+import type { AgentIcon, AgentIconStyle } from '../assets/icons/agents'
 
 /**
  * Encuadre de la imagen del jugador dentro del Card Art Container.
@@ -31,6 +32,19 @@ export type Faction = keyof typeof FACTIONS
 export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]
 
 /**
+ * Color de cada facción, muestreado del extremo izquierdo de su banda en
+ * `src/assets/layers/faction-*.png` (la banda degrada hacia negro a la
+ * derecha, así que ese píxel es el color "puro"). Sólo lo usa la UI: en la
+ * carta el color viene dentro del PNG.
+ */
+export const FACTION_COLORS: Record<Faction, string> = {
+  emperor: '#636363',
+  'spacing-guild': '#CD3A3D',
+  'bene-gesserit': '#77588B',
+  fremen: '#6A81B9',
+}
+
+/**
  * El modelo de la carta. Es la única fuente de verdad: el render es una
  * función pura de este objeto, así que guardar / cargar / exportar en lote
  * es simplemente serializar esto.
@@ -44,6 +58,9 @@ export type Card = {
   cost: number | null
   /** Icono del beneficio de compra. Si hay uno, se dibuja la cinta larga. */
   purchaseBenefit: IconId | null
+  /** Dónde se puede mandar el agente. Se apilan en la columna izquierda. */
+  agentIcons: AgentIcon[]
+  agentIconStyle: AgentIconStyle
   art: CardArt | null
 }
 
@@ -53,5 +70,7 @@ export const emptyCard = (): Card => ({
   faction: null,
   cost: null,
   purchaseBenefit: null,
+  agentIcons: [],
+  agentIconStyle: 'locations',
   art: null,
 })

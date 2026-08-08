@@ -80,7 +80,53 @@ export function Toggle({
   )
 }
 
-/** Grupo de botones excluyentes. `null` es una opción válida ("ninguno"). */
+/** Igual que Choice pero se pueden elegir varias a la vez. */
+export function MultiChoice<T extends string>({
+  values,
+  options,
+  columns = 2,
+  onChange,
+}: {
+  values: T[]
+  options: { value: T; label: string }[]
+  columns?: number
+  onChange: (values: T[]) => void
+}) {
+  return (
+    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+      {options.map((option) => {
+        const selected = values.includes(option.value)
+
+        return (
+          <button
+            key={option.value}
+            onClick={() =>
+              onChange(
+                selected
+                  ? values.filter((value) => value !== option.value)
+                  : [...values, option.value],
+              )
+            }
+            className={`truncate rounded-md px-2.5 py-2 text-xs transition-colors ${
+              selected
+                ? 'bg-sand-500 font-medium text-zinc-950'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            {option.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * Grupo de botones excluyentes. `null` es una opción válida ("ninguno").
+ * Una opción con `color` va pintada de ese color siempre: apagada mientras
+ * no está elegida (la opacidad la mezcla con el fondo oscuro del panel) y a
+ * pleno, con anillo, cuando lo está.
+ */
 export function Choice<T extends string>({
   value,
   options,
@@ -88,25 +134,34 @@ export function Choice<T extends string>({
   onChange,
 }: {
   value: T | null
-  options: { value: T | null; label: string }[]
+  options: { value: T | null; label: string; color?: string }[]
   columns?: number
   onChange: (value: T | null) => void
 }) {
   return (
     <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
-      {options.map((option) => (
-        <button
-          key={option.value ?? '__none__'}
-          onClick={() => onChange(option.value)}
-          className={`truncate rounded-md px-2.5 py-2 text-xs transition-colors ${
-            value === option.value
-              ? 'bg-zinc-100 font-medium text-zinc-900'
-              : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+      {options.map((option) => {
+        const selected = value === option.value
+
+        return (
+          <button
+            key={option.value ?? '__none__'}
+            onClick={() => onChange(option.value)}
+            style={option.color ? { backgroundColor: option.color } : undefined}
+            className={`truncate rounded-md px-2.5 py-2 text-xs transition ${
+              option.color
+                ? selected
+                  ? 'ring-sand-300 font-medium text-white ring-2'
+                  : 'text-white/80 opacity-55 hover:opacity-80'
+                : selected
+                  ? 'bg-sand-500 font-medium text-zinc-950'
+                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }

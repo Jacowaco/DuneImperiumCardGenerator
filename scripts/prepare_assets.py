@@ -210,26 +210,43 @@ def slice_column(source, folder, region=None):
           f'tope y={bands[0][0] + offset_y}, paso {pitch:.1f} px')
 
 
-def diamond_center(image):
+def emblem_slot(variant):
     """
-    Centro y ancho del rombo, ignorando los chevrones.
+    Dónde va el emblema dentro del rombo, y de qué tamaño.
 
-    No sirve buscar la fila más ancha: los chevrones son igual de anchos que el
-    rombo y corren el centro hacia arriba o hacia abajo. Lo que sí los separa
-    es el color — el rombo es gris neutro y los chevrones son dorados o rojos —
-    así que el rombo son los píxeles sin saturación.
+    La posición sale de comparar el rombo con "?" contra el vacío: la
+    diferencia entre los dos **es** el "?", o sea el hueco que el diseñador
+    dejó para el símbolo.
+
+    No sirve calcularlo por geometría, porque el "?" no está en el centro del
+    rombo: en las variantes de ganar el chevrón tapa el vértice de arriba y lo
+    corre para abajo, y en las de perder pasa al revés. Un centro geométrico
+    cae en el medio de los dos casos y queda mal en ambos.
+
+    El ancho sí sale de la geometría: el rombo son los píxeles sin saturación
+    (los chevrones son dorados o rojos).
     """
-    pixels = np.array(image).astype(int)
+    with_mark = Image.open(ICONS_OUT / f'influence-{variant}.png').convert('RGBA')
+    blank = Image.open(ICONS_OUT / 'blanks' / f'blank-{variant}.png').convert('RGBA')
+
+    if with_mark.size != blank.size:
+        fail(f'influence-{variant} y blank-{variant} miden distinto '
+             f'({with_mark.size} vs {blank.size}); no se pueden comparar.')
+
+    difference = np.abs(np.array(with_mark).astype(int) - np.array(blank).astype(int))
+    mark = difference.sum(axis=2) > 25
+    rows = np.flatnonzero(mark.any(axis=1))
+    columns = np.flatnonzero(mark.any(axis=0))
+
+    pixels = np.array(blank).astype(int)
     rgb = pixels[..., :3]
-    saturation = rgb.max(axis=2) - rgb.min(axis=2)
-    body = (saturation < 30) & (pixels[..., 3] > 200)
+    body = ((rgb.max(axis=2) - rgb.min(axis=2)) < 30) & (pixels[..., 3] > 200)
+    body_columns = np.flatnonzero(body.any(axis=0))
 
-    rows = np.flatnonzero(body.any(axis=1))
-    columns = np.flatnonzero(body.any(axis=0))
     return (
         (int(columns[0]) + int(columns[-1])) / 2,
         (int(rows[0]) + int(rows[-1])) / 2,
-        int(columns[-1]) - int(columns[0]) + 1,
+        int(body_columns[-1]) - int(body_columns[0]) + 1,
     )
 
 
@@ -240,7 +257,7 @@ def compose_influence():
 
     for variant in INFLUENCE_VARIANTS:
         base = Image.open(ICONS_OUT / 'blanks' / f'blank-{variant}.png').convert('RGBA')
-        cx, cy, width = diamond_center(base)
+        cx, cy, width = emblem_slot(variant)
 
         for faction in INFLUENCE_FACTIONS:
             emblem = Image.open(ICONS_OUT / 'emblems' / f'{faction}.png').convert('RGBA')

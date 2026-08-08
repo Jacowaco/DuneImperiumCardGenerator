@@ -1,3 +1,10 @@
+import emblemBeneGesserit from './emblems/bene-gesserit.png'
+import emblemCity from './emblems/city.png'
+import emblemEmperor from './emblems/emperor.png'
+import emblemFremen from './emblems/fremen.png'
+import emblemLandsraad from './emblems/landsraad.png'
+import emblemSpacingGuild from './emblems/spacing-guild.png'
+import emblemSpiceTrade from './emblems/spice-trade.png'
 import infiltrateBeneGesserit from './infiltrate/bene-gesserit.png'
 import infiltrateCity from './infiltrate/city.png'
 import infiltrateEmperor from './infiltrate/emperor.png'
@@ -61,4 +68,19 @@ export const AGENT_ICON_URLS: Record<AgentIconStyle, Record<AgentIcon, string>> 
     city: infiltrateCity,
     'spice-trade': infiltrateSpiceTrade,
   },
+}
+
+/**
+ * Los mismos siete emblemas sueltos, sin el tab de fondo crema y sin estilo.
+ * No van en la carta: son para los botones del panel, donde el fondo del tab
+ * ensucia contra el gris oscuro de la UI.
+ */
+export const AGENT_EMBLEM_URLS: Record<AgentIcon, string> = {
+  emperor: emblemEmperor,
+  'spacing-guild': emblemSpacingGuild,
+  'bene-gesserit': emblemBeneGesserit,
+  fremen: emblemFremen,
+  landsraad: emblemLandsraad,
+  city: emblemCity,
+  'spice-trade': emblemSpiceTrade,
 }

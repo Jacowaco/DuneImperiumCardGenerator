@@ -3,8 +3,8 @@ import {
   AGENT_ICON_IDS,
   AGENT_ICON_STYLE_IDS,
   AGENT_ICON_STYLES,
-  AGENT_ICON_URLS,
   AGENT_ICONS,
+  AGENT_EMBLEM_URLS,
   type AgentIconStyle,
 } from '../assets/icons/agents'
 import {
@@ -60,13 +60,13 @@ export function CardPanel({ card, onChange }: Props) {
       <Section title="Iconos de agente">
         <MultiChoice
           values={card.agentIcons}
+          iconsOnly
+          columns={4}
           onChange={(agentIcons) => onChange({ agentIcons })}
           options={AGENT_ICON_IDS.map((id) => ({
             value: id,
             label: AGENT_ICONS[id],
-            // El botón muestra el icono del estilo elegido, así se ve en el
-            // panel qué va a salir en la carta sin tener que probar.
-            icon: AGENT_ICON_URLS[card.agentIconStyle][id],
+            icon: AGENT_EMBLEM_URLS[id],
           }))}
         />
         <Field label="Estilo">

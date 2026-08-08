@@ -68,11 +68,30 @@ La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
 carta terminada queda casi tapada por los iconos de contenido; sola se ve más
 marcada de lo que se va a ver después.
 
+### Iconos generados
+
+Los rombos de influencia por facción **no se exportan**: los compone
+`prepare_assets.py` juntando el rombo vacío (`icons/blanks/`) con el emblema
+de la facción (`icons/emblems/`), y salen las 16 combinaciones a
+`icons/influence/`. El manifiesto de TypeScript los levanta con
+`import.meta.glob`, así que agregar una combinación no toca código.
+
+El centro del rombo se calcula por saturación, no por la fila más ancha: los
+chevrones son igual de anchos que el rombo y correrían el centro.
+
 ### Falta exportar
 
-- Las hojas de iconos `Base Game Icons`, `Ix Icons`, `Immortality Icons`.
-- `unload.png` ya está en `layers/` pero sin usar: es de la expansión y se
-  hace más adelante.
+Iconos del juego base que todavía no están:
+
+- Las dos flechas de costo verticales (↓ y el chevrón ancho). Sólo está la
+  horizontal.
+- Espadachín (el rombo con "+"), Mentat, Control (la banderita), Robar intriga
+  a oponentes, y Maker (el gusano).
+- Puede que estos sean texto con icono en vez de icono suelto: Alianza,
+  Fremen Bond, y el requisito de influencia tipo "2 Influence".
+
+Y para las expansiones: `Ix Icons`, `Immortality Icons` y el uso de
+`unload.png`, que ya está en `layers/` sin conectar.
 
 ## Arquitectura
 

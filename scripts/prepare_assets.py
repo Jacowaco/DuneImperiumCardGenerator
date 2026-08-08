@@ -3,7 +3,7 @@ Convierte los PNG crudos de `psd-exports/` en los assets que consume la app.
 
 Uso:  npm run assets
 
-Dos transformaciones:
+Tres transformaciones:
 
 1. CAPAS -> src/assets/layers/
    Se copian tal cual (750 x 1039 con transparencia), sólo se renombran a
@@ -11,9 +11,14 @@ Dos transformaciones:
    una debajo de la otra para mostrarlas todas juntas. En una carta real sólo
    se ve una, así que se alinean todas a la misma altura (FACTION_BAND_TOP).
 
-2. ICONOS -> src/assets/icons/
-   La hoja `Symbols.png` se rebana buscando huecos de filas y columnas, y cada
-   icono se guarda recortado al contenido, porque se posicionan dinámicamente.
+2. HOJAS DE ICONOS -> src/assets/icons/
+   Se rebanan buscando huecos de filas y columnas, y cada icono se guarda
+   recortado al contenido, porque se posicionan dinámicamente.
+
+3. ROMBOS DE INFLUENCIA -> src/assets/icons/influence/
+   Se generan componiendo: rombo vacío + emblema de la facción. Con 4 rombos
+   y 4 emblemas salen las 16 combinaciones, y si cambia el arte se regeneran
+   todas de una.
 """
 
 import sys
@@ -56,8 +61,23 @@ FACTION_LAYERS = {
     'Faction_Fremen.png': 'faction-fremen.png',
 }
 
-# En orden de lectura de la hoja: fila por fila, de izquierda a derecha.
-# Nombres según el glosario del reglamento.
+# Los siete iconos de agente, apilados en columna en el PSD.
+AGENT_ICONS = [
+    'emperor', 'spacing-guild', 'bene-gesserit', 'fremen',
+    'landsraad', 'city', 'spice-trade',
+]
+
+# Hojas con los iconos de agente en columna. Cada estilo va a su carpeta.
+COLUMN_SHEETS = {
+    'location symbols.png': ('locations', None),
+    'infiltrate symbols.png': ('infiltrate', None),
+    # Esta hoja tiene los emblemas sueltos arriba a la izquierda y las filas de
+    # símbolos abajo y a la derecha, con las dos zonas solapadas en x y en y.
+    # Por eso hay que acotar con un rectángulo.
+    'simbolos sin fondo.png': ('emblems', (0, 0, 130, 700)),
+}
+
+# En orden de lectura: fila por fila, de izquierda a derecha.
 SYMBOLS = [
     'cost-arrow', 'victory-point',
     'water', 'solari', 'spice', 'troop',
@@ -67,20 +87,21 @@ SYMBOLS = [
     'influence-gain-two', 'influence-lose-two',
 ]
 
-# Los siete iconos de agente (dónde se puede mandar el agente), apilados en
-# columna en el PSD. Vienen en dos estilos, cada uno en su propia hoja.
-AGENT_ICONS = [
-    'emperor', 'spacing-guild', 'bene-gesserit', 'fremen',
-    'landsraad', 'city', 'spice-trade',
+# De la hoja con los rombos vacíos sólo se guardan los rombos: el resto de los
+# símbolos ya viene de `symbols corrected.png`. Por eso se acota a la última
+# fila y los tres primeros de esa fila se descartan.
+BLANK_ROW = (0, 850, 750, 1039)
+BLANK_SYMBOLS = [
+    '_signet-ring', '_persuasion', '_sword',
+    'blank-gain-one', 'blank-lose-one',
+    'blank-gain-two', 'blank-lose-two',
 ]
 
-COLUMN_SHEETS = {
-    'location symbols.png': 'locations',
-    'infiltrate symbols.png': 'infiltrate',
-    # Los mismos siete emblemas pero sueltos, sin el tab de fondo. Son la
-    # materia prima para armar los rombos de influencia por facción.
-    'iconos faltantes.png': 'emblems',
-}
+INFLUENCE_VARIANTS = ['gain-one', 'lose-one', 'gain-two', 'lose-two']
+INFLUENCE_FACTIONS = ['emperor', 'spacing-guild', 'bene-gesserit', 'fremen']
+
+# Qué porción del ancho del rombo ocupa el emblema.
+EMBLEM_FILL = 0.58
 
 
 def runs(mask, min_gap):
@@ -101,24 +122,43 @@ def alpha_mask(image):
     return np.array(image.getchannel('A')) > 8
 
 
+def load_sheet(source, region=None):
+    """
+    Abre una hoja y opcionalmente la acota a un rectángulo (x0, y0, x1, y1).
+
+    Hace falta acotar porque algunas hojas mezclan una columna de iconos a la
+    izquierda con filas de símbolos a la derecha, y ninguna de las dos se puede
+    aislar con un corte de un solo eje.
+    """
+    image = Image.open(SRC / source).convert('RGBA')
+    if region:
+        image = image.crop(region)
+    return image, alpha_mask(image)
+
+
+def fail(message):
+    print(f'\n! {message}', file=sys.stderr)
+    sys.exit(1)
+
+
 def copy_layer(source, target):
     Image.open(SRC / source).convert('RGBA').save(LAYERS_OUT / target)
-    print(f'  capa    {target}')
+    print(f'  capa     {target}')
 
 
 def align_faction_band(source, target):
     """Sube o baja la banda para que su borde superior quede en FACTION_BAND_TOP."""
     image = Image.open(SRC / source).convert('RGBA')
-    top = alpha_mask(image).any(axis=1).argmax()
+    top = int(alpha_mask(image).any(axis=1).argmax())
     shifted = Image.new('RGBA', image.size, (0, 0, 0, 0))
-    shifted.paste(image, (0, FACTION_BAND_TOP - int(top)))
+    shifted.paste(image, (0, FACTION_BAND_TOP - top))
     shifted.save(LAYERS_OUT / target)
-    print(f'  facción {target}  (movida {FACTION_BAND_TOP - int(top):+d} px)')
+    print(f'  facción  {target}  (movida {FACTION_BAND_TOP - top:+d} px)')
 
 
-def slice_symbols(source):
-    image = Image.open(SRC / source).convert('RGBA')
-    mask = alpha_mask(image)
+def slice_rows_and_columns(source, names, out_dir, region=None):
+    """Rebana una hoja con los iconos en filas. Los nombres con '_' se saltean."""
+    image, mask = load_sheet(source, region)
 
     boxes = []
     for top, bottom in runs(mask.any(axis=1), 12):
@@ -127,50 +167,97 @@ def slice_symbols(source):
             ys = np.flatnonzero(band[:, left:right + 1].any(axis=1))
             boxes.append((left, top + int(ys[0]), right + 1, top + int(ys[-1]) + 1))
 
-    if len(boxes) != len(SYMBOLS):
-        print(
-            f'\n! {source}: se detectaron {len(boxes)} símbolos pero SYMBOLS '
-            f'tiene {len(SYMBOLS)} nombres. Revisá la lista en este script.',
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    if len(boxes) != len(names):
+        fail(f'{source}: se detectaron {len(boxes)} iconos pero la lista tiene {len(names)}.')
 
-    for name, box in zip(SYMBOLS, boxes):
-        image.crop(box).save(ICONS_OUT / f'{name}.png')
-        print(f'  icono   {name}.png  ({box[2] - box[0]}x{box[3] - box[1]})')
+    out_dir.mkdir(parents=True, exist_ok=True)
+    saved = 0
+    for name, box in zip(names, boxes):
+        if name.startswith('_'):
+            continue
+        image.crop(box).save(out_dir / f'{name}.png')
+        saved += 1
+    print(f'  iconos   {out_dir.name}/: {saved} de {source}')
 
 
-def slice_column(source, folder):
+def slice_column(source, folder, region=None):
     """
     Rebana una hoja con iconos apilados en columna. Se corta en cualquier fila
     vacía: los iconos son sólidos, así que no hay huecos internos.
+
+    Todos se recortan con el mismo rango horizontal para que compartan el
+    origen izquierdo y la app pueda dibujarlos en una sola x.
     """
-    image = Image.open(SRC / source).convert('RGBA')
-    mask = alpha_mask(image)
+    image, mask = load_sheet(source, region)
     bands = runs(mask.any(axis=1), 1)
 
     if len(bands) != len(AGENT_ICONS):
-        print(
-            f'\n! {source}: se detectaron {len(bands)} iconos pero AGENT_ICONS '
-            f'tiene {len(AGENT_ICONS)} nombres.',
-            file=sys.stderr,
-        )
-        sys.exit(1)
+        fail(f'{source}: se detectaron {len(bands)} iconos pero AGENT_ICONS tiene '
+             f'{len(AGENT_ICONS)}.')
 
-    out = ICONS_OUT / folder
-    out.mkdir(parents=True, exist_ok=True)
-
-    # Todos se recortan con el mismo rango horizontal para que compartan el
-    # origen izquierdo y la app pueda dibujarlos en una sola x.
     columns = np.flatnonzero(mask.any(axis=0))
     left, right = int(columns[0]), int(columns[-1]) + 1
 
+    out = ICONS_OUT / folder
+    out.mkdir(parents=True, exist_ok=True)
     for name, (top, bottom) in zip(AGENT_ICONS, bands):
         image.crop((left, top, right, bottom + 1)).save(out / f'{name}.png')
 
     pitch = (bands[-1][0] - bands[0][0]) / (len(bands) - 1)
-    print(f'  columna {folder}: {len(bands)} iconos, x={left}, tope y={bands[0][0]}, '
-          f'paso {pitch:.1f} px')
+    offset_x, offset_y = (region[0], region[1]) if region else (0, 0)
+    print(f'  columna  {folder}/: {len(bands)} iconos, x={left + offset_x}, '
+          f'tope y={bands[0][0] + offset_y}, paso {pitch:.1f} px')
+
+
+def diamond_center(image):
+    """
+    Centro y ancho del rombo, ignorando los chevrones.
+
+    No sirve buscar la fila más ancha: los chevrones son igual de anchos que el
+    rombo y corren el centro hacia arriba o hacia abajo. Lo que sí los separa
+    es el color — el rombo es gris neutro y los chevrones son dorados o rojos —
+    así que el rombo son los píxeles sin saturación.
+    """
+    pixels = np.array(image).astype(int)
+    rgb = pixels[..., :3]
+    saturation = rgb.max(axis=2) - rgb.min(axis=2)
+    body = (saturation < 30) & (pixels[..., 3] > 200)
+
+    rows = np.flatnonzero(body.any(axis=1))
+    columns = np.flatnonzero(body.any(axis=0))
+    return (
+        (int(columns[0]) + int(columns[-1])) / 2,
+        (int(rows[0]) + int(rows[-1])) / 2,
+        int(columns[-1]) - int(columns[0]) + 1,
+    )
+
+
+def compose_influence():
+    """Rombo vacío + emblema de facción, para las 16 combinaciones."""
+    out = ICONS_OUT / 'influence'
+    out.mkdir(parents=True, exist_ok=True)
+
+    for variant in INFLUENCE_VARIANTS:
+        base = Image.open(ICONS_OUT / 'blanks' / f'blank-{variant}.png').convert('RGBA')
+        cx, cy, width = diamond_center(base)
+
+        for faction in INFLUENCE_FACTIONS:
+            emblem = Image.open(ICONS_OUT / 'emblems' / f'{faction}.png').convert('RGBA')
+            target = width * EMBLEM_FILL
+            scale = min(target / emblem.width, target / emblem.height)
+            emblem = emblem.resize(
+                (max(1, round(emblem.width * scale)), max(1, round(emblem.height * scale))),
+                Image.LANCZOS,
+            )
+
+            composed = base.copy()
+            composed.alpha_composite(
+                emblem,
+                (round(cx - emblem.width / 2), round(cy - emblem.height / 2)),
+            )
+            composed.save(out / f'{faction}-{variant}.png')
+
+    print(f'  compuesto influence/: {len(INFLUENCE_FACTIONS) * len(INFLUENCE_VARIANTS)} rombos')
 
 
 def main():
@@ -181,9 +268,15 @@ def main():
         copy_layer(source, target)
     for source, target in FACTION_LAYERS.items():
         align_faction_band(source, target)
-    slice_symbols('symbols corrected.png')
-    for source, folder in COLUMN_SHEETS.items():
-        slice_column(source, folder)
+
+    slice_rows_and_columns('symbols corrected.png', SYMBOLS, ICONS_OUT)
+    slice_rows_and_columns(
+        'simbolos sin fondo.png', BLANK_SYMBOLS, ICONS_OUT / 'blanks', region=BLANK_ROW
+    )
+    for source, (folder, region) in COLUMN_SHEETS.items():
+        slice_column(source, folder, region)
+
+    compose_influence()
 
     print('\nListo.')
 

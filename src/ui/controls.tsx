@@ -82,18 +82,22 @@ export function Toggle({
 
 /**
  * Igual que Choice pero se pueden elegir varias a la vez. Una opción con
- * `icon` (url de imagen) lo muestra antes del texto, que es lo que termina
- * identificando al botón cuando el nombre no entra entero.
+ * `icon` (url de imagen) lo muestra antes del texto.
+ *
+ * Con `iconsOnly` el nombre pasa al tooltip y el botón queda del tamaño del
+ * símbolo: es el símbolo el que identifica la opción, no el texto.
  */
 export function MultiChoice<T extends string>({
   values,
   options,
   columns = 2,
+  iconsOnly = false,
   onChange,
 }: {
   values: T[]
   options: { value: T; label: string; icon?: string }[]
   columns?: number
+  iconsOnly?: boolean
   onChange: (values: T[]) => void
 }) {
   return (
@@ -111,7 +115,11 @@ export function MultiChoice<T extends string>({
                   : [...values, option.value],
               )
             }
-            className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-xs transition-colors ${
+            title={iconsOnly ? option.label : undefined}
+            aria-label={iconsOnly ? option.label : undefined}
+            className={`flex items-center rounded-md text-xs transition-colors ${
+              iconsOnly ? 'justify-center px-1 py-1.5' : 'gap-2 px-2.5 py-2'
+            } ${
               selected
                 ? 'bg-sand-500 font-medium text-zinc-950'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
@@ -121,10 +129,14 @@ export function MultiChoice<T extends string>({
               <img
                 src={option.icon}
                 alt=""
-                className={`h-5 w-auto shrink-0 transition-opacity ${selected ? '' : 'opacity-70'}`}
+                // Ancho fijo con object-contain: los emblemas tienen alturas
+                // distintas, y si no cada uno ocuparía un ancho diferente.
+                className={`shrink-0 object-contain transition-opacity ${
+                  iconsOnly ? 'h-7 w-9' : 'h-5 w-7'
+                } ${selected ? '' : 'opacity-80'}`}
               />
             )}
-            <span className="truncate">{option.label}</span>
+            {!iconsOnly && <span className="truncate">{option.label}</span>}
           </button>
         )
       })}

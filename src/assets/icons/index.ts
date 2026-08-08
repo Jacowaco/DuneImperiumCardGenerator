@@ -13,6 +13,7 @@ import spice from './spice.png'
 import sword from './sword.png'
 import trash from './trash.png'
 import troop from './troop.png'
+import { INFLUENCE_ICONS, type InfluenceIconId } from './influence'
 import victoryPoint from './victory-point.png'
 import water from './water.png'
 
@@ -21,8 +22,12 @@ import water from './water.png'
  *
  * `solari`, `spice` y `persuasion` vienen sin número: la cantidad la dibuja
  * la app encima.
+ *
+ * Los `influence-*` sin facción son los genéricos con "?" ("la facción que
+ * elijas"); los rombos por facción se agregan desde `./influence`, donde se
+ * generan por composición.
  */
-export const ICONS = {
+const BASE_ICONS = {
   'victory-point': { url: victoryPoint, label: 'Punto de victoria' },
   water: { url: water, label: 'Agua' },
   solari: { url: solari, label: 'Solari' },
@@ -42,7 +47,12 @@ export const ICONS = {
   'cost-arrow': { url: costArrow, label: 'Flecha de costo' },
 } as const
 
-export type IconId = keyof typeof ICONS
+export const ICONS: Record<IconId, { url: string; label: string }> = {
+  ...BASE_ICONS,
+  ...INFLUENCE_ICONS,
+}
+
+export type IconId = keyof typeof BASE_ICONS | InfluenceIconId
 
 export const ICON_IDS = Object.keys(ICONS) as IconId[]
 

@@ -9,6 +9,25 @@ type Props = {
 }
 
 /**
+ * Un color por tipo de pieza, el mismo en la fila y en el botón que la agrega.
+ * En una lista larga y mezclada, el color se lee antes que el contenido.
+ */
+const STYLES = {
+  icon: {
+    row: 'border-sand-500 bg-sand-500/10',
+    button: 'bg-sand-500/15 text-sand-100 hover:bg-sand-500/25',
+  },
+  text: {
+    row: 'border-sky-500 bg-sky-500/10',
+    button: 'bg-sky-500/15 text-sky-100 hover:bg-sky-500/25',
+  },
+  break: {
+    row: 'border-zinc-500 bg-zinc-500/10',
+    button: 'bg-zinc-500/15 text-zinc-200 hover:bg-zinc-500/25',
+  },
+} as const
+
+/**
  * Contenido de una caja: iconos y texto en la misma lista, en el orden en que
  * se dibujan. El acomodo en renglones lo hace el layout, no el usuario; acá
  * sólo se elige qué va y en qué orden.
@@ -34,7 +53,10 @@ export function ContentEditor({ parts, onChange }: Props) {
       {parts.length === 0 && <Hint>Caja vacía.</Hint>}
 
       {parts.map((part, index) => (
-        <div key={index} className="flex items-center gap-2 rounded-md bg-zinc-900 p-1.5">
+        <div
+          key={index}
+          className={`flex items-center gap-2 rounded-md border-l-4 p-1.5 ${STYLES[part.type].row}`}
+        >
           {part.type === 'icon' && (
             <>
               <img src={ICONS[part.icon].url} alt="" className="size-7 shrink-0 object-contain" />
@@ -87,9 +109,15 @@ export function ContentEditor({ parts, onChange }: Props) {
       ))}
 
       <div className="grid grid-cols-3 gap-2">
-        <Add onClick={() => setPicking(!picking)}>{picking ? 'Cerrar' : 'Icono…'}</Add>
-        <Add onClick={() => onChange([...parts, textPart()])}>Texto</Add>
-        <Add onClick={() => onChange([...parts, { type: 'break' }])}>Renglón</Add>
+        <Add type="icon" onClick={() => setPicking(!picking)}>
+          {picking ? 'Cerrar' : 'Icono…'}
+        </Add>
+        <Add type="text" onClick={() => onChange([...parts, textPart()])}>
+          Texto
+        </Add>
+        <Add type="break" onClick={() => onChange([...parts, { type: 'break' }])}>
+          Renglón
+        </Add>
       </div>
 
       {picking && (
@@ -114,11 +142,19 @@ export function ContentEditor({ parts, onChange }: Props) {
   )
 }
 
-function Add({ onClick, children }: { onClick: () => void; children: string }) {
+function Add({
+  type,
+  onClick,
+  children,
+}: {
+  type: keyof typeof STYLES
+  onClick: () => void
+  children: string
+}) {
   return (
     <button
       onClick={onClick}
-      className="rounded-md bg-zinc-800 px-2 py-2 text-xs text-zinc-200 transition-colors hover:bg-zinc-700"
+      className={`rounded-md px-2 py-2 text-xs font-medium transition-colors ${STYLES[type].button}`}
     >
       {children}
     </button>

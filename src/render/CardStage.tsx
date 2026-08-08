@@ -14,6 +14,7 @@ import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
 import { AgentIcons } from './layers/AgentIcons'
 import { CardTitle } from './layers/CardTitle'
 import { ContentBoxes } from './layers/ContentBoxes'
+import { ContentIcons } from './layers/ContentIcons'
 import { CostBadge } from './layers/CostBadge'
 import { FactionBand } from './layers/FactionBand'
 import { useFontsReady } from './useFontsReady'
@@ -90,6 +91,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
         {!card.art && <ArtPlaceholder />}
 
         <ContentBoxes card={card} />
+        <ContentIcons card={card} />
         <AgentIcons icons={card.agentIcons} style={card.agentIconStyle} />
         <FactionBand faction={card.faction} />
         <CardTitle card={card} />

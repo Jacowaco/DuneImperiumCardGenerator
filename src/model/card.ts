@@ -29,6 +29,15 @@ export const FACTIONS = {
 
 export type Faction = keyof typeof FACTIONS
 
+/**
+ * Un icono dentro de una caja de contenido. `amount` sólo lo usan los iconos
+ * que salen vacíos del PSD (solari, especia, persuasión); el resto lo ignora.
+ */
+export type ContentEntry = {
+  icon: IconId
+  amount: number
+}
+
 /** Alturas disponibles de la caja del turno de agente. 0 = sin caja. */
 export const PLAY_ROWS = [0, 1, 2, 3] as const
 export type PlayRows = (typeof PLAY_ROWS)[number]
@@ -79,6 +88,9 @@ export type Card = {
   /** La silueta negra del agente, al costado izquierdo de la caja de play. */
   agentSilhouette: boolean
   revealBox: boolean
+  /** Iconos dentro de cada caja, en el orden en que se dibujan. */
+  playIcons: ContentEntry[]
+  revealIcons: ContentEntry[]
   art: CardArt | null
 }
 
@@ -94,5 +106,7 @@ export const emptyCard = (): Card => ({
   playRows: 1,
   agentSilhouette: true,
   revealBox: true,
+  playIcons: [],
+  revealIcons: [],
   art: null,
 })

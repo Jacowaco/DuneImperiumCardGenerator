@@ -1,0 +1,134 @@
+{
+  "acquire-foldspace": [
+    65,
+    98
+  ],
+  "cost-arrow": [
+    61,
+    55
+  ],
+  "draw-card": [
+    64,
+    98
+  ],
+  "draw-intrigue": [
+    65,
+    98
+  ],
+  "influence-bene-gesserit-gain-one": [
+    87,
+    99
+  ],
+  "influence-bene-gesserit-gain-two": [
+    74,
+    96
+  ],
+  "influence-bene-gesserit-lose-one": [
+    86,
+    99
+  ],
+  "influence-bene-gesserit-lose-two": [
+    74,
+    94
+  ],
+  "influence-emperor-gain-one": [
+    87,
+    99
+  ],
+  "influence-emperor-gain-two": [
+    74,
+    96
+  ],
+  "influence-emperor-lose-one": [
+    86,
+    99
+  ],
+  "influence-emperor-lose-two": [
+    74,
+    94
+  ],
+  "influence-fremen-gain-one": [
+    87,
+    99
+  ],
+  "influence-fremen-gain-two": [
+    74,
+    96
+  ],
+  "influence-fremen-lose-one": [
+    86,
+    99
+  ],
+  "influence-fremen-lose-two": [
+    74,
+    94
+  ],
+  "influence-gain-one": [
+    87,
+    99
+  ],
+  "influence-gain-two": [
+    74,
+    96
+  ],
+  "influence-lose-one": [
+    86,
+    99
+  ],
+  "influence-lose-two": [
+    74,
+    94
+  ],
+  "influence-spacing-guild-gain-one": [
+    87,
+    99
+  ],
+  "influence-spacing-guild-gain-two": [
+    74,
+    96
+  ],
+  "influence-spacing-guild-lose-one": [
+    86,
+    99
+  ],
+  "influence-spacing-guild-lose-two": [
+    74,
+    94
+  ],
+  "persuasion": [
+    99,
+    98
+  ],
+  "signet-ring": [
+    112,
+    99
+  ],
+  "solari": [
+    100,
+    99
+  ],
+  "spice": [
+    111,
+    96
+  ],
+  "sword": [
+    71,
+    95
+  ],
+  "trash": [
+    65,
+    98
+  ],
+  "troop": [
+    91,
+    100
+  ],
+  "victory-point": [
+    100,
+    100
+  ],
+  "water": [
+    69,
+    94
+  ]
+}

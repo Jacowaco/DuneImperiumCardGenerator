@@ -68,6 +68,17 @@ La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
 carta terminada queda casi tapada por los iconos de contenido; sola se ve más
 marcada de lo que se va a ver después.
 
+Las filas de iconos se centran dentro del área interior de la caja (el borde
+de adentro, no el exterior): y 705–804 / 843 / 878 según la altura. La fila de
+revelación no tiene caja propia, así que se centra en lo que queda entre el
+pie de la caja de play y y=1007.
+
+Todos los iconos de una fila se escalan con el **mismo factor**, no a la misma
+altura: en el arte original no todos miden igual y unificar la altura les
+cambiaría la proporción entre sí. Los tamaños naturales salen de
+`src/assets/icons/sizes.json`, que genera el script, para que el layout se
+calcule sin esperar a que carguen los PNG.
+
 ### Iconos generados
 
 Los rombos de influencia por facción **no se exportan**: los compone
@@ -112,7 +123,7 @@ punto que le corresponde y nada más cambia.
 - [ ] Fase 3 — sistema de iconos
   - [x] fondo negro y columna de iconos de agente (dos estilos)
   - [x] cajas de play (3 alturas) y banda de reveal
-  - [ ] filas de iconos dentro de esas cajas
+  - [x] filas de iconos dentro de esas cajas, con cantidad
 - [ ] Fase 4 — pulido de UI
 - [ ] Fase 5 — biblioteca de cartas, export en lote, hoja de impresión 3×3
 - [ ] Fase 6 — empaquetado de escritorio

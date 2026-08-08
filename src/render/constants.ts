@@ -52,6 +52,31 @@ export const AGENT_COLUMN = {
 } as const
 
 /**
+ * Filas de iconos dentro de las cajas de contenido.
+ *
+ * `play.top` y `play.bottoms` son el borde interior de cada caja (la línea
+ * clara de adentro), no el exterior. La fila de reveal no tiene caja propia
+ * con borde: ocupa lo que queda entre el pie de la caja de play y el pie de
+ * la banda, así que su centro se calcula en tiempo de dibujo.
+ */
+export const CONTENT = {
+  left: 38,
+  right: 711,
+  play: {
+    top: 705,
+    bottoms: { 1: 804, 2: 843, 3: 878 } as Record<number, number>,
+  },
+  reveal: { top: 810, bottom: 1007 },
+  /** Alto de referencia de los iconos de las hojas del PSD. */
+  nominalIconHeight: 99,
+  padding: 8,
+  gap: 12,
+  /** Alto del número respecto del icono, para los que salen vacíos. */
+  numberHeightRatio: 0.48,
+  numberWeight: 500,
+} as const
+
+/**
  * Costo de compra. El rombo está centrado en (676, 93) y el número mide 71 px
  * de alto. La variante con beneficio de compra suma una cinta hacia abajo con
  * un hueco para un icono.

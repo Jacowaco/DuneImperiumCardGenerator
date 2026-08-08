@@ -21,6 +21,7 @@ Tres transformaciones:
    todas de una.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -260,6 +261,25 @@ def compose_influence():
     print(f'  compuesto influence/: {len(INFLUENCE_FACTIONS) * len(INFLUENCE_VARIANTS)} rombos')
 
 
+def write_icon_sizes():
+    """
+    Deja el tamaño natural de cada icono en un JSON.
+
+    La app arma las filas de iconos midiendo antes de dibujar, y si tuviera que
+    esperar a que cada PNG cargue para saber cuánto mide, el layout saltaría en
+    pantalla. Con esto el cálculo es sincrónico.
+    """
+    sizes = {}
+    for path in sorted(ICONS_OUT.glob('*.png')):
+        sizes[path.stem] = Image.open(path).size
+    for path in sorted((ICONS_OUT / 'influence').glob('*.png')):
+        sizes[f'influence-{path.stem}'] = Image.open(path).size
+
+    target = ICONS_OUT / 'sizes.json'
+    target.write_text(json.dumps(dict(sorted(sizes.items())), indent=2), encoding='utf-8')
+    print(f'  medidas  {target.name}: {len(sizes)} iconos')
+
+
 def main():
     LAYERS_OUT.mkdir(parents=True, exist_ok=True)
     ICONS_OUT.mkdir(parents=True, exist_ok=True)
@@ -277,6 +297,7 @@ def main():
         slice_column(source, folder, region)
 
     compose_influence()
+    write_icon_sizes()
 
     print('\nListo.')
 

@@ -1,19 +1,28 @@
 import type Konva from 'konva'
-import { useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
 
 import { exportCardPng } from './export/exportPng'
 import { loadArtFromFile } from './model/art'
 import { emptyCard, type ArtTransform, type Card } from './model/card'
+import { downloadCard, loadAutosave, saveAutosave } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
 import { CardPanel } from './ui/CardPanel'
 import { ExportPanel } from './ui/ExportPanel'
+import { ProjectPanel } from './ui/ProjectPanel'
 
 export function App() {
-  const [card, setCard] = useState<Card>(emptyCard)
+  const [card, setCard] = useState<Card>(() => loadAutosave() ?? emptyCard())
   const [exporting, setExporting] = useState(false)
   const [dragging, setDragging] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Autoguardado: recargar la página no debería costar el trabajo hecho.
+  useEffect(() => {
+    const timer = setTimeout(() => saveAutosave(card), 500)
+    return () => clearTimeout(timer)
+  }, [card])
 
   const stageRef = useRef<Konva.Stage | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -22,11 +31,12 @@ export function App() {
 
   const setArtFromFile = async (file: File | undefined) => {
     if (!file?.type.startsWith('image/')) return
-    const art = await loadArtFromFile(file)
-    setCard((current) => {
-      if (current.art) URL.revokeObjectURL(current.art.src)
-      return { ...current, art }
-    })
+    try {
+      const art = await loadArtFromFile(file)
+      setCard((current) => ({ ...current, art }))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo cargar la imagen.')
+    }
   }
 
   const setTransform = (transform: ArtTransform) =>
@@ -34,18 +44,14 @@ export function App() {
       current.art ? { ...current, art: { ...current.art, transform } } : current,
     )
 
-  const clearArt = () =>
-    setCard((current) => {
-      if (current.art) URL.revokeObjectURL(current.art.src)
-      return { ...current, art: null }
-    })
+  const clearArt = () => setCard((current) => ({ ...current, art: null }))
 
   const handleExport = async () => {
     const stage = stageRef.current
     if (!stage) return
     setExporting(true)
     try {
-      await exportCardPng(stage, { filename: 'dune-card.png' })
+      await exportCardPng(stage, { filename: `${card.title.trim() || 'carta'}.png` })
     } finally {
       setExporting(false)
     }
@@ -82,6 +88,14 @@ export function App() {
         />
 
         <ExportPanel busy={exporting} onExport={handleExport} />
+
+        <ProjectPanel
+          card={card}
+          onSave={() => downloadCard(card)}
+          onOpen={setCard}
+          onNew={() => setCard(emptyCard())}
+          onError={setError}
+        />
       </aside>
 
       <main
@@ -107,6 +121,15 @@ export function App() {
 
         {dragging && (
           <div className="pointer-events-none absolute inset-4 rounded-lg border-2 border-dashed border-sand-500" />
+        )}
+
+        {error && (
+          <button
+            onClick={() => setError(null)}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-md bg-red-900/90 px-4 py-2.5 text-sm text-red-50 shadow-lg"
+          >
+            {error}
+          </button>
         )}
       </main>
 

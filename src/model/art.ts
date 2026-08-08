@@ -28,22 +28,31 @@ export function centerAt(
   }
 }
 
-/** Carga un archivo del usuario y lo encuadra para cubrir el contenedor. */
+/**
+ * Carga un archivo del usuario y lo encuadra para cubrir el contenedor.
+ *
+ * La imagen se guarda como data URL en vez de object URL para que el modelo
+ * sea serializable tal cual: guardar la carta es un JSON.stringify.
+ */
 export function loadArtFromFile(file: File): Promise<CardArt> {
   return new Promise((resolve, reject) => {
-    const src = URL.createObjectURL(file)
-    const image = new Image()
-    image.onload = () =>
-      resolve({
-        src,
-        width: image.width,
-        height: image.height,
-        transform: fitCover(image.width, image.height),
-      })
-    image.onerror = () => {
-      URL.revokeObjectURL(src)
-      reject(new Error(`No se pudo leer la imagen: ${file.name}`))
+    const reader = new FileReader()
+
+    reader.onerror = () => reject(new Error(`No se pudo leer el archivo: ${file.name}`))
+    reader.onload = () => {
+      const src = String(reader.result)
+      const image = new Image()
+      image.onerror = () => reject(new Error(`No es una imagen válida: ${file.name}`))
+      image.onload = () =>
+        resolve({
+          src,
+          width: image.width,
+          height: image.height,
+          transform: fitCover(image.width, image.height),
+        })
+      image.src = src
     }
-    image.src = src
+
+    reader.readAsDataURL(file)
   })
 }

@@ -90,6 +90,19 @@ de la facción (`icons/emblems/`), y salen las 16 combinaciones a
 El centro del rombo se calcula por saturación, no por la fila más ancha: los
 chevrones son igual de anchos que el rombo y correrían el centro.
 
+### Deuda pendiente: texto en las cajas de contenido
+
+Las cajas de play y reveal también pueden llevar **texto**, no sólo iconos
+(las cartas reales tienen cosas como "Gana 1 influencia con una facción donde
+un oponente tenga más que vos"). Todavía no está hecho.
+
+Cuando se haga, `ContentEntry` (`src/model/card.ts`) tiene que pasar de ser
+sólo `{ icon, amount }` a una unión discriminada — `{ type: 'icon', … }` |
+`{ type: 'text', … }` — y `layoutIconRow` va a tener que medir texto además de
+iconos. Eso rompe los archivos ya guardados, así que hay que subir el
+`version` en `src/model/storage.ts` y migrar al abrir; el formato ya tiene el
+campo previsto.
+
 ### Falta exportar
 
 Iconos del juego base que todavía no están:

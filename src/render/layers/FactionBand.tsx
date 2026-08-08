@@ -5,7 +5,8 @@ import beneGesseritUrl from '../../assets/layers/faction-bene-gesserit.png'
 import emperorUrl from '../../assets/layers/faction-emperor.png'
 import fremenUrl from '../../assets/layers/faction-fremen.png'
 import spacingGuildUrl from '../../assets/layers/faction-spacing-guild.png'
-import type { Faction } from '../../model/card'
+import { FACTION_IDS, type Faction } from '../../model/card'
+import { FACTION_BAND_PITCH } from '../constants'
 
 /**
  * El nombre de la facción viene dibujado en el PNG, y todas las bandas ya
@@ -18,12 +19,25 @@ const BANDS: Record<Faction, string> = {
   fremen: fremenUrl,
 }
 
-export function FactionBand({ faction }: { faction: Faction | null }) {
-  // El componente interno existe para no llamar a useImage con src vacío.
-  return faction ? <Band url={BANDS[faction]} /> : null
+/**
+ * Apila una banda por facción hacia abajo, siempre en el orden canónico
+ * (no en el orden en que las eligió el usuario), igual que la columna de
+ * iconos de agente.
+ */
+export function FactionBand({ factions }: { factions: Faction[] }) {
+  const ordered = FACTION_IDS.filter((id) => factions.includes(id))
+
+  return (
+    <>
+      {ordered.map((id, index) => (
+        <Band key={id} url={BANDS[id]} y={index * FACTION_BAND_PITCH} />
+      ))}
+    </>
+  )
 }
 
-function Band({ url }: { url: string }) {
+// El componente interno existe para no llamar a useImage con src vacío.
+function Band({ url, y }: { url: string; y: number }) {
   const [band] = useImage(url)
-  return <KonvaImage image={band} listening={false} />
+  return <KonvaImage image={band} y={y} listening={false} />
 }

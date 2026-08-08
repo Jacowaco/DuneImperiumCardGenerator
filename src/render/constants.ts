@@ -41,6 +41,14 @@ export const TITLE = {
 } as const
 
 /**
+ * Las bandas de facción salen del script ya alineadas al tope de la ranura
+ * (FACTION_BAND_TOP en `prepare_assets.py`). Una carta de varias facciones
+ * apila una banda debajo de la otra con este paso, que es el alto exacto de
+ * la banda: no queda aire entre una y la siguiente.
+ */
+export const FACTION_BAND_PITCH = 44
+
+/**
  * Columna de iconos de agente, arriba a la izquierda debajo de la banda de
  * facción. Los iconos elegidos se apilan desde arriba con este paso; el resto
  * de la columna queda vacío. Cada estilo tiene su propio origen porque los

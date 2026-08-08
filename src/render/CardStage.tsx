@@ -93,7 +93,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
         <ContentBoxes card={card} />
         <ContentIcons card={card} />
         <AgentIcons icons={card.agentIcons} style={card.agentIconStyle} />
-        <FactionBand faction={card.faction} />
+        <FactionBand factions={card.factions} />
         <CardTitle card={card} />
         <CostBadge card={card} />
 

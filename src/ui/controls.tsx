@@ -86,6 +86,9 @@ export function Toggle({
  *
  * Con `iconsOnly` el nombre pasa al tooltip y el botón queda del tamaño del
  * símbolo: es el símbolo el que identifica la opción, no el texto.
+ *
+ * `color` funciona igual que en Choice: el botón va pintado siempre, apagado
+ * mientras no está elegido.
  */
 export function MultiChoice<T extends string>({
   values,
@@ -95,7 +98,7 @@ export function MultiChoice<T extends string>({
   onChange,
 }: {
   values: T[]
-  options: { value: T; label: string; icon?: string }[]
+  options: { value: T; label: string; icon?: string; color?: string }[]
   columns?: number
   iconsOnly?: boolean
   onChange: (values: T[]) => void
@@ -117,12 +120,17 @@ export function MultiChoice<T extends string>({
             }
             title={iconsOnly ? option.label : undefined}
             aria-label={iconsOnly ? option.label : undefined}
-            className={`flex items-center rounded-md text-xs transition-colors ${
+            style={option.color ? { backgroundColor: option.color } : undefined}
+            className={`flex items-center rounded-md text-xs transition ${
               iconsOnly ? 'justify-center px-1 py-1.5' : 'gap-2 px-2.5 py-2'
             } ${
-              selected
-                ? 'bg-sand-500 font-medium text-zinc-950'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+              option.color
+                ? selected
+                  ? 'ring-sand-300 font-medium text-white ring-2'
+                  : 'text-white/80 opacity-55 hover:opacity-80'
+                : selected
+                  ? 'bg-sand-500 font-medium text-zinc-950'
+                  : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
             }`}
           >
             {option.icon && (

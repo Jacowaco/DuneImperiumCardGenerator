@@ -38,8 +38,11 @@ export type ContentEntry = {
   amount: number
 }
 
-/** Alturas disponibles de la caja del turno de agente. 0 = sin caja. */
-export const PLAY_ROWS = [0, 1, 2, 3] as const
+/**
+ * Alturas disponibles de la caja del turno de agente, en filas de iconos.
+ * No hay opción de sacarla: todas las cartas la llevan, aunque esté vacía.
+ */
+export const PLAY_ROWS = [1, 2, 3] as const
 export type PlayRows = (typeof PLAY_ROWS)[number]
 
 export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]
@@ -66,7 +69,12 @@ export type Card = {
   title: string
   /** Cartas del mazo inicial: llevan el rombo antes del nombre. */
   starting: boolean
-  faction: Faction | null
+  /**
+   * Una carta puede pertenecer a más de una facción. Las bandas se apilan
+   * hacia abajo siempre en el orden de `FACTION_IDS`, no en el que se
+   * eligieron.
+   */
+  factions: Faction[]
   /** null = carta sin costo de compra (las del mazo inicial, por ejemplo). */
   cost: number | null
   /** Icono del beneficio de compra. Si hay uno, se dibuja la cinta larga. */
@@ -97,7 +105,7 @@ export type Card = {
 export const emptyCard = (): Card => ({
   title: '',
   starting: false,
-  faction: null,
+  factions: [],
   cost: null,
   purchaseBenefit: null,
   purchaseBenefitAmount: 1,

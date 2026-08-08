@@ -16,7 +16,7 @@ import {
   type Faction,
   type PlayRows,
 } from '../model/card'
-import { Choice, Field, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
+import { Choice, Field, Hint, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
 import { IconRowEditor } from './IconRowEditor'
 
 type Props = {
@@ -44,18 +44,18 @@ export function CardPanel({ card, onChange }: Props) {
       </Section>
 
       <Section title="Facción">
-        <Choice<Faction>
-          value={card.faction}
-          onChange={(faction) => onChange({ faction })}
-          options={[
-            { value: null, label: 'Ninguna' },
-            ...FACTION_IDS.map((id) => ({
-              value: id,
-              label: FACTIONS[id],
-              color: FACTION_COLORS[id],
-            })),
-          ]}
+        <MultiChoice<Faction>
+          values={card.factions}
+          onChange={(factions) => onChange({ factions })}
+          options={FACTION_IDS.map((id) => ({
+            value: id,
+            label: FACTIONS[id],
+            color: FACTION_COLORS[id],
+          }))}
         />
+        <Hint>
+          Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas.
+        </Hint>
       </Section>
 
       <Section title="Iconos de agente">

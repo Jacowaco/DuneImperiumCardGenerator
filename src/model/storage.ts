@@ -1,4 +1,4 @@
-import { emptyCard, type Card } from './card'
+import { emptyCard, type Card, type Faction } from './card'
 
 /**
  * La carta se guarda como JSON plano. La imagen viaja adentro como data URL,
@@ -36,7 +36,16 @@ export function parseCard(json: string): Card {
     throw new Error('El archivo no es una carta de Dune: Imperium.')
   }
 
-  return { ...emptyCard(), ...(parsed as SavedFile).card }
+  return migrate({ ...emptyCard(), ...(parsed as SavedFile).card })
+}
+
+/** Antes la carta tenía una sola facción, en singular. */
+type LegacyCard = Card & { faction?: Faction | null }
+
+function migrate(card: LegacyCard): Card {
+  if (!card.factions.length && card.faction) card.factions = [card.faction]
+  delete card.faction
+  return card
 }
 
 export function downloadCard(card: Card) {

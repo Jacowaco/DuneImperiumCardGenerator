@@ -1,5 +1,6 @@
 import type Konva from 'konva'
 import { CARD_WIDTH } from '../render/constants'
+import { downloadBlob } from './download'
 
 /**
  * Los nodos con este nombre son ayudas visuales del editor y se ocultan
@@ -30,12 +31,7 @@ export async function exportCardPng(
       mimeType: 'image/png',
     })) as Blob
 
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(url)
+    downloadBlob(blob, filename)
   } finally {
     helpers.forEach((node) => node.show())
   }

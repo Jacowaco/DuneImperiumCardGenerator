@@ -62,6 +62,28 @@ FACTION_LAYERS = {
     'Faction_Fremen.png': 'faction-fremen.png',
 }
 
+# Plantillas en blanco de la banda de facción, una por posición en la pila
+# (1 = arriba y más ancha, 4 = abajo y más angosta). El código las tiñe con el
+# color de cada facción y les dibuja el nombre encima: qué facción cae en qué
+# posición depende de qué combinación eligió el usuario, así que no puede venir
+# resuelto de antemano en un PNG por facción como antes.
+FACTION_BAND_LAYERS = {
+    'Faction Band 1.png': 'faction-band-1.png',
+    'Faction Band 2.png': 'faction-band-2.png',
+    'Faction Band 3.png': 'faction-band-3.png',
+    'Faction Band 4.png': 'faction-band-4.png',
+}
+
+# Mismos cuatro colores que FACTION_COLORS en src/model/card.ts. Duplicado a
+# mano porque el script no puede importar TypeScript; si cambia uno, cambian
+# los dos.
+FACTION_COLORS = {
+    'emperor': (0x63, 0x63, 0x63),
+    'spacing-guild': (0xCD, 0x3A, 0x3D),
+    'bene-gesserit': (0x77, 0x58, 0x8B),
+    'fremen': (0x6A, 0x81, 0xB9),
+}
+
 # Los siete iconos de agente, apilados en columna en el PSD.
 AGENT_ICONS = [
     'emperor', 'spacing-guild', 'bene-gesserit', 'fremen',
@@ -72,6 +94,10 @@ AGENT_ICONS = [
 COLUMN_SHEETS = {
     'location symbols.png': ('locations', None),
     'infiltrate symbols.png': ('infiltrate', None),
+    # El emblema sobre su placa negra, sin el marco crema de `locations`. No va
+    # en la carta: es para los botones del panel, donde el fondo negro despega
+    # al emblema del color que tenga atrás.
+    'simbolos con fondo.png': ('badges', None),
     # Esta hoja tiene los emblemas sueltos arriba a la izquierda y las filas de
     # símbolos abajo y a la derecha, con las dos zonas solapadas en x y en y.
     # Por eso hay que acotar con un rectángulo.
@@ -104,7 +130,7 @@ EXPANSION_SYMBOLS = [
     'research', 'combat',
     'tleilaxu', 'genetic-marker-two', 'genetic-marker-one', 'specimen',
     'trash-intrigue',
-    'discard-card', 'dreadnought', 'unit', 'acquire-tech',
+    'discard-card', 'freighter', 'unit', 'acquire-tech',
     'acquire-tech-discount-one',
 ]
 
@@ -288,6 +314,63 @@ def compose_influence():
     print(f'  compuesto influence/: {len(INFLUENCE_FACTIONS) * len(INFLUENCE_VARIANTS)} rombos')
 
 
+def compose_faction_bands():
+    """
+    Tiñe cada plantilla en blanco con cada uno de los cuatro colores de
+    facción, para las 16 combinaciones posición × facción.
+
+    La plantilla es la banda en gris: el canal de color es la sombra (más clara
+    a la izquierda, degradando hacia la derecha) y el alpha es la silueta. Para
+    teñirla, cada fila se normaliza contra su propio píxel más claro —el del
+    borde izquierdo, que es donde la banda real muestra el color puro— y esa
+    proporción multiplica el color de la facción hacia el negro. Así la sombra
+    de la plantilla queda igual sea cual sea el color que reciba.
+    """
+    out = LAYERS_OUT / 'faction-bands'
+    out.mkdir(parents=True, exist_ok=True)
+
+    count = 0
+    for source, target in FACTION_BAND_LAYERS.items():
+        template = Image.open(SRC / source).convert('RGBA')
+        raw = np.array(template)
+        top = int(alpha_mask(template).any(axis=1).argmax())
+        shifted = np.zeros_like(raw)
+        shift = FACTION_BAND_TOP - top
+        if shift >= 0:
+            shifted[shift:, :] = raw[: raw.shape[0] - shift, :]
+        else:
+            shifted[: raw.shape[0] + shift, :] = raw[-shift:, :]
+
+        arr = shifted.astype(float)
+        gray = arr[..., 0]  # el PNG es gris puro: los tres canales son iguales
+        alpha = arr[..., 3]
+
+        opaque = alpha > 8
+        left_edge = np.full(gray.shape[0], np.nan)
+        for y in range(gray.shape[0]):
+            xs = np.flatnonzero(opaque[y])
+            if len(xs):
+                left_edge[y] = gray[y, xs[0]]
+
+        rows_with_band = ~np.isnan(left_edge)
+        ratio = np.zeros_like(gray)
+        ratio[rows_with_band] = gray[rows_with_band] / left_edge[rows_with_band, None]
+        ratio = np.clip(ratio, 0, 1)
+
+        rank = target.removeprefix('faction-band-').removesuffix('.png')
+        for faction, color in FACTION_COLORS.items():
+            tinted = np.zeros_like(arr)
+            for channel in range(3):
+                tinted[..., channel] = ratio * color[channel]
+            tinted[..., 3] = alpha
+            Image.fromarray(tinted.astype(np.uint8), 'RGBA').save(
+                out / f'{faction}-{rank}.png'
+            )
+            count += 1
+
+    print(f'  compuesto faction-bands/: {count} bandas')
+
+
 def write_icon_sizes():
     """
     Deja el tamaño natural de cada icono en un JSON.
@@ -325,6 +408,7 @@ def main():
         slice_column(source, folder, region)
 
     compose_influence()
+    compose_faction_bands()
     write_icon_sizes()
 
     print('\nListo.')

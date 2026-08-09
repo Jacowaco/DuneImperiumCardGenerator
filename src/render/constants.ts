@@ -7,8 +7,6 @@
  * Los números de abajo salen de medir los PNG del PSD y el render de
  * referencia, no de estimar a ojo. Si cambia el template, se remiden.
  */
-import type { Faction } from '../model/card'
-
 export const CARD_WIDTH = 750
 export const CARD_HEIGHT = 1039
 
@@ -30,10 +28,10 @@ export const ART_RECT = {
  * dejar lugar al rombo.
  */
 export const TITLE = {
-  x: 38,
+  x: 42,
   startingX: 83,
   right: 706,
-  baseline: 76,
+  baseline: 74,
   capHeight: 37,
   smallCapRatio: 26 / 37,
   letterSpacing: 2,
@@ -43,22 +41,28 @@ export const TITLE = {
 } as const
 
 /**
- * Borde superior e inferior útil de cada banda de facción, medido del alpha
- * del PNG con precisión sub-píxel.
+ * Banda de facción. A diferencia del resto de las capas, no tiene un PNG por
+ * facción: tiene uno por posición en la pila (la de arriba es la más ancha,
+ * `widths[1]`), y el código la tiñe con el color de la facción que le toca y
+ * le dibuja el nombre encima. Las cuatro posiciones miden lo mismo de alto,
+ * así que un solo `height` alcanza para apilarlas.
  *
- * El PSD las exporta con el borde antialiaseado: el alto real es 43,27 px —no
- * entero— y `prepare_assets.py` las alinea por la primera fila con algo de
- * tinta, así que cada banda queda apoyada en una fracción de píxel distinta.
- * Apilarlas con un paso fijo dejaba una línea de fondo de 1 px entre algunos
- * pares. Con estos números cada banda se apoya exactamente sobre el borde
- * inferior de la anterior, sea cual sea la combinación elegida.
+ * `widths` es el ancho en el borde superior de cada posición; el corte
+ * diagonal lo va angostando hacia abajo a razón de casi `height` px por banda,
+ * así que el nombre no puede usar todo ese ancho — ver `text.rightPadding`.
  */
-export const FACTION_BAND_EDGES: Record<Faction, { top: number; bottom: number }> = {
-  'bene-gesserit': { top: 90.839, bottom: 134.102 },
-  'spacing-guild': { top: 90.098, bottom: 133.369 },
-  emperor: { top: 90.365, bottom: 133.631 },
-  fremen: { top: 90.627, bottom: 133.894 },
-}
+export const FACTION_BAND = {
+  top: 90,
+  height: 42.75,
+  widths: { 1: 350, 2: 311, 3: 270, 4: 229 } as Record<number, number>,
+  text: {
+    x: 37,
+    capHeight: 19,
+    weight: 600,
+    color: '#d9dad8',
+    rightPadding: 50,
+  },
+} as const
 
 /**
  * Columna de iconos de agente, sobre el borde izquierdo del arte. `top` es la
@@ -86,6 +90,13 @@ export const CONTENT = {
   play: {
     top: 705,
     bottoms: { 1: 804, 2: 843, 3: 878 } as Record<number, number>,
+    /**
+     * Color del interior de la caja, muestreado de `layers/play-box-1.png`.
+     * Es plano: el mismo píxel en todo el ancho y el alto. En la carta lo
+     * dibuja el PNG; esto es para que la UI pueda mostrar un icono sobre el
+     * fondo que va a tener de verdad.
+     */
+    surface: '#8e867a',
   },
   reveal: { top: 810, bottom: 1007 },
   /** Alto de referencia de los iconos de las hojas del PSD. */

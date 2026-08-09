@@ -1,3 +1,4 @@
+import type { Language } from '../../model/language'
 import { AGENT_ICONS } from './agents'
 
 /**
@@ -11,14 +12,14 @@ const files = import.meta.glob('./influence/*.png', {
   import: 'default',
 }) as Record<string, string>
 
-export const INFLUENCE_VARIANTS = {
-  'gain-one': 'Ganar 1',
-  'lose-one': 'Perder 1',
-  'gain-two': 'Ganar 2',
-  'lose-two': 'Perder 2',
-} as const
+export type InfluenceVariant = 'gain-one' | 'lose-one' | 'gain-two' | 'lose-two'
 
-export type InfluenceVariant = keyof typeof INFLUENCE_VARIANTS
+export const INFLUENCE_VARIANTS: Record<InfluenceVariant, Record<Language, string>> = {
+  'gain-one': { es: 'Ganar 1', en: 'Gain 1' },
+  'lose-one': { es: 'Perder 1', en: 'Lose 1' },
+  'gain-two': { es: 'Ganar 2', en: 'Gain 2' },
+  'lose-two': { es: 'Perder 2', en: 'Lose 2' },
+}
 
 /** Sólo las cuatro facciones tienen rombo; Landsraad, Ciudad y Especia no. */
 export const INFLUENCE_FACTIONS = [
@@ -38,8 +39,11 @@ export const INFLUENCE_ICONS = Object.fromEntries(
       `influence-${faction}-${variant}`,
       {
         url: files[`./influence/${faction}-${variant}.png`],
-        label: `${INFLUENCE_VARIANTS[variant]} influencia · ${AGENT_ICONS[faction]}`,
+        label: {
+          es: `${INFLUENCE_VARIANTS[variant].es} influencia · ${AGENT_ICONS[faction].es}`,
+          en: `${INFLUENCE_VARIANTS[variant].en} influence · ${AGENT_ICONS[faction].en}`,
+        },
       },
     ]),
   ),
-) as Record<InfluenceIconId, { url: string; label: string }>
+) as Record<InfluenceIconId, { url: string; label: Record<Language, string> }>

@@ -1,10 +1,10 @@
-import emblemBeneGesserit from './emblems/bene-gesserit.png'
-import emblemCity from './emblems/city.png'
-import emblemEmperor from './emblems/emperor.png'
-import emblemFremen from './emblems/fremen.png'
-import emblemLandsraad from './emblems/landsraad.png'
-import emblemSpacingGuild from './emblems/spacing-guild.png'
-import emblemSpiceTrade from './emblems/spice-trade.png'
+import badgeBeneGesserit from './badges/bene-gesserit.png'
+import badgeCity from './badges/city.png'
+import badgeEmperor from './badges/emperor.png'
+import badgeFremen from './badges/fremen.png'
+import badgeLandsraad from './badges/landsraad.png'
+import badgeSpacingGuild from './badges/spacing-guild.png'
+import badgeSpiceTrade from './badges/spice-trade.png'
 import infiltrateBeneGesserit from './infiltrate/bene-gesserit.png'
 import infiltrateCity from './infiltrate/city.png'
 import infiltrateEmperor from './infiltrate/emperor.png'
@@ -19,33 +19,41 @@ import locationFremen from './locations/fremen.png'
 import locationLandsraad from './locations/landsraad.png'
 import locationSpacingGuild from './locations/spacing-guild.png'
 import locationSpiceTrade from './locations/spice-trade.png'
+import type { Language } from '../../model/language'
 
 /**
  * Los siete iconos de agente del reglamento, en el orden en que aparecen
  * apilados en el PSD. La columna de la carta respeta este orden, no el orden
  * en que se eligieron.
  */
-export const AGENT_ICONS = {
-  emperor: 'Emperador',
-  'spacing-guild': 'Cofradía Espacial',
-  'bene-gesserit': 'Bene Gesserit',
-  fremen: 'Fremen',
-  landsraad: 'Landsraad',
-  city: 'Ciudad',
-  'spice-trade': 'Comercio de especia',
-} as const
+export const AGENT_ICONS: Record<AgentIcon, Record<Language, string>> = {
+  emperor: { es: 'Emperador', en: 'Emperor' },
+  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild' },
+  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit' },
+  fremen: { es: 'Fremen', en: 'Fremen' },
+  landsraad: { es: 'Landsraad', en: 'Landsraad' },
+  city: { es: 'Ciudad', en: 'City' },
+  'spice-trade': { es: 'Comercio de especia', en: 'Spice Trade' },
+}
 
-export type AgentIcon = keyof typeof AGENT_ICONS
+export type AgentIcon =
+  | 'emperor'
+  | 'spacing-guild'
+  | 'bene-gesserit'
+  | 'fremen'
+  | 'landsraad'
+  | 'city'
+  | 'spice-trade'
 
 export const AGENT_ICON_IDS = Object.keys(AGENT_ICONS) as AgentIcon[]
 
-/** El PSD trae dos estilos para la misma columna. */
-export const AGENT_ICON_STYLES = {
-  locations: 'Normal',
-  infiltrate: 'Infiltrate',
-} as const
+export type AgentIconStyle = 'locations' | 'infiltrate'
 
-export type AgentIconStyle = keyof typeof AGENT_ICON_STYLES
+/** El PSD trae dos estilos para la misma columna. */
+export const AGENT_ICON_STYLES: Record<AgentIconStyle, Record<Language, string>> = {
+  locations: { es: 'Normal', en: 'Normal' },
+  infiltrate: { es: 'Infiltración', en: 'Infiltrate' },
+}
 
 export const AGENT_ICON_STYLE_IDS = Object.keys(AGENT_ICON_STYLES) as AgentIconStyle[]
 
@@ -71,16 +79,21 @@ export const AGENT_ICON_URLS: Record<AgentIconStyle, Record<AgentIcon, string>> 
 }
 
 /**
- * Los mismos siete emblemas sueltos, sin el tab de fondo crema y sin estilo.
- * No van en la carta: son para los botones del panel, donde el fondo del tab
- * ensucia contra el gris oscuro de la UI.
+ * Los mismos siete emblemas sobre su placa negra, sin el marco crema de
+ * `locations`. **Es la versión que va en los botones del panel**: el negro
+ * despega al emblema de cualquier color que tenga atrás, que es justo lo que
+ * hace falta en los botones de facción, pintados del color de la facción.
  */
-export const AGENT_EMBLEM_URLS: Record<AgentIcon, string> = {
-  emperor: emblemEmperor,
-  'spacing-guild': emblemSpacingGuild,
-  'bene-gesserit': emblemBeneGesserit,
-  fremen: emblemFremen,
-  landsraad: emblemLandsraad,
-  city: emblemCity,
-  'spice-trade': emblemSpiceTrade,
+export const AGENT_BADGE_URLS: Record<AgentIcon, string> = {
+  emperor: badgeEmperor,
+  'spacing-guild': badgeSpacingGuild,
+  'bene-gesserit': badgeBeneGesserit,
+  fremen: badgeFremen,
+  landsraad: badgeLandsraad,
+  city: badgeCity,
+  'spice-trade': badgeSpiceTrade,
 }
+
+// `icons/emblems/` —el emblema sin fondo de ninguna clase— no se importa desde
+// acá: lo usa `prepare_assets.py` para componer los rombos de influencia. En la
+// UI quedó el badge, que se lee sobre cualquier color.

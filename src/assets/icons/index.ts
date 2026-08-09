@@ -3,7 +3,7 @@ import acquireTech from './acquire-tech.png'
 import acquireTechDiscountOne from './acquire-tech-discount-one.png'
 import combat from './combat.png'
 import discardCard from './discard-card.png'
-import dreadnought from './dreadnought.png'
+import freighter from './freighter.png'
 import geneticMarkerOne from './genetic-marker-one.png'
 import geneticMarkerTwo from './genetic-marker-two.png'
 import research from './research.png'
@@ -28,6 +28,7 @@ import troop from './troop.png'
 import { INFLUENCE_ICONS, type InfluenceIconId } from './influence'
 import victoryPoint from './victory-point.png'
 import water from './water.png'
+import type { Language } from '../../model/language'
 
 /**
  * Iconos recortados de la hoja de símbolos por `scripts/prepare_assets.py`.
@@ -39,52 +40,70 @@ import water from './water.png'
  * elijas"); los rombos por facción se agregan desde `./influence`, donde se
  * generan por composición.
  */
-const BASE_ICONS = {
-  'victory-point': { url: victoryPoint, label: 'Punto de victoria' },
-  water: { url: water, label: 'Agua' },
-  solari: { url: solari, label: 'Solari' },
-  spice: { url: spice, label: 'Especia' },
-  troop: { url: troop, label: 'Tropa' },
-  'draw-card': { url: drawCard, label: 'Robar carta' },
-  'draw-intrigue': { url: drawIntrigue, label: 'Robar intriga' },
-  trash: { url: trash, label: 'Descartar' },
-  'acquire-foldspace': { url: acquireFoldspace, label: 'Foldspace' },
-  'signet-ring': { url: signetRing, label: 'Anillo de sello' },
-  persuasion: { url: persuasion, label: 'Persuasión' },
-  sword: { url: sword, label: 'Espada' },
-  'influence-gain-one': { url: influenceGainOne, label: 'Ganar 1 influencia' },
-  'influence-gain-two': { url: influenceGainTwo, label: 'Ganar 2 influencia' },
-  'influence-lose-one': { url: influenceLoseOne, label: 'Perder 1 influencia' },
-  'influence-lose-two': { url: influenceLoseTwo, label: 'Perder 2 influencia' },
-  'cost-arrow': { url: costArrow, label: 'Flecha de costo' },
+const label = (es: string, en: string): Record<Language, string> => ({ es, en })
 
-  // Rise of Ix
-  'acquire-tech': { url: acquireTech, label: 'Ix · Adquirir tecnología' },
+const CORE_ICONS = {
+  'victory-point': { url: victoryPoint, label: label('Punto de victoria', 'Victory Point') },
+  water: { url: water, label: label('Agua', 'Water') },
+  solari: { url: solari, label: label('Solari', 'Solari') },
+  spice: { url: spice, label: label('Especia', 'Spice') },
+  troop: { url: troop, label: label('Tropa', 'Troop') },
+  'draw-card': { url: drawCard, label: label('Robar carta', 'Draw Card') },
+  'draw-intrigue': { url: drawIntrigue, label: label('Robar intriga', 'Draw Intrigue') },
+  trash: { url: trash, label: label('Descartar', 'Trash') },
+  'acquire-foldspace': { url: acquireFoldspace, label: label('Foldspace', 'Foldspace') },
+  'signet-ring': { url: signetRing, label: label('Anillo de sello', 'Signet Ring') },
+  persuasion: { url: persuasion, label: label('Persuasión', 'Persuasion') },
+  sword: { url: sword, label: label('Espada', 'Sword') },
+  'influence-gain-one': {
+    url: influenceGainOne,
+    label: label('Ganar 1 influencia', 'Gain 1 Influence'),
+  },
+  'influence-gain-two': {
+    url: influenceGainTwo,
+    label: label('Ganar 2 influencia', 'Gain 2 Influence'),
+  },
+  'influence-lose-one': {
+    url: influenceLoseOne,
+    label: label('Perder 1 influencia', 'Lose 1 Influence'),
+  },
+  'influence-lose-two': {
+    url: influenceLoseTwo,
+    label: label('Perder 2 influencia', 'Lose 2 Influence'),
+  },
+  'cost-arrow': { url: costArrow, label: label('Flecha de costo', 'Cost Arrow') },
+} as const
+
+const IX_ICONS = {
+  'acquire-tech': { url: acquireTech, label: label('Adquirir tecnología', 'Acquire Tech') },
   'acquire-tech-discount-one': {
     url: acquireTechDiscountOne,
-    label: 'Ix · Adquirir tecnología (−1 especia)',
+    label: label('Adquirir tecnología (−1 especia)', 'Acquire Tech (−1 Spice)'),
   },
-  dreadnought: { url: dreadnought, label: 'Ix · Dreadnought' },
-  unit: { url: unit, label: 'Ix · Unidad (tropa o dreadnought)' },
-  'discard-card': { url: discardCard, label: 'Ix · Descartar una carta' },
+  freighter: { url: freighter, label: label('Carguero', 'Freighter') },
+  unit: { url: unit, label: label('Acorazado', 'Unit') },
+  'discard-card': { url: discardCard, label: label('Descartar una carta', 'Discard a Card') },
+} as const
 
-  // Immortality
-  research: { url: research, label: 'Immortality · Investigación' },
-  tleilaxu: { url: tleilaxu, label: 'Immortality · Tleilaxu' },
-  specimen: { url: specimen, label: 'Immortality · Espécimen' },
-  combat: { url: combat, label: 'Immortality · Combate' },
-  'trash-intrigue': { url: trashIntrigue, label: 'Immortality · Descartar intriga' },
+const IMMORTALITY_ICONS = {
+  research: { url: research, label: label('Investigación', 'Research') },
+  tleilaxu: { url: tleilaxu, label: label('Tleilaxu', 'Tleilaxu') },
+  specimen: { url: specimen, label: label('Espécimen', 'Specimen') },
+  combat: { url: combat, label: label('Combate', 'Combat') },
+  'trash-intrigue': { url: trashIntrigue, label: label('Descartar intriga', 'Trash Intrigue') },
   'genetic-marker-one': {
     url: geneticMarkerOne,
-    label: 'Immortality · Marcador genético 1',
+    label: label('Marcador genético 1', 'Genetic Marker 1'),
   },
   'genetic-marker-two': {
     url: geneticMarkerTwo,
-    label: 'Immortality · Marcador genético 2',
+    label: label('Marcador genético 2', 'Genetic Marker 2'),
   },
 } as const
 
-export const ICONS: Record<IconId, { url: string; label: string }> = {
+const BASE_ICONS = { ...CORE_ICONS, ...IX_ICONS, ...IMMORTALITY_ICONS } as const
+
+export const ICONS: Record<IconId, { url: string; label: Record<Language, string> }> = {
   ...BASE_ICONS,
   ...INFLUENCE_ICONS,
 }
@@ -92,6 +111,11 @@ export const ICONS: Record<IconId, { url: string; label: string }> = {
 export type IconId = keyof typeof BASE_ICONS | InfluenceIconId
 
 export const ICON_IDS = Object.keys(ICONS) as IconId[]
+
+/** Para agrupar el selector de iconos del editor por expansión. */
+export const IX_ICON_IDS = Object.keys(IX_ICONS) as IconId[]
+export const IMMORTALITY_ICON_IDS = Object.keys(IMMORTALITY_ICONS) as IconId[]
+export const INFLUENCE_ICON_IDS = Object.keys(INFLUENCE_ICONS) as IconId[]
 
 /**
  * Los iconos que vienen vacíos necesitan que la app les dibuje la cantidad

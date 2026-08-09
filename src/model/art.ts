@@ -1,5 +1,6 @@
 import { ART_RECT } from '../render/constants'
 import type { ArtTransform, CardArt } from './card'
+import { AppError } from './errors'
 
 export const MAX_ART_SCALE = 8
 
@@ -78,11 +79,11 @@ export function loadArtFromFile(file: File): Promise<CardArt> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
 
-    reader.onerror = () => reject(new Error(`No se pudo leer el archivo: ${file.name}`))
+    reader.onerror = () => reject(new AppError('read-failed', { name: file.name }))
     reader.onload = () => {
       const src = String(reader.result)
       const image = new Image()
-      image.onerror = () => reject(new Error(`No es una imagen válida: ${file.name}`))
+      image.onerror = () => reject(new AppError('invalid-image', { name: file.name }))
       image.onload = () =>
         resolve({
           src,

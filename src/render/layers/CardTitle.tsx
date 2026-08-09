@@ -1,15 +1,15 @@
 import { Image as KonvaImage } from 'react-konva'
-import useImage from 'use-image'
 
 import nameBandUrl from '../../assets/layers/card-name.png'
 import nameBandStartingUrl from '../../assets/layers/card-name-starting.png'
 import type { Card } from '../../model/card'
 import { TITLE } from '../constants'
+import { useCardImage } from '../imageCache'
 import { layoutSmallCaps } from '../text'
 import { TextShape } from './TextShape'
 
 export function CardTitle({ card }: { card: Card }) {
-  const [band] = useImage(card.starting ? nameBandStartingUrl : nameBandUrl)
+  const band = useCardImage(card.starting ? nameBandStartingUrl : nameBandUrl)
 
   const x = card.starting ? TITLE.startingX : TITLE.x
   const { glyphs } = layoutSmallCaps(card.title, {

@@ -2,15 +2,16 @@ import type Konva from 'konva'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { RefObject } from 'react'
 import { Group, Image as KonvaImage, Layer, Rect, Stage, Text } from 'react-konva'
-import useImage from 'use-image'
 
 import backgroundUrl from '../assets/layers/background.png'
 import blackBorderUrl from '../assets/layers/black-border.png'
 import cardArtContainerUrl from '../assets/layers/card-art-container.png'
 import { NO_EXPORT } from '../export/exportPng'
+import { useT } from '../i18n/strings'
 import { clampArtScale, clampArtTransform } from '../model/art'
 import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
+import { useCardImage } from './imageCache'
 import { AgentIcons } from './layers/AgentIcons'
 import { CardTitle } from './layers/CardTitle'
 import { ContentBoxes } from './layers/ContentBoxes'
@@ -29,6 +30,8 @@ type Props = {
    * las miniaturas de la galería.
    */
   onArtChange?: (transform: ArtTransform) => void
+  /** Sin imagen, tocar el hueco del arte abre el diálogo para elegir una. */
+  onArtPick?: () => void
 }
 
 const ZOOM_SPEED = 0.0015
@@ -38,10 +41,11 @@ const ZOOM_SPEED = 0.0015
  * apilado del PSD, de abajo hacia arriba — las capas nuevas se insertan en
  * el punto que les corresponde y nada más cambia.
  */
-export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
-  const [background] = useImage(backgroundUrl)
-  const [artContainer] = useImage(cardArtContainerUrl)
-  const [blackBorder] = useImage(blackBorderUrl)
+export function CardStage({ card, scale, stageRef, onArtChange, onArtPick }: Props) {
+  const background = useCardImage(backgroundUrl)
+  const artContainer = useCardImage(cardArtContainerUrl)
+  const blackBorder = useCardImage(blackBorderUrl)
+  const placeholderText = useT().artPanel.placeholder
   useFontsReady()
 
   const handleWheel = (event: KonvaEventObject<WheelEvent>) => {
@@ -117,7 +121,7 @@ export function CardStage({ card, scale, stageRef, onArtChange }: Props) {
           )}
         </Group>
 
-        {!card.art && onArtChange && <ArtPlaceholder />}
+        {!card.art && onArtChange && <ArtPlaceholder onPick={onArtPick} placeholder={placeholderText} />}
 
         <ContentBoxes card={card} />
         <ContentBlock card={card} />
@@ -144,7 +148,7 @@ function ArtImage({
   draggable: boolean
   onDrag: (event: KonvaEventObject<DragEvent>) => void
 }) {
-  const [image] = useImage(art.src)
+  const image = useCardImage(art.src)
   if (!image) return null
 
   return (
@@ -173,9 +177,21 @@ function ArtImage({
   )
 }
 
-function ArtPlaceholder() {
+function ArtPlaceholder({ onPick, placeholder }: { onPick?: () => void; placeholder: string }) {
+  const setCursor = (cursor: string) => (event: KonvaEventObject<MouseEvent>) => {
+    const stage = event.target.getStage()
+    if (stage) stage.container().style.cursor = cursor
+  }
+
   return (
-    <Group name={NO_EXPORT} listening={false}>
+    <Group
+      name={NO_EXPORT}
+      listening={Boolean(onPick)}
+      onClick={onPick}
+      onTap={onPick}
+      onMouseEnter={setCursor('pointer')}
+      onMouseLeave={setCursor('default')}
+    >
       <Rect
         {...ART_RECT}
         stroke="#a1a1aa"
@@ -185,7 +201,7 @@ function ArtPlaceholder() {
       />
       <Text
         {...ART_RECT}
-        text="Arrastrá una imagen acá"
+        text={placeholder}
         fontSize={34}
         fontFamily="system-ui, sans-serif"
         fill="#a1a1aa"

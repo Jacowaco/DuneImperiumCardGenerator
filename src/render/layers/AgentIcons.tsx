@@ -1,5 +1,4 @@
 import { Image as KonvaImage } from 'react-konva'
-import useImage from 'use-image'
 
 import {
   AGENT_ICON_IDS,
@@ -8,6 +7,7 @@ import {
   type AgentIconStyle,
 } from '../../assets/icons/agents'
 import { AGENT_COLUMN } from '../constants'
+import { useCardImage } from '../imageCache'
 
 /**
  * Apila los iconos elegidos siempre en el orden canónico del reglamento (no en
@@ -43,6 +43,6 @@ export function AgentIcons({
 }
 
 function Icon({ url, x, y }: { url: string; x: number; y: number }) {
-  const [image] = useImage(url)
+  const image = useCardImage(url)
   return <KonvaImage image={image} x={x} y={y} listening={false} />
 }

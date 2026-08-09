@@ -1,3 +1,4 @@
+import { useT } from '../i18n/strings'
 import {
   centerAt,
   clampArtScale,
@@ -8,6 +9,7 @@ import {
 } from '../model/art'
 import type { ArtTransform, CardArt } from '../model/card'
 import { Button, Hint, Section } from './controls'
+import { ImageIcon } from './icons'
 
 type Props = {
   art: CardArt | null
@@ -27,28 +29,31 @@ const fromSlider = (art: CardArt, value: number) =>
   coverScale(art.width, art.height) * Math.exp(value * range(art))
 
 export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
+  const t = useT()
+
   return (
     <>
-      <Section title="Imagen">
+      <Section title={t.artPanel.image}>
         <Button variant="primary" onClick={onPick}>
-          {art ? 'Cambiar imagen…' : 'Elegir imagen…'}
+          <ImageIcon />
+          {art ? t.artPanel.changeImage : t.artPanel.chooseImage}
         </Button>
         {art ? (
           <>
             <Hint>
               {art.width} × {art.height} px
             </Hint>
-            <Button onClick={onClear}>Quitar</Button>
+            <Button onClick={onClear}>{t.artPanel.remove}</Button>
           </>
         ) : (
-          <Hint>También podés arrastrar un archivo sobre la carta.</Hint>
+          <Hint>{t.artPanel.dragHint}</Hint>
         )}
       </Section>
 
-      <Section title="Encuadre">
+      <Section title={t.artPanel.frame}>
         <label className="flex flex-col gap-2">
           <span className="flex justify-between text-xs text-zinc-400">
-            <span>Zoom</span>
+            <span>{t.artPanel.zoom}</span>
             <span className="tabular-nums">
               {art ? `${Math.round(art.transform.scale * 100)}%` : '—'}
             </span>
@@ -92,7 +97,7 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
             disabled={!art}
             onClick={() => art && onTransform(fitCover(art.width, art.height))}
           >
-            Ajustar
+            {t.artPanel.fit}
           </Button>
           <Button
             disabled={!art}
@@ -100,11 +105,11 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
               art && onTransform(centerAt(art.width, art.height, art.transform.scale))
             }
           >
-            Centrar
+            {t.artPanel.center}
           </Button>
         </div>
 
-        <Hint>Arrastrá la imagen sobre la carta para moverla; la rueda hace zoom.</Hint>
+        <Hint>{t.artPanel.dragZoomHint}</Hint>
       </Section>
     </>
   )

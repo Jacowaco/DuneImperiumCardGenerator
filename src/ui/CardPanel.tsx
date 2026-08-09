@@ -1,132 +1,88 @@
-import { ICON_IDS, ICONS, iconTakesNumber, type IconId } from '../assets/icons'
-import {
-  AGENT_ICON_IDS,
-  AGENT_ICON_STYLE_IDS,
-  AGENT_ICON_STYLES,
-  AGENT_ICONS,
-  AGENT_EMBLEM_URLS,
-  type AgentIconStyle,
-} from '../assets/icons/agents'
+import { AGENT_BADGE_URLS } from '../assets/icons/agents'
+import { useT } from '../i18n/strings'
 import {
   FACTION_COLORS,
   FACTION_IDS,
   FACTIONS,
-  PLAY_ROWS,
-  PLAY_ROWS_LABELS,
+  type AnyIconId,
   type Card,
   type Faction,
-  type PlayRows,
 } from '../model/card'
-import { Choice, Field, Hint, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
-import { ContentEditor } from './ContentEditor'
+import { useIconLibrary } from '../model/iconLibrary'
+import { pick, useLanguage } from '../model/language'
+import { Field, Hint, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
 
 type Props = {
   card: Card
   onChange: (patch: Partial<Card>) => void
 }
 
+/**
+ * Los datos de la carta: nombre, facción y qué cuesta comprarla. Son las tres
+ * cosas que se dibujan **arriba** —placa del nombre, banda de facción y rombo
+ * del costo—, igual que `RulesPanel` es todo lo de las cajas de abajo.
+ *
+ * La pestaña se llama "Encabezado" y no "Carta" porque en un editor de cartas
+ * todo es la carta: el nombre no distinguía nada, y encima repetía el de la
+ * sección de adentro.
+ */
 export function CardPanel({ card, onChange }: Props) {
+  const t = useT()
+  const { language } = useLanguage()
+  const library = useIconLibrary()
+  const benefit = card.purchaseBenefit ? library[card.purchaseBenefit] : undefined
+
   return (
     <>
-      <Section title="Carta">
-        <Field label="Nombre">
+      {/* Sin título: sería "Nombre" arriba de un campo que ya se llama así, y
+          el interruptor de abajo se explica solo. */}
+      <Section>
+        <Field label={t.cardPanel.name}>
           <TextInput
             value={card.title}
-            placeholder="Duncan Idaho"
+            placeholder={t.cardPanel.namePlaceholder}
             onChange={(event) => onChange({ title: event.target.value })}
           />
         </Field>
 
         <Toggle
-          label="Carta de mazo inicial"
+          label={t.cardPanel.startingCard}
           checked={card.starting}
           onChange={(starting) => onChange({ starting })}
         />
       </Section>
 
-      <Section title="Facción">
+      <Section title={t.cardPanel.faction}>
         <MultiChoice<Faction>
           values={card.factions}
           onChange={(factions) => onChange({ factions })}
+          /*
+            El emblema va con su placa negra y no pelado: el botón está pintado
+            del color de la facción y el emblema solo se pierde ahí —medidos,
+            los cuatro quedan a menos de 1,1 de contraste contra su propio
+            color, porque el color del botón sale de la banda de esa misma
+            facción—. El negro lo despega de cualquier color que tenga atrás.
+          */
           options={FACTION_IDS.map((id) => ({
             value: id,
-            label: FACTIONS[id],
+            label: pick(FACTIONS[id], language),
             color: FACTION_COLORS[id],
+            icon: AGENT_BADGE_URLS[id],
           }))}
         />
-        <Hint>
-          Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas.
-        </Hint>
+        <Hint>{t.cardPanel.factionHint}</Hint>
       </Section>
 
-      <Section title="Iconos de agente">
-        <MultiChoice
-          values={card.agentIcons}
-          iconsOnly
-          columns={4}
-          onChange={(agentIcons) => onChange({ agentIcons })}
-          options={AGENT_ICON_IDS.map((id) => ({
-            value: id,
-            label: AGENT_ICONS[id],
-            icon: AGENT_EMBLEM_URLS[id],
-          }))}
-        />
-        <Field label="Estilo">
-          <Choice<AgentIconStyle>
-            value={card.agentIconStyle}
-            onChange={(style) => onChange({ agentIconStyle: style ?? 'locations' })}
-            options={AGENT_ICON_STYLE_IDS.map((id) => ({
-              value: id,
-              label: AGENT_ICON_STYLES[id],
-            }))}
-          />
-        </Field>
-      </Section>
-
-      <Section title="Cajas de contenido">
-        <Field label="Caja del turno de agente">
-          <Choice
-            value={String(card.playRows)}
-            columns={3}
-            onChange={(rows) => onChange({ playRows: Number(rows ?? 1) as PlayRows })}
-            options={PLAY_ROWS.map((rows) => ({
-              value: String(rows),
-              label: PLAY_ROWS_LABELS[rows],
-            }))}
-          />
-        </Field>
-        <Hint>
-          La caja de turno de agente y la banda de revelación van siempre, aunque queden vacías.
-        </Hint>
-
+      <Section title={t.cardPanel.cost}>
         <Toggle
-          label="Silueta del agente"
-          checked={card.agentSilhouette}
-          onChange={(agentSilhouette) => onChange({ agentSilhouette })}
-        />
-      </Section>
-
-      <Section title="Iconos del turno de agente">
-        <ContentEditor parts={card.playContent} onChange={(playContent) => onChange({ playContent })} />
-      </Section>
-
-      <Section title="Iconos de revelación">
-        <ContentEditor
-          parts={card.revealContent}
-          onChange={(revealContent) => onChange({ revealContent })}
-        />
-      </Section>
-
-      <Section title="Costo de compra">
-        <Toggle
-          label="Tiene costo"
+          label={t.cardPanel.hasCost}
           checked={card.cost !== null}
           onChange={(has) => onChange({ cost: has ? 2 : null, purchaseBenefit: null })}
         />
 
         {card.cost !== null && (
           <>
-            <Field label="Persuasión">
+            <Field label={t.cardPanel.persuasion}>
               <TextInput
                 type="number"
                 min={0}
@@ -138,24 +94,24 @@ export function CardPanel({ card, onChange }: Props) {
               />
             </Field>
 
-            <Field label="Beneficio de compra">
+            <Field label={t.cardPanel.purchaseBenefit}>
               <Select
                 value={card.purchaseBenefit ?? ''}
                 onChange={(event) =>
-                  onChange({ purchaseBenefit: (event.target.value || null) as IconId | null })
+                  onChange({ purchaseBenefit: (event.target.value || null) as AnyIconId | null })
                 }
               >
-                <option value="">Ninguno</option>
-                {ICON_IDS.map((id) => (
+                <option value="">{t.cardPanel.none}</option>
+                {Object.entries(library).map(([id, icon]) => (
                   <option key={id} value={id}>
-                    {ICONS[id].label}
+                    {icon.custom ? t.cardPanel.custom(icon.label) : icon.label}
                   </option>
                 ))}
               </Select>
             </Field>
 
-            {card.purchaseBenefit && iconTakesNumber(card.purchaseBenefit) && (
-              <Field label="Cantidad">
+            {benefit?.numberColor && (
+              <Field label={t.cardPanel.amount}>
                 <TextInput
                   type="number"
                   min={0}

@@ -5,12 +5,18 @@ import type {
   SelectHTMLAttributes,
 } from 'react'
 
-export function Section({ title, children }: { title: string; children: ReactNode }) {
+/**
+ * Bloque del panel. El título es opcional: adentro de un diálogo lo pone el
+ * encabezado del diálogo, y repetirlo sería leer dos veces lo mismo.
+ */
+export function Section({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="border-b border-zinc-800 px-5 py-5">
-      <h2 className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
-        {title}
-      </h2>
+    <section className="border-b border-zinc-800 px-5 py-5 last:border-b-0">
+      {title && (
+        <h2 className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+          {title}
+        </h2>
+      )}
       <div className="flex flex-col gap-3">{children}</div>
     </section>
   )
@@ -26,11 +32,43 @@ export function Button({ variant = 'ghost', className = '', ...props }: ButtonPr
       ? 'bg-sand-500 text-zinc-950 hover:bg-sand-300'
       : 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
 
+  // `inline-flex` para acomodar el icono al lado del texto. Como flex y grid
+  // convierten a sus hijos en bloques, los botones que ya estaban dentro de una
+  // grilla siguen ocupando la celda entera igual que antes.
   return (
     <button
       {...props}
-      className={`rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
     />
+  )
+}
+
+/**
+ * Botón cuadrado de una fila de lista: mover, quitar, borrar. El símbolo es la
+ * etiqueta, así que el nombre va en `label` —tooltip y lectores de pantalla— y
+ * no en el contenido.
+ *
+ * Va con fondo propio y no como un símbolo suelto: en una fila que ya tiene
+ * campos de texto, un carácter sin caja no se lee como algo apretable.
+ */
+export function Action({
+  label,
+  onClick,
+  children,
+}: {
+  label: string
+  onClick: () => void
+  children: string
+}) {
+  return (
+    <button
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+      className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-950/40 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+    >
+      {children}
+    </button>
   )
 }
 

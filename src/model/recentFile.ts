@@ -1,3 +1,4 @@
+import { FILES_STORE, withStore } from './db'
 import type { Handle } from './files'
 
 /**
@@ -12,40 +13,13 @@ import type { Handle } from './files'
  * abrir el diálogo del navegador.
  */
 
-const DB_NAME = 'dune-card-generator'
-const STORE = 'files'
 const KEY = 'deck'
-
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
-    request.onupgradeneeded = () => request.result.createObjectStore(STORE)
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
-  })
-}
-
-async function withStore<T>(
-  mode: IDBTransactionMode,
-  run: (store: IDBObjectStore) => IDBRequest<T>,
-): Promise<T> {
-  const db = await openDb()
-  try {
-    return await new Promise<T>((resolve, reject) => {
-      const request = run(db.transaction(STORE, mode).objectStore(STORE))
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-  } finally {
-    db.close()
-  }
-}
 
 /** Recordar (o olvidar, con null) el archivo abierto. */
 export async function rememberDeckFile(handle: Handle | null) {
   try {
-    if (handle) await withStore('readwrite', (store) => store.put(handle, KEY))
-    else await withStore('readwrite', (store) => store.delete(KEY))
+    if (handle) await withStore(FILES_STORE, 'readwrite', (store) => store.put(handle, KEY))
+    else await withStore(FILES_STORE, 'readwrite', (store) => store.delete(KEY))
   } catch {
     // Sin IndexedDB (modo incógnito, permisos) se pierde la memoria del
     // archivo y nada más: no es motivo para romper la app.
@@ -54,7 +28,11 @@ export async function rememberDeckFile(handle: Handle | null) {
 
 export async function recallDeckFile(): Promise<Handle | null> {
   try {
-    return (await withStore<Handle | undefined>('readonly', (store) => store.get(KEY))) ?? null
+    return (
+      (await withStore<Handle | undefined>(FILES_STORE, 'readonly', (store) =>
+        store.get(KEY),
+      )) ?? null
+    )
   } catch {
     return null
   }

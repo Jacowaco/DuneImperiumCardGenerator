@@ -1,10 +1,7 @@
-import ICON_SIZES from '../assets/icons/sizes.json'
-import type { ContentPart } from '../model/card'
+import { PLAY_ROWS, type Card, type ContentPart, type PlayRows } from '../model/card'
+import type { IconLibrary } from '../model/iconLibrary'
 import { CONTENT } from './constants'
 import { fontSizeForCapHeight, textWidth } from './text'
-
-/** Tamaño natural de cada icono, generado por `scripts/prepare_assets.py`. */
-const SIZES: Record<string, number[]> = ICON_SIZES
 
 export type Box = { top: number; bottom: number }
 
@@ -24,15 +21,16 @@ type Item =
 const NOMINAL_FONT = fontSizeForCapHeight(CONTENT.text.capHeight, CONTENT.text.weight)
 const SPACE = textWidth(' ', NOMINAL_FONT, CONTENT.text.weight)
 
-function measure(parts: ContentPart[]): Item[] {
+function measure(parts: ContentPart[], library: IconLibrary): Item[] {
   return parts.flatMap((part): Item[] => {
     if (part.type === 'break') return [{ kind: 'break' }]
 
     if (part.type === 'icon') {
-      const [width, height] = SIZES[part.icon] ?? [
-        CONTENT.nominalIconHeight,
-        CONTENT.nominalIconHeight,
-      ]
+      // Un icono propio que ya no está en el mazo no reserva lugar: dejar el
+      // hueco vacío se vería como un error de layout y no como lo que es.
+      const entry = library[part.icon]
+      if (!entry) return []
+      const { width, height } = entry
       return [{ kind: 'icon', icon: part.icon, amount: part.amount, width, height }]
     }
 
@@ -100,8 +98,12 @@ const blockHeight = (lines: Line[]) => lines.reduce((total, line) => total + lin
  * el corte de línea cambia y hay que rehacerlo. Se arranca a tamaño completo y
  * se baja hasta que el bloque entra a lo alto.
  */
-export function layoutContent(parts: ContentPart[], box: Box): Placement[] {
-  const items = measure(parts)
+export function layoutContent(
+  parts: ContentPart[],
+  box: Box,
+  library: IconLibrary,
+): Placement[] {
+  const items = measure(parts, library)
   if (!items.length) return []
 
   const maxWidth = CONTENT.right - CONTENT.left - CONTENT.paddingX * 2
@@ -188,3 +190,30 @@ export const revealBox = (rows: number): Box => ({
   top: Math.max(CONTENT.play.bottoms[rows], CONTENT.reveal.top),
   bottom: CONTENT.reveal.bottom,
 })
+
+/**
+ * La caja de play más chica de las tres donde el contenido entra a tamaño
+ * completo (sin que `layoutContent` tenga que achicarlo). Si ni la más grande
+ * alcanza, se devuelve esa igual — el achique automático se hace cargo.
+ */
+export function autoPlayRows(parts: ContentPart[], library: IconLibrary): PlayRows {
+  const items = measure(parts, library)
+  if (!items.length) return PLAY_ROWS[0]
+
+  const maxWidth = CONTENT.right - CONTENT.left - CONTENT.paddingX * 2
+  const height = blockHeight(wrap(items, maxWidth))
+
+  for (const rows of PLAY_ROWS) {
+    const box = playBox(rows)
+    if (height <= box.bottom - box.top - CONTENT.padding * 2) return rows
+  }
+  return PLAY_ROWS[PLAY_ROWS.length - 1]
+}
+
+/** Alto de caja que efectivamente se dibuja, según si el ajuste automático está prendido. */
+export function effectivePlayRows(
+  card: Pick<Card, 'playRows' | 'playRowsAuto' | 'playContent'>,
+  library: IconLibrary,
+): PlayRows {
+  return card.playRowsAuto ? autoPlayRows(card.playContent, library) : card.playRows
+}

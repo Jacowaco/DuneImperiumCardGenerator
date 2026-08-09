@@ -1,23 +1,28 @@
 import { Image as KonvaImage } from 'react-konva'
-import useImage from 'use-image'
 
-import { ICON_NUMBER_COLORS, ICONS, type IconId } from '../../assets/icons'
 import type { Card } from '../../model/card'
+import { useIconLibrary, type IconEntry } from '../../model/iconLibrary'
 import { CONTENT } from '../constants'
-import { layoutContent, playBox, revealBox, type Placement } from '../contentLayout'
+import { effectivePlayRows, layoutContent, playBox, revealBox, type Placement } from '../contentLayout'
+import { useCardImage } from '../imageCache'
 import { fontSizeForCapHeight, textWidth } from '../text'
 import { TextShape } from './TextShape'
 
 /** El contenido de las dos cajas: iconos y texto mezclados. */
 export function ContentBlock({ card }: { card: Card }) {
+  const library = useIconLibrary()
+  const rows = effectivePlayRows(card, library)
+
   return (
     <>
       <Block
-        placements={layoutContent(card.playContent, playBox(card.playRows))}
+        library={library}
+        placements={layoutContent(card.playContent, playBox(rows), library)}
         textColor={CONTENT.text.playColor}
       />
       <Block
-        placements={layoutContent(card.revealContent, revealBox(card.playRows))}
+        library={library}
+        placements={layoutContent(card.revealContent, revealBox(rows), library)}
         textColor={CONTENT.text.revealColor}
       />
     </>
@@ -25,9 +30,11 @@ export function ContentBlock({ card }: { card: Card }) {
 }
 
 function Block({
+  library,
   placements,
   textColor,
 }: {
+  library: ReturnType<typeof useIconLibrary>
   placements: Placement[]
   textColor: string
 }) {
@@ -35,7 +42,7 @@ function Block({
     <>
       {placements.map((placement, index) =>
         placement.kind === 'icon' ? (
-          <ContentIcon key={index} placement={placement} />
+          <ContentIcon key={index} placement={placement} entry={library[placement.icon]} />
         ) : (
           <TextShape
             key={index}
@@ -53,13 +60,14 @@ function Block({
 
 function ContentIcon({
   placement,
+  entry,
 }: {
   placement: Extract<Placement, { kind: 'icon' }>
+  entry: IconEntry
 }) {
-  const icon = placement.icon as IconId
-  const [image] = useImage(ICONS[icon].url)
+  const image = useCardImage(entry.url)
 
-  const numberColor = ICON_NUMBER_COLORS[icon]
+  const numberColor = entry.numberColor
   const digitHeight = placement.height * CONTENT.numberHeightRatio
   const size = fontSizeForCapHeight(digitHeight, CONTENT.numberWeight)
   const text = String(placement.amount)

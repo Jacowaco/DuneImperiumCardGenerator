@@ -1,5 +1,11 @@
-import type { Card } from './card'
-import { downloadDeck, FILE_EXTENSION, fileSafe, parseDeck, serializeDeck } from './storage'
+import {
+  downloadDeck,
+  FILE_EXTENSION,
+  fileSafe,
+  parseDeck,
+  serializeDeck,
+  type Deck,
+} from './storage'
 
 /**
  * Guardar sobre el archivo abierto.
@@ -57,7 +63,7 @@ const FILE_TYPES = [
 export const isCancelled = (error: unknown) =>
   error instanceof DOMException && error.name === 'AbortError'
 
-export type OpenedDeck = { cards: Card[]; handle: Handle | null; name: string }
+export type OpenedDeck = { deck: Deck; handle: Handle | null; name: string }
 
 /**
  * Abre con el diálogo nativo si se puede, para quedarse con el handle. Si no,
@@ -69,86 +75,97 @@ export async function openDeck(): Promise<OpenedDeck | null> {
 
   const [handle] = await show({ types: FILE_TYPES })
   const file = await handle.getFile()
-  return { cards: parseDeck(await file.text()), handle, name: file.name }
+  return { deck: parseDeck(await file.text()), handle, name: file.name }
 }
 
 export async function openDeckFromFile(file: File): Promise<OpenedDeck> {
-  return { cards: parseDeck(await file.text()), handle: null, name: file.name }
+  return { deck: parseDeck(await file.text()), handle: null, name: file.name }
 }
 
 /** Pide dónde guardar y devuelve el handle nuevo. */
 export async function saveDeckAs(
-  cards: Card[],
+  deck: Deck,
   suggestedName: string,
 ): Promise<{ handle: Handle | null; name: string }> {
   const show = picker().showSaveFilePicker
   if (!show || writesBlocked) {
-    downloadDeck(cards)
+    downloadDeck(deck)
     return { handle: null, name: suggestedName }
   }
 
   const handle = await show({ suggestedName, types: FILE_TYPES })
 
   try {
-    await write(handle, cards)
+    await write(handle, deck)
   } catch (cause) {
     if (!isUnwritable(cause)) throw cause
     // El diálogo lo dio pero la escritura no: este entorno no sirve para
     // sobrescribir. Queda el camino viejo, bajar una copia.
     writesBlocked = true
-    downloadDeck(cards)
+    downloadDeck(deck)
     return { handle: null, name: suggestedName }
   }
   return { handle, name: handle.name }
 }
 
 /**
- * Sobrescribe el archivo abierto. Devuelve false si ya no se puede — permiso
- * denegado, o el archivo se movió o se borró — para caer en "Guardar como" en
- * vez de dejar al usuario sin guardar.
+ * Sobrescribe el archivo abierto. Los dos fracasos posibles no se tratan
+ * igual: si el archivo ya no está, lo único que queda es preguntar dónde
+ * guardar; pero si lo que falta es el permiso hay que decirlo, porque abrir el
+ * diálogo en silencio parece que el botón hubiera ignorado el archivo abierto.
  */
-export async function saveDeck(cards: Card[], handle: Handle): Promise<boolean> {
-  if (!(await ensureWritable(handle))) return false
+export type SaveResult = 'saved' | 'denied' | 'missing'
+
+export async function saveDeck(deck: Deck, handle: Handle): Promise<SaveResult> {
+  if (!(await ensureWritable(handle))) return 'denied'
 
   try {
-    await write(handle, cards)
+    await write(handle, deck)
   } catch (cause) {
-    if (isUnwritable(cause)) return false
-    throw cause
+    if (!isUnwritable(cause)) throw cause
+    return (cause as DOMException).name === 'NotFoundError' ? 'missing' : 'denied'
   }
-  return true
+  return 'saved'
 }
 
 /**
  * El archivo abierto ya no sirve para escribir: se movió o se borró
  * (`NotFoundError`), o el navegador no da el permiso en este momento
- * (`NotAllowedError`, `SecurityError`). Ninguno es un error para mostrar: hay
- * que volver a preguntar dónde guardar.
+ * (`NotAllowedError`, `SecurityError`).
  */
 const isUnwritable = (cause: unknown) =>
   cause instanceof DOMException &&
   ['NotFoundError', 'NotAllowedError', 'SecurityError'].includes(cause.name)
 
 /**
- * El permiso de escritura se pide aparte del de lectura, y no sobrevive a
- * recargar la página. Se consulta primero para no abrir el diálogo cuando ya
- * está dado; pedirlo necesita un click reciente, así que esto sólo se llama
- * desde el botón de guardar.
+ * El permiso de escritura va aparte del de lectura, y abrir un archivo lo da
+ * sólo para leer: `showOpenFilePicker` no tiene forma de pedir escritura. Por
+ * eso el primer "Guardar" sobre un mazo abierto siempre pasa por el cartel de
+ * Chrome, y aceptarlo una vez alcanza para el resto de la sesión.
+ *
+ * Se consulta primero para no molestar cuando ya está dado. Pedirlo necesita
+ * un click reciente, así que cuelga del botón de guardar y no de la apertura,
+ * donde el click ya se lo consumió el diálogo.
  */
 async function ensureWritable(handle: Handle) {
-  const current = (await handle.queryPermission?.({ mode: 'readwrite' })) ?? 'granted'
-  if (current === 'granted') return true
+  try {
+    const current = (await handle.queryPermission?.({ mode: 'readwrite' })) ?? 'granted'
+    if (current === 'granted') return true
 
-  const asked = (await handle.requestPermission?.({ mode: 'readwrite' })) ?? 'granted'
-  return asked === 'granted'
+    const asked = (await handle.requestPermission?.({ mode: 'readwrite' })) ?? 'granted'
+    return asked === 'granted'
+  } catch {
+    // Sin click reciente Chrome ni siquiera deja preguntar.
+    return false
+  }
 }
 
-async function write(handle: Handle, cards: Card[]) {
+async function write(handle: Handle, deck: Deck) {
   const writable = await handle.createWritable()
-  await writable.write(serializeDeck(cards))
+  await writable.write(serializeDeck(deck))
   await writable.close()
 }
 
 /** Nombre por defecto: el de la carta si hay una sola, si no algo genérico. */
-export const suggestedName = (cards: Card[]) =>
+export const suggestedName = ({ cards }: Deck) =>
   `${fileSafe(cards.length === 1 ? cards[0].title.trim() || 'carta' : 'mazo')}${FILE_EXTENSION}`

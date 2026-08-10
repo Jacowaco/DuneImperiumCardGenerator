@@ -17,9 +17,15 @@ export const LANGUAGE_IDS = Object.keys(LANGUAGE_NAMES) as Language[]
 
 const STORAGE_KEY = 'dune-card-generator:language'
 
+const detectLanguage = (): Language => {
+  const preferred = navigator.languages ?? [navigator.language]
+  return preferred.some((lang) => lang?.toLowerCase().startsWith('es')) ? 'es' : 'en'
+}
+
 const loadLanguage = (): Language => {
   const stored = localStorage.getItem(STORAGE_KEY)
-  return stored === 'en' ? 'en' : 'es'
+  if (stored === 'en' || stored === 'es') return stored
+  return detectLanguage()
 }
 
 export function useLanguageState() {

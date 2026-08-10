@@ -74,6 +74,7 @@ export function TopBar({
         <span className="text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
           {t.topBar.subtitle}
         </span>
+        <span className="text-[10px] text-zinc-600">v{__APP_VERSION__}</span>
       </div>
 
       <div className="h-5 w-px shrink-0 bg-zinc-800" />

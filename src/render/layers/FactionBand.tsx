@@ -22,9 +22,10 @@ export function FactionBand({ factions }: { factions: Faction[] }) {
 
   return (
     <>
-      {ordered.map((id, index) => (
-        <Band key={id} faction={id} rank={index + 1} y={index * FACTION_BAND.height} />
-      ))}
+      {ordered.map((id, index) => {
+        const rank = index + 1
+        return <Band key={id} faction={id} rank={rank} y={FACTION_BAND.offsets[rank]} />
+      })}
     </>
   )
 }

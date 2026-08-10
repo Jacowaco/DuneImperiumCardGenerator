@@ -44,8 +44,14 @@ export const TITLE = {
  * Banda de facción. A diferencia del resto de las capas, no tiene un PNG por
  * facción: tiene uno por posición en la pila (la de arriba es la más ancha,
  * `widths[1]`), y el código la tiñe con el color de la facción que le toca y
- * le dibuja el nombre encima. Las cuatro posiciones miden lo mismo de alto,
- * así que un solo `height` alcanza para apilarlas.
+ * le dibuja el nombre encima.
+ *
+ * Las cuatro posiciones **no** miden lo mismo de alto: 43, 43, 42 y 43 px
+ * (medido del alpha de `faction-bands/*.png`, borde a borde). Apilarlas con
+ * un paso fijo promedio (42,75) deja una línea de fondo de 1 px entre un par
+ * cualquiera, porque el redondeo se acumula. `offsets` es la suma acumulada
+ * de los altos reales de las posiciones anteriores, así que cada banda se
+ * apoya justo donde termina la de arriba, sea cual sea la combinación.
  *
  * `widths` es el ancho en el borde superior de cada posición; el corte
  * diagonal lo va angostando hacia abajo a razón de casi `height` px por banda,
@@ -54,6 +60,7 @@ export const TITLE = {
 export const FACTION_BAND = {
   top: 90,
   height: 42.75,
+  offsets: { 1: 0, 2: 43, 3: 86, 4: 128 } as Record<number, number>,
   widths: { 1: 350, 2: 311, 3: 270, 4: 229 } as Record<number, number>,
   text: {
     x: 37,

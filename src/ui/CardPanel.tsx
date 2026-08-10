@@ -20,7 +20,7 @@ type Props = {
 // Cubren el rango en el que cae la gran mayoría de las cartas reales; lo que
 // quede afuera se escribe a mano en el campo de al lado.
 const COST_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-const BENEFIT_AMOUNT_QUICK_PICKS = [1, 2, 3, 4, 5]
+const BENEFIT_AMOUNT_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 /**
  * Los datos de la carta: nombre, facción y qué cuesta comprarla. Son las tres
@@ -92,6 +92,8 @@ export function CardPanel({ card, onChange }: Props) {
                 value={card.cost}
                 options={COST_QUICK_PICKS}
                 otherLabel={t.cardPanel.otherValue}
+                decreaseLabel={t.contentEditor.decrease(t.cardPanel.persuasion)}
+                increaseLabel={t.contentEditor.increase(t.cardPanel.persuasion)}
                 onChange={(cost) => onChange({ cost })}
               />
             </Field>
@@ -118,6 +120,8 @@ export function CardPanel({ card, onChange }: Props) {
                   value={card.purchaseBenefitAmount}
                   options={BENEFIT_AMOUNT_QUICK_PICKS}
                   otherLabel={t.cardPanel.otherValue}
+                  decreaseLabel={t.contentEditor.decrease(t.cardPanel.amount)}
+                  increaseLabel={t.contentEditor.increase(t.cardPanel.amount)}
                   onChange={(purchaseBenefitAmount) => onChange({ purchaseBenefitAmount })}
                 />
               </Field>

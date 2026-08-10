@@ -5,6 +5,7 @@ import type {
   ReactNode,
   SelectHTMLAttributes,
 } from 'react'
+import { MinusIcon, PlusIcon } from './icons'
 
 /**
  * Bloque del panel. El título es opcional: adentro de un diálogo lo pone el
@@ -206,11 +207,15 @@ export function NumberField({
   value,
   options,
   otherLabel,
+  decreaseLabel,
+  increaseLabel,
   onChange,
 }: {
   value: number
   options: number[]
   otherLabel: string
+  decreaseLabel: string
+  increaseLabel: string
   onChange: (value: number) => void
 }) {
   const [customOpen, setCustomOpen] = useState(false)
@@ -241,15 +246,37 @@ export function NumberField({
       })}
 
       {showInput ? (
-        <input
-          type="number"
-          min={0}
-          max={99}
-          autoFocus={customOpen}
-          value={value}
-          onChange={(event) => onChange(Math.max(0, Math.min(99, Number(event.target.value))))}
-          className="h-8 w-16 shrink-0 rounded-md border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-100 outline-none focus:border-sand-500"
-        />
+        <div className="flex h-8 shrink-0 items-center overflow-hidden rounded-md border border-zinc-700 bg-zinc-900 focus-within:border-sand-500">
+          <button
+            type="button"
+            title={decreaseLabel}
+            aria-label={decreaseLabel}
+            disabled={value <= 0}
+            onClick={() => onChange(Math.max(0, value - 1))}
+            className="flex size-8 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <MinusIcon />
+          </button>
+          <input
+            type="number"
+            min={0}
+            max={99}
+            autoFocus={customOpen}
+            value={value}
+            onChange={(event) => onChange(Math.max(0, Math.min(99, Number(event.target.value))))}
+            className="w-8 shrink-0 bg-transparent text-center text-sm text-zinc-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          />
+          <button
+            type="button"
+            title={increaseLabel}
+            aria-label={increaseLabel}
+            disabled={value >= 99}
+            onClick={() => onChange(Math.min(99, value + 1))}
+            className="flex size-8 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <PlusIcon />
+          </button>
+        </div>
       ) : (
         <button
           type="button"

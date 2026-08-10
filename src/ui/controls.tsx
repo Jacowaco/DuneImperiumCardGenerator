@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -186,6 +187,80 @@ export function MultiChoice<T extends string>({
           </button>
         )
       })}
+    </div>
+  )
+}
+
+/**
+ * Fila de números sueltos para no tener que escribirlos: cubre los valores
+ * más comunes de un campo numérico (costo, cantidad). El botón "…" al final
+ * abre un campo de texto para los que no están en la lista.
+ *
+ * El campo no queda siempre visible al lado de la grilla: repetiría el mismo
+ * número dos veces y, para un solo dígito, pesaba tanto como toda la grilla
+ * junta. Aparece sólo mientras hace falta —el valor actual no es ninguno de
+ * los botones, o se lo pidió a mano con "…"— y se vuelve a esconder en cuanto
+ * se elige un botón.
+ */
+export function NumberField({
+  value,
+  options,
+  otherLabel,
+  onChange,
+}: {
+  value: number
+  options: number[]
+  otherLabel: string
+  onChange: (value: number) => void
+}) {
+  const [customOpen, setCustomOpen] = useState(false)
+  const showInput = customOpen || !options.includes(value)
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {options.map((option) => {
+        const selected = value === option
+
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => {
+              setCustomOpen(false)
+              onChange(option)
+            }}
+            className={`flex size-8 shrink-0 items-center justify-center rounded-md text-xs transition ${
+              selected
+                ? 'bg-sand-500 font-medium text-zinc-950'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+            }`}
+          >
+            {option}
+          </button>
+        )
+      })}
+
+      {showInput ? (
+        <input
+          type="number"
+          min={0}
+          max={99}
+          autoFocus={customOpen}
+          value={value}
+          onChange={(event) => onChange(Math.max(0, Math.min(99, Number(event.target.value))))}
+          className="h-8 w-16 shrink-0 rounded-md border border-zinc-700 bg-zinc-900 px-2 text-sm text-zinc-100 outline-none focus:border-sand-500"
+        />
+      ) : (
+        <button
+          type="button"
+          title={otherLabel}
+          aria-label={otherLabel}
+          onClick={() => setCustomOpen(true)}
+          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-800 text-zinc-300 transition hover:bg-zinc-700"
+        >
+          …
+        </button>
+      )}
     </div>
   )
 }

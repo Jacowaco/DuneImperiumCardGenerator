@@ -2,12 +2,12 @@ import { useRef } from 'react'
 
 import { describeError, useT } from '../i18n/strings'
 import { cardIconIds, type Card } from '../model/card'
-import { loadCustomIcon, type CustomIcon } from '../model/customIcon'
+import { DEFAULT_CUSTOM_ICON_NUMBER_COLOR, loadCustomIcon, type CustomIcon } from '../model/customIcon'
 import { customIconEntry } from '../model/iconLibrary'
 import { useLanguage } from '../model/language'
 import { CONTENT } from '../render/constants'
 import { Action, Hint, Section } from './controls'
-import { UploadIcon } from './icons'
+import { MinusIcon, PlusIcon, UploadIcon } from './icons'
 
 /**
  * Cuánto se achica la carta para la previsualización: el icono nominal del
@@ -129,25 +129,76 @@ export function IconPanel({ icons, cards, onChange, onError }: Props) {
 
                 El "%" va escrito al lado del campo y no sólo en el tooltip: un
                 número suelto no dice de qué es. */}
-            <label
+            <div
               title={t.iconPanel.heightTitle}
               className="flex min-w-0 items-center gap-1 text-xs text-zinc-500"
             >
+              <div className="flex min-w-0 flex-1 items-center overflow-hidden rounded border border-zinc-700 bg-zinc-950">
+                <button
+                  type="button"
+                  aria-label={t.iconPanel.decreaseHeightLabel(icon.label)}
+                  disabled={icon.size <= 20}
+                  onClick={() => update(icon.id, { size: Math.max(20, icon.size - 5) })}
+                  className="flex size-5 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <MinusIcon />
+                </button>
+                <input
+                  type="number"
+                  min={20}
+                  max={200}
+                  step={5}
+                  aria-label={t.iconPanel.heightLabel(icon.label)}
+                  value={icon.size}
+                  onChange={(event) =>
+                    update(icon.id, {
+                      size: Math.max(20, Math.min(200, Number(event.target.value) || 100)),
+                    })
+                  }
+                  className="w-full min-w-0 bg-transparent px-0.5 py-1 text-center text-xs text-zinc-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <button
+                  type="button"
+                  aria-label={t.iconPanel.increaseHeightLabel(icon.label)}
+                  disabled={icon.size >= 200}
+                  onClick={() => update(icon.id, { size: Math.min(200, icon.size + 5) })}
+                  className="flex size-5 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <PlusIcon />
+                </button>
+              </div>
+              %
+            </div>
+
+            {/* Si el icono ya representa una cantidad fija (un "1" dibujado
+                adentro, por ejemplo) no hace falta el número encima; si no, el
+                usuario lo prende acá. El color es aparte porque el fondo de un
+                icono propio puede ser cualquier cosa, a diferencia de los del
+                PSD donde ya se eligió uno que contrasta. */}
+            <label className="flex items-center gap-1.5 text-xs text-zinc-500">
               <input
-                type="number"
-                min={20}
-                max={200}
-                step={5}
-                aria-label={t.iconPanel.heightLabel(icon.label)}
-                value={icon.size}
+                type="checkbox"
+                checked={icon.showNumber ?? false}
+                aria-label={t.iconPanel.showNumberLabel(icon.label)}
                 onChange={(event) =>
                   update(icon.id, {
-                    size: Math.max(20, Math.min(200, Number(event.target.value) || 100)),
+                    showNumber: event.target.checked,
+                    numberColor: icon.numberColor ?? DEFAULT_CUSTOM_ICON_NUMBER_COLOR,
                   })
                 }
-                className="w-full min-w-0 rounded border border-zinc-700 bg-zinc-950 px-1.5 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
+                className="size-3.5 shrink-0 accent-sand-500"
               />
-              %
+              {t.iconPanel.showNumberText}
+              {icon.showNumber && (
+                <input
+                  type="color"
+                  value={icon.numberColor ?? DEFAULT_CUSTOM_ICON_NUMBER_COLOR}
+                  title={t.iconPanel.numberColorTitle}
+                  aria-label={t.iconPanel.numberColorLabel(icon.label)}
+                  onChange={(event) => update(icon.id, { numberColor: event.target.value })}
+                  className="ml-auto size-5 shrink-0 cursor-pointer rounded border border-zinc-700 bg-zinc-950 p-0"
+                />
+              )}
             </label>
 
             {/* En la esquina y no en la fila de abajo: con la ficha angosta, el

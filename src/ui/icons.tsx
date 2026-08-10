@@ -107,6 +107,12 @@ export const PlusIcon = () => (
   </Icon>
 )
 
+export const MinusIcon = () => (
+  <Icon>
+    <path d="M3.25 8h9.5" />
+  </Icon>
+)
+
 /** Agregar texto a una caja de contenido: una T de letra suelta. */
 export const TextIcon = () => (
   <Icon>

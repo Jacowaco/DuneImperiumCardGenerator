@@ -30,7 +30,23 @@ export type CustomIcon = {
   height: number
   /** Alto dentro de la carta, en % del icono nominal (99 px). */
   size: number
+  /**
+   * Si dibuja encima la cantidad del `ContentPart`, como los iconos que salen
+   * vacíos del PSD (`iconTakesNumber`). A diferencia de esos, acá lo elige el
+   * usuario: un icono propio puede ser un símbolo que ya representa "uno" o
+   * uno pensado para llevar cantidad, y no hay forma de saberlo del PNG.
+   *
+   * Opcional para que un mazo guardado antes de este campo siga abriendo:
+   * `customIconEntry` (`iconLibrary.ts`) es el único lugar que lo lee, y ahí
+   * se completa con `false`.
+   */
+  showNumber?: boolean
+  /** Color del número, elegido por el usuario porque el fondo del icono varía. */
+  numberColor?: string
 }
+
+/** Color inicial del número al prender `showNumber`, editable después. */
+export const DEFAULT_CUSTOM_ICON_NUMBER_COLOR = '#ffffff'
 
 export const isCustomIconId = (id: string): id is CustomIconId =>
   id.startsWith(CUSTOM_ICON_PREFIX)
@@ -49,7 +65,14 @@ export function mergeIcons(base: CustomIcon[], winning: CustomIcon[]): CustomIco
 /** Si dos listas dicen lo mismo. Alcanza con lo editable: el PNG no cambia. */
 export const sameIcons = (a: CustomIcon[], b: CustomIcon[]) =>
   a.length === b.length &&
-  a.every((icon, i) => icon.id === b[i].id && icon.label === b[i].label && icon.size === b[i].size)
+  a.every(
+    (icon, i) =>
+      icon.id === b[i].id &&
+      icon.label === b[i].label &&
+      icon.size === b[i].size &&
+      icon.showNumber === b[i].showNumber &&
+      icon.numberColor === b[i].numberColor,
+  )
 
 /**
  * Alpha por debajo de esto es fondo: el antialias del borde no cuenta como
@@ -122,6 +145,8 @@ export async function loadCustomIcon(file: File): Promise<CustomIcon> {
     width,
     height,
     size: 100,
+    showNumber: false,
+    numberColor: DEFAULT_CUSTOM_ICON_NUMBER_COLOR,
   }
 }
 

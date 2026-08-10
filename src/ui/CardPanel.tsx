@@ -10,12 +10,17 @@ import {
 } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
-import { Field, Hint, MultiChoice, Section, Select, TextInput, Toggle } from './controls'
+import { Field, Hint, MultiChoice, NumberField, Section, Select, TextInput, Toggle } from './controls'
 
 type Props = {
   card: Card
   onChange: (patch: Partial<Card>) => void
 }
+
+// Cubren el rango en el que cae la gran mayoría de las cartas reales; lo que
+// quede afuera se escribe a mano en el campo de al lado.
+const COST_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+const BENEFIT_AMOUNT_QUICK_PICKS = [1, 2, 3, 4, 5]
 
 /**
  * Los datos de la carta: nombre, facción y qué cuesta comprarla. Son las tres
@@ -83,14 +88,11 @@ export function CardPanel({ card, onChange }: Props) {
         {card.cost !== null && (
           <>
             <Field label={t.cardPanel.persuasion}>
-              <TextInput
-                type="number"
-                min={0}
-                max={99}
+              <NumberField
                 value={card.cost}
-                onChange={(event) =>
-                  onChange({ cost: Math.max(0, Math.min(99, Number(event.target.value))) })
-                }
+                options={COST_QUICK_PICKS}
+                otherLabel={t.cardPanel.otherValue}
+                onChange={(cost) => onChange({ cost })}
               />
             </Field>
 
@@ -112,19 +114,11 @@ export function CardPanel({ card, onChange }: Props) {
 
             {benefit?.numberColor && (
               <Field label={t.cardPanel.amount}>
-                <TextInput
-                  type="number"
-                  min={0}
-                  max={99}
+                <NumberField
                   value={card.purchaseBenefitAmount}
-                  onChange={(event) =>
-                    onChange({
-                      purchaseBenefitAmount: Math.max(
-                        0,
-                        Math.min(99, Number(event.target.value)),
-                      ),
-                    })
-                  }
+                  options={BENEFIT_AMOUNT_QUICK_PICKS}
+                  otherLabel={t.cardPanel.otherValue}
+                  onChange={(purchaseBenefitAmount) => onChange({ purchaseBenefitAmount })}
                 />
               </Field>
             )}

@@ -58,6 +58,7 @@ type Strings = {
     none: string
     custom: (label: string) => string
     amount: string
+    otherValue: string
   }
   contentEditor: {
     empty: string
@@ -72,6 +73,8 @@ type Strings = {
     custom: string
     core: string
     influence: string
+    decrease: (label: string) => string
+    increase: (label: string) => string
   }
   rulesPanel: {
     agentIcons: string
@@ -102,6 +105,12 @@ type Strings = {
     nameLabel: (label: string) => string
     heightTitle: string
     heightLabel: (label: string) => string
+    decreaseHeightLabel: (label: string) => string
+    increaseHeightLabel: (label: string) => string
+    showNumberText: string
+    showNumberLabel: (label: string) => string
+    numberColorTitle: string
+    numberColorLabel: (label: string) => string
     upload: string
     hint: string
     confirmRemove: (label: string, used: number) => string
@@ -186,6 +195,7 @@ const STRINGS: Record<Language, Strings> = {
       none: 'Ninguno',
       custom: (label) => `Propio · ${label}`,
       amount: 'Cantidad',
+      otherValue: 'Otro valor',
     },
     contentEditor: {
       empty: 'Caja vacía.',
@@ -200,6 +210,8 @@ const STRINGS: Record<Language, Strings> = {
       custom: 'Propios',
       core: 'Dune Imperium',
       influence: 'Influencia por facción',
+      decrease: (label) => `Restar ${label}`,
+      increase: (label) => `Sumar ${label}`,
     },
     rulesPanel: {
       agentIcons: 'Iconos de agente',
@@ -232,6 +244,12 @@ const STRINGS: Record<Language, Strings> = {
       nameLabel: (label) => `Nombre de ${label}`,
       heightTitle: 'Alto en la carta, en % del icono del juego',
       heightLabel: (label) => `Alto de ${label} en la carta, en % del icono del juego`,
+      decreaseHeightLabel: (label) => `Achicar ${label}`,
+      increaseHeightLabel: (label) => `Agrandar ${label}`,
+      showNumberText: 'Número',
+      showNumberLabel: (label) => `Mostrar número sobre ${label}`,
+      numberColorTitle: 'Color del número',
+      numberColorLabel: (label) => `Color del número de ${label}`,
       upload: 'Subir icono…',
       hint: 'PNG con transparencia, se recortan solos al contenido. El % es el alto en la carta comparado con un icono del juego. Quedan guardados en este navegador, y el mazo se lleva adentro los que sus cartas usan.',
       confirmRemove: (label, used) =>
@@ -329,6 +347,7 @@ const STRINGS: Record<Language, Strings> = {
       none: 'None',
       custom: (label) => `Custom · ${label}`,
       amount: 'Amount',
+      otherValue: 'Custom value',
     },
     contentEditor: {
       empty: 'Empty box.',
@@ -343,6 +362,8 @@ const STRINGS: Record<Language, Strings> = {
       custom: 'Custom',
       core: 'Dune Imperium',
       influence: 'Influence by Faction',
+      decrease: (label) => `Decrease ${label}`,
+      increase: (label) => `Increase ${label}`,
     },
     rulesPanel: {
       agentIcons: 'Agent Icons',
@@ -375,6 +396,12 @@ const STRINGS: Record<Language, Strings> = {
       nameLabel: (label) => `Name of ${label}`,
       heightTitle: "Height on the card, as a % of the game's icon",
       heightLabel: (label) => `Height of ${label} on the card, as a % of the game's icon`,
+      decreaseHeightLabel: (label) => `Shrink ${label}`,
+      increaseHeightLabel: (label) => `Grow ${label}`,
+      showNumberText: 'Number',
+      showNumberLabel: (label) => `Show number over ${label}`,
+      numberColorTitle: 'Number color',
+      numberColorLabel: (label) => `Number color for ${label}`,
       upload: 'Upload icon…',
       hint: "Transparent PNGs, auto-cropped to content. The % is the height on the card compared to a game icon. They're saved in this browser, and the deck carries along the ones its cards use.",
       confirmRemove: (label, used) =>

@@ -4,7 +4,7 @@ import { ICON_NUMBER_COLORS, ICONS, type IconId } from '../assets/icons'
 import ICON_SIZES from '../assets/icons/sizes.json'
 import { CONTENT } from '../render/constants'
 import type { AnyIconId } from './card'
-import type { CustomIcon } from './customIcon'
+import { DEFAULT_CUSTOM_ICON_NUMBER_COLOR, type CustomIcon } from './customIcon'
 import { pick, type Language } from './language'
 
 /**
@@ -64,6 +64,7 @@ export const customIconEntry = (icon: CustomIcon): IconEntry => {
     height,
     width: height * (icon.width / icon.height),
     custom: true,
+    numberColor: icon.showNumber ? icon.numberColor ?? DEFAULT_CUSTOM_ICON_NUMBER_COLOR : undefined,
   }
 }
 

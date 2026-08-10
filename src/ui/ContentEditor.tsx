@@ -4,7 +4,7 @@ import { useT } from '../i18n/strings'
 import { iconPart, textPart, type AnyIconId, type ContentPart } from '../model/card'
 import { useIconLibrary, type IconLibrary } from '../model/iconLibrary'
 import { Action, Hint } from './controls'
-import { BreakIcon, DiamondIcon, GripIcon, TextIcon } from './icons'
+import { BreakIcon, DiamondIcon, GripIcon, MinusIcon, PlusIcon, TextIcon } from './icons'
 
 type Props = {
   parts: ContentPart[]
@@ -144,19 +144,45 @@ export function ContentEditor({ parts, onChange }: Props) {
                 {library[part.icon]?.label ?? t.contentEditor.deletedIcon}
               </span>
               {library[part.icon]?.numberColor && (
-                <input
-                  type="number"
-                  min={0}
-                  max={99}
-                  value={part.amount}
-                  onChange={(event) =>
-                    update(index, {
-                      ...part,
-                      amount: Math.max(0, Math.min(99, Number(event.target.value))),
-                    })
-                  }
-                  className="w-12 rounded border border-zinc-700 bg-zinc-950 px-1.5 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
-                />
+                <div className="flex shrink-0 items-center overflow-hidden rounded border border-zinc-700 bg-zinc-950">
+                  <button
+                    type="button"
+                    title={t.contentEditor.decrease(library[part.icon]?.label ?? '')}
+                    aria-label={t.contentEditor.decrease(library[part.icon]?.label ?? '')}
+                    disabled={part.amount <= 0}
+                    onClick={() =>
+                      update(index, { ...part, amount: Math.max(0, part.amount - 1) })
+                    }
+                    className="flex size-6 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <MinusIcon />
+                  </button>
+                  <input
+                    type="number"
+                    min={0}
+                    max={99}
+                    value={part.amount}
+                    onChange={(event) =>
+                      update(index, {
+                        ...part,
+                        amount: Math.max(0, Math.min(99, Number(event.target.value))),
+                      })
+                    }
+                    className="w-7 shrink-0 bg-transparent text-center text-xs text-zinc-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                  <button
+                    type="button"
+                    title={t.contentEditor.increase(library[part.icon]?.label ?? '')}
+                    aria-label={t.contentEditor.increase(library[part.icon]?.label ?? '')}
+                    disabled={part.amount >= 99}
+                    onClick={() =>
+                      update(index, { ...part, amount: Math.min(99, part.amount + 1) })
+                    }
+                    className="flex size-6 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <PlusIcon />
+                  </button>
+                </div>
               )}
             </>
           )}

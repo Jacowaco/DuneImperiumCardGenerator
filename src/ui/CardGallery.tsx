@@ -57,7 +57,7 @@ export function CardGallery({
   }, [selected])
 
   return (
-    <aside className="flex w-[228px] shrink-0 flex-col border-l border-zinc-800 bg-zinc-950">
+    <aside className="flex w-[340px] shrink-0 flex-col border-l border-zinc-800 bg-zinc-950">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-800 px-3 py-2.5">
         <div className="min-w-0">
           <h2 className="text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
@@ -77,7 +77,7 @@ export function CardGallery({
 
       {/* `flex-1` para que el pie quede abajo de la columna y no colgando de la
           última miniatura, que se mueve con cada carta que se agrega. */}
-      <div className="grid min-h-0 flex-1 grid-cols-2 content-start gap-3 overflow-y-auto p-3">
+      <div className="grid min-h-0 flex-1 grid-cols-3 content-start gap-3 overflow-y-auto p-3">
         {cards.map((card, index) => (
           <div
             key={index}
@@ -109,16 +109,19 @@ export function CardGallery({
               </div>
             )}
 
-            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute top-1 left-1 opacity-0 transition-opacity group-hover:opacity-100">
               <ThumbnailAction label={t.gallery.duplicate} onClick={() => onDuplicate(index)}>
                 ⧉
               </ThumbnailAction>
-              {cards.length > 1 && (
+            </div>
+
+            {cards.length > 1 && (
+              <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
                 <ThumbnailAction label={t.gallery.remove} onClick={() => onRemove(index)}>
                   ×
                 </ThumbnailAction>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* El tilde va en el pie y no encima de la miniatura: ahí se lee sin
                 taparle el título a la carta. La casilla está siempre a la vista,
@@ -173,7 +176,7 @@ function ThumbnailAction({
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="size-5 rounded bg-zinc-900/85 text-xs text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+      className="flex size-7 items-center justify-center rounded bg-zinc-900/85 text-base text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
     >
       {children}
     </button>

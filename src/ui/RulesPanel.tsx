@@ -1,17 +1,15 @@
 import {
   AGENT_ICON_IDS,
-  AGENT_ICON_STYLE_IDS,
   AGENT_ICON_STYLES,
   AGENT_ICONS,
   AGENT_BADGE_URLS,
-  type AgentIconStyle,
 } from '../assets/icons/agents'
 import { useT } from '../i18n/strings'
 import { PLAY_ROWS, PLAY_ROWS_LABELS, type Card, type PlayRows } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
 import { autoPlayRows } from '../render/contentLayout'
-import { Choice, Field, Hint, MultiChoice, Section, Toggle } from './controls'
+import { Choice, MultiChoice, Section, Toggle } from './controls'
 import { ContentEditor } from './ContentEditor'
 
 type Props = {
@@ -31,11 +29,20 @@ export function RulesPanel({ card, onChange }: Props) {
 
   return (
     <>
-      <Section title={t.rulesPanel.agentIcons}>
+      <Section
+        title={t.rulesPanel.agentIcons}
+        action={
+          <Toggle
+            label={pick(AGENT_ICON_STYLES.infiltrate, language)}
+            checked={card.agentIconStyle === 'infiltrate'}
+            onChange={(checked) => onChange({ agentIconStyle: checked ? 'infiltrate' : 'locations' })}
+          />
+        }
+      >
         <MultiChoice
           values={card.agentIcons}
           iconsOnly
-          columns={4}
+          columns={AGENT_ICON_IDS.length}
           onChange={(agentIcons) => onChange({ agentIcons })}
           options={AGENT_ICON_IDS.map((id) => ({
             value: id,
@@ -43,20 +50,10 @@ export function RulesPanel({ card, onChange }: Props) {
             icon: AGENT_BADGE_URLS[id],
           }))}
         />
-        <Field label={t.rulesPanel.style}>
-          <Choice<AgentIconStyle>
-            value={card.agentIconStyle}
-            onChange={(style) => onChange({ agentIconStyle: style ?? 'locations' })}
-            options={AGENT_ICON_STYLE_IDS.map((id) => ({
-              value: id,
-              label: pick(AGENT_ICON_STYLES[id], language),
-            }))}
-          />
-        </Field>
       </Section>
 
       <Section title={t.rulesPanel.playTurn}>
-        <Field label={t.rulesPanel.boxHeight}>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Toggle
             label={t.rulesPanel.autoAdjust}
             checked={card.playRowsAuto}
@@ -69,13 +66,7 @@ export function RulesPanel({ card, onChange }: Props) {
             }
           />
 
-          {card.playRowsAuto ? (
-            <Hint>
-              {t.rulesPanel.autoHint(
-                pick(PLAY_ROWS_LABELS[autoPlayRows(card.playContent, library)], language),
-              )}
-            </Hint>
-          ) : (
+          {!card.playRowsAuto && (
             <Choice
               value={String(card.playRows)}
               columns={3}
@@ -86,13 +77,13 @@ export function RulesPanel({ card, onChange }: Props) {
               }))}
             />
           )}
-        </Field>
 
-        <Toggle
-          label={t.rulesPanel.agentSilhouette}
-          checked={card.agentSilhouette}
-          onChange={(agentSilhouette) => onChange({ agentSilhouette })}
-        />
+          <Toggle
+            label={t.rulesPanel.agentSilhouette}
+            checked={card.agentSilhouette}
+            onChange={(agentSilhouette) => onChange({ agentSilhouette })}
+          />
+        </div>
 
         <ContentEditor
           parts={card.playContent}
@@ -105,7 +96,6 @@ export function RulesPanel({ card, onChange }: Props) {
           parts={card.revealContent}
           onChange={(revealContent) => onChange({ revealContent })}
         />
-        <Hint>{t.rulesPanel.alwaysBothHint}</Hint>
       </Section>
     </>
   )

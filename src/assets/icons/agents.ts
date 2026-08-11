@@ -27,13 +27,13 @@ import type { Language } from '../../model/language'
  * en que se eligieron.
  */
 export const AGENT_ICONS: Record<AgentIcon, Record<Language, string>> = {
-  emperor: { es: 'Emperador', en: 'Emperor' },
-  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild' },
-  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit' },
-  fremen: { es: 'Fremen', en: 'Fremen' },
-  landsraad: { es: 'Landsraad', en: 'Landsraad' },
-  city: { es: 'Ciudad', en: 'City' },
-  'spice-trade': { es: 'Comercio de especia', en: 'Spice Trade' },
+  emperor: { es: 'Emperador', en: 'Emperor', pt: 'Imperador' },
+  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild', pt: 'Guilda Espacial' },
+  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit', pt: 'Bene Gesserit' },
+  fremen: { es: 'Fremen', en: 'Fremen', pt: 'Fremen' },
+  landsraad: { es: 'Landsraad', en: 'Landsraad', pt: 'Landsraad' },
+  city: { es: 'Ciudad', en: 'City', pt: 'Cidade' },
+  'spice-trade': { es: 'Comercio de especia', en: 'Spice Trade', pt: 'Comércio de Especiaria' },
 }
 
 export type AgentIcon =
@@ -51,8 +51,8 @@ export type AgentIconStyle = 'locations' | 'infiltrate'
 
 /** El PSD trae dos estilos para la misma columna. */
 export const AGENT_ICON_STYLES: Record<AgentIconStyle, Record<Language, string>> = {
-  locations: { es: 'Normal', en: 'Normal' },
-  infiltrate: { es: 'Infiltración', en: 'Infiltrate' },
+  locations: { es: 'Normal', en: 'Normal', pt: 'Normal' },
+  infiltrate: { es: 'Infiltración', en: 'Infiltrate', pt: 'Infiltração' },
 }
 
 export const AGENT_ICON_STYLE_IDS = Object.keys(AGENT_ICON_STYLES) as AgentIconStyle[]

@@ -32,85 +32,77 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
   const t = useT()
 
   return (
-    <>
-      <Section title={t.artPanel.image}>
+    <Section title={t.artPanel.image} hint={t.artPanel.dragZoomHint}>
+      <div className="flex flex-wrap items-center gap-3">
         <Button variant="primary" onClick={onPick}>
           <ImageIcon />
           {art ? t.artPanel.changeImage : t.artPanel.chooseImage}
         </Button>
-        {art ? (
+        {art && (
           <>
+            <Button onClick={onClear} title={t.artPanel.remove} aria-label={t.artPanel.remove}>
+              ×
+            </Button>
             <Hint>
               {art.width} × {art.height} px
             </Hint>
-            <Button onClick={onClear}>{t.artPanel.remove}</Button>
           </>
-        ) : (
-          <Hint>{t.artPanel.dragHint}</Hint>
         )}
-      </Section>
+      </div>
+      {!art && <Hint>{t.artPanel.dragHint}</Hint>}
 
-      <Section title={t.artPanel.frame}>
-        <label className="flex flex-col gap-2">
-          <span className="flex justify-between text-xs text-zinc-400">
-            <span>{t.artPanel.zoom}</span>
-            <span className="tabular-nums">
-              {art ? `${Math.round(art.transform.scale * 100)}%` : '—'}
-            </span>
+      <label className="flex flex-col gap-2">
+        <span className="flex justify-between text-xs text-zinc-400">
+          <span>{t.artPanel.zoom}</span>
+          <span className="tabular-nums">
+            {art ? `${Math.round(art.transform.scale * 100)}%` : '—'}
           </span>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.001}
-            disabled={!art}
-            value={art ? toSlider(art, art.transform.scale) : 0}
-            onChange={(event) => {
-              if (!art) return
-              const scale = clampArtScale(
-                fromSlider(art, Number(event.target.value)),
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.001}
+          disabled={!art}
+          value={art ? toSlider(art, art.transform.scale) : 0}
+          onChange={(event) => {
+            if (!art) return
+            const scale = clampArtScale(
+              fromSlider(art, Number(event.target.value)),
+              art.width,
+              art.height,
+            )
+            // Zoom desde el centro del recorte, no desde la esquina de la imagen.
+            const { x, y, scale: current } = art.transform
+            const cx = art.width / 2
+            const cy = art.height / 2
+            onTransform(
+              clampArtTransform(
+                {
+                  scale,
+                  x: x + cx * current - cx * scale,
+                  y: y + cy * current - cy * scale,
+                },
                 art.width,
                 art.height,
-              )
-              // Zoom desde el centro del recorte, no desde la esquina de la imagen.
-              const { x, y, scale: current } = art.transform
-              const cx = art.width / 2
-              const cy = art.height / 2
-              onTransform(
-                clampArtTransform(
-                  {
-                    scale,
-                    x: x + cx * current - cx * scale,
-                    y: y + cy * current - cy * scale,
-                  },
-                  art.width,
-                  art.height,
-                ),
-              )
-            }}
-            className="accent-sand-500"
-          />
-        </label>
+              ),
+            )
+          }}
+          className="accent-sand-500"
+        />
+      </label>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            disabled={!art}
-            onClick={() => art && onTransform(fitCover(art.width, art.height))}
-          >
-            {t.artPanel.fit}
-          </Button>
-          <Button
-            disabled={!art}
-            onClick={() =>
-              art && onTransform(centerAt(art.width, art.height, art.transform.scale))
-            }
-          >
-            {t.artPanel.center}
-          </Button>
-        </div>
-
-        <Hint>{t.artPanel.dragZoomHint}</Hint>
-      </Section>
-    </>
+      <div className="grid grid-cols-2 gap-2">
+        <Button disabled={!art} onClick={() => art && onTransform(fitCover(art.width, art.height))}>
+          {t.artPanel.fit}
+        </Button>
+        <Button
+          disabled={!art}
+          onClick={() => art && onTransform(centerAt(art.width, art.height, art.transform.scale))}
+        >
+          {t.artPanel.center}
+        </Button>
+      </div>
+    </Section>
   )
 }

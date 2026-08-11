@@ -6,11 +6,12 @@ import { createContext, useContext, useState } from 'react'
  * en el idioma que esa máquina tenga elegido, igual que el resto de la UI —
  * por eso no es un campo de `Card` ni de `Deck`.
  */
-export type Language = 'es' | 'en'
+export type Language = 'es' | 'en' | 'pt'
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   es: 'Español',
   en: 'English',
+  pt: 'Português',
 }
 
 export const LANGUAGE_IDS = Object.keys(LANGUAGE_NAMES) as Language[]
@@ -19,12 +20,13 @@ const STORAGE_KEY = 'dune-card-generator:language'
 
 const detectLanguage = (): Language => {
   const preferred = navigator.languages ?? [navigator.language]
-  return preferred.some((lang) => lang?.toLowerCase().startsWith('es')) ? 'es' : 'en'
+  const prefixes: Language[] = ['es', 'pt', 'en']
+  return prefixes.find((prefix) => preferred.some((lang) => lang?.toLowerCase().startsWith(prefix))) ?? 'en'
 }
 
 const loadLanguage = (): Language => {
   const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'en' || stored === 'es') return stored
+  if (stored === 'en' || stored === 'es' || stored === 'pt') return stored
   return detectLanguage()
 }
 

@@ -101,6 +101,15 @@ export const UploadIcon = () => (
   </Icon>
 )
 
+/** Marca de ayuda junto a un título: el texto completo va en el `title`. */
+export const InfoIcon = () => (
+  <Icon>
+    <circle cx="8" cy="8" r="5.75" />
+    <circle cx="8" cy="5.4" r="0.75" fill="currentColor" stroke="none" />
+    <path d="M8 7.5v3.25" />
+  </Icon>
+)
+
 export const PlusIcon = () => (
   <Icon>
     <path d="M8 3.25v9.5M3.25 8h9.5" />
@@ -133,6 +142,22 @@ export const EditIcon = () => (
   <Icon>
     <path d="M9.75 3.25 12.75 6.25 5.5 13.5H2.5v-3z" />
     <path d="M8.75 4.25 11.75 7.25" />
+  </Icon>
+)
+
+/** Elegir el idioma: el globo de siempre. */
+export const GlobeIcon = () => (
+  <Icon>
+    <circle cx="8" cy="8" r="5.75" />
+    <path d="M2.25 8h11.5" />
+    <path d="M8 2.25c1.9 1.7 2.95 3.6 2.95 5.75S9.9 12.05 8 13.75c-1.9-1.7-2.95-3.6-2.95-5.75S6.1 3.95 8 2.25z" />
+  </Icon>
+)
+
+/** Marca que algo se despliega: el chevron de siempre. */
+export const ChevronDownIcon = () => (
+  <Icon>
+    <path d="M4.25 6.25 8 10l3.75-3.75" />
   </Icon>
 )
 

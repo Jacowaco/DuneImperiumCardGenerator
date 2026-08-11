@@ -31,6 +31,13 @@ export const TITLE = {
   x: 42,
   startingX: 83,
   right: 706,
+  /**
+   * Límite derecho cuando hay costo de compra: el rombo mide su ancho por
+   * partida, y a la altura de la línea de base (74) su borde izquierdo cae en
+   * x=616 (medido en `card-cost.png`, alpha > 10). Se deja un margen para que
+   * el texto no roce el rombo.
+   */
+  costRight: 600,
   baseline: 74,
   capHeight: 37,
   smallCapRatio: 26 / 37,

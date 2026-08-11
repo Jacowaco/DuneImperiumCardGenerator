@@ -12,13 +12,14 @@ export function CardTitle({ card }: { card: Card }) {
   const band = useCardImage(card.starting ? nameBandStartingUrl : nameBandUrl)
 
   const x = card.starting ? TITLE.startingX : TITLE.x
+  const right = card.cost !== null ? TITLE.costRight : TITLE.right
   const { glyphs } = layoutSmallCaps(card.title, {
     capHeight: TITLE.capHeight,
     smallCapRatio: TITLE.smallCapRatio,
     letterSpacing: TITLE.letterSpacing,
     wordSpacing: TITLE.wordSpacing,
     weight: TITLE.weight,
-    maxWidth: TITLE.right - x,
+    maxWidth: right - x,
   })
 
   return (

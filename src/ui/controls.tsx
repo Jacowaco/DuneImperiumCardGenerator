@@ -5,22 +5,47 @@ import type {
   ReactNode,
   SelectHTMLAttributes,
 } from 'react'
-import { MinusIcon, PlusIcon } from './icons'
+import { InfoIcon, MinusIcon, PlusIcon } from './icons'
 
 /**
  * Bloque del panel. El título es opcional: adentro de un diálogo lo pone el
  * encabezado del diálogo, y repetirlo sería leer dos veces lo mismo.
+ *
+ * `hint` es para una aclaración que no hace falta leer siempre: va al lado
+ * del título como una marca "(?)", con el texto en el `title` nativo.
  */
-export function Section({ title, children }: { title?: string; children: ReactNode }) {
+export function Section({
+  title,
+  hint,
+  action,
+  children,
+}: {
+  title?: string
+  hint?: string
+  action?: ReactNode
+  children: ReactNode
+}) {
   return (
     <section className="border-b border-zinc-800 px-5 py-5 last:border-b-0">
       {title && (
-        <h2 className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
-          {title}
-        </h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+            {title}
+            {hint && <HintMark label={hint} />}
+          </h2>
+          {action}
+        </div>
       )}
       <div className="flex flex-col gap-3">{children}</div>
     </section>
+  )
+}
+
+function HintMark({ label }: { label: string }) {
+  return (
+    <span title={label} tabIndex={0} className="shrink-0 text-zinc-500 normal-case">
+      <InfoIcon />
+    </span>
   )
 }
 
@@ -177,11 +202,13 @@ export function MultiChoice<T extends string>({
               <img
                 src={option.icon}
                 alt=""
-                // Ancho fijo con object-contain: los emblemas tienen alturas
-                // distintas, y si no cada uno ocuparía un ancho diferente.
-                className={`shrink-0 object-contain transition-opacity ${
-                  iconsOnly ? 'h-7 w-9' : 'h-5 w-7'
-                } ${selected ? '' : 'opacity-80'}`}
+                // Sólo ancho fijo, alto automático: los emblemas salen de una
+                // hoja recortada al contenido de cada uno, así que comparten
+                // ancho pero no alto. Fijar los dos (como antes) hacía que
+                // `object-contain` escalara cada emblema a una proporción
+                // distinta para llenar la caja, y quedaban de tamaños
+                // dispares entre sí pese a medir lo mismo en el arte.
+                className={`h-auto w-7 shrink-0 transition-opacity ${selected ? '' : 'opacity-80'}`}
               />
             )}
             {!iconsOnly && <span className="truncate">{option.label}</span>}
@@ -234,7 +261,7 @@ export function NumberField({
               setCustomOpen(false)
               onChange(option)
             }}
-            className={`flex size-8 shrink-0 items-center justify-center rounded-md text-xs transition ${
+            className={`flex size-5 shrink-0 items-center justify-center rounded text-[10px] transition ${
               selected
                 ? 'bg-sand-500 font-medium text-zinc-950'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
@@ -246,14 +273,14 @@ export function NumberField({
       })}
 
       {showInput ? (
-        <div className="flex h-8 shrink-0 items-center overflow-hidden rounded-md border border-zinc-700 bg-zinc-900 focus-within:border-sand-500">
+        <div className="flex h-5 shrink-0 items-center overflow-hidden rounded border border-zinc-700 bg-zinc-900 focus-within:border-sand-500">
           <button
             type="button"
             title={decreaseLabel}
             aria-label={decreaseLabel}
             disabled={value <= 0}
             onClick={() => onChange(Math.max(0, value - 1))}
-            className="flex size-8 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+            className="flex size-5 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30 [&_svg]:size-3"
           >
             <MinusIcon />
           </button>
@@ -264,7 +291,7 @@ export function NumberField({
             autoFocus={customOpen}
             value={value}
             onChange={(event) => onChange(Math.max(0, Math.min(99, Number(event.target.value))))}
-            className="w-8 shrink-0 bg-transparent text-center text-sm text-zinc-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="w-5 shrink-0 bg-transparent text-center text-[10px] text-zinc-100 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <button
             type="button"
@@ -272,7 +299,7 @@ export function NumberField({
             aria-label={increaseLabel}
             disabled={value >= 99}
             onClick={() => onChange(Math.min(99, value + 1))}
-            className="flex size-8 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30"
+            className="flex size-5 shrink-0 items-center justify-center text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:pointer-events-none disabled:opacity-30 [&_svg]:size-3"
           >
             <PlusIcon />
           </button>
@@ -283,7 +310,7 @@ export function NumberField({
           title={otherLabel}
           aria-label={otherLabel}
           onClick={() => setCustomOpen(true)}
-          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-zinc-800 text-zinc-300 transition hover:bg-zinc-700"
+          className="flex size-5 shrink-0 items-center justify-center rounded bg-zinc-800 text-[10px] text-zinc-300 transition hover:bg-zinc-700"
         >
           …
         </button>

@@ -40,10 +40,10 @@ export type CardArt = {
 export type Faction = 'emperor' | 'spacing-guild' | 'bene-gesserit' | 'fremen'
 
 export const FACTIONS: Record<Faction, Record<Language, string>> = {
-  emperor: { es: 'Emperador', en: 'Emperor' },
-  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild' },
-  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit' },
-  fremen: { es: 'Fremen', en: 'Fremen' },
+  emperor: { es: 'Emperador', en: 'Emperor', pt: 'Imperador' },
+  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild', pt: 'Guilda Espacial' },
+  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit', pt: 'Bene Gesserit' },
+  fremen: { es: 'Fremen', en: 'Fremen', pt: 'Fremen' },
 }
 
 /**
@@ -73,9 +73,9 @@ export type PlayRows = (typeof PLAY_ROWS)[number]
  * la caja, no cómo se elige: lo que se ve es una caja más chica o más grande.
  */
 export const PLAY_ROWS_LABELS: Record<PlayRows, Record<Language, string>> = {
-  1: { es: 'Chica', en: 'Small' },
-  2: { es: 'Media', en: 'Medium' },
-  3: { es: 'Grande', en: 'Large' },
+  1: { es: 'Chica', en: 'Small', pt: 'Pequena' },
+  2: { es: 'Media', en: 'Medium', pt: 'Média' },
+  3: { es: 'Grande', en: 'Large', pt: 'Grande' },
 }
 
 export const FACTION_IDS = Object.keys(FACTIONS) as Faction[]

@@ -28,7 +28,7 @@ type Strings = {
     defaultFileName: string
     language: string
   }
-  tabs: { art: string; card: string; rules: string }
+  tabs: { front: string; rules: string }
   doneBanner: { locked: string; unlock: string }
   doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
   dialogs: { icons: string; print: string }
@@ -78,14 +78,10 @@ type Strings = {
   }
   rulesPanel: {
     agentIcons: string
-    style: string
     playTurn: string
-    boxHeight: string
     autoAdjust: string
-    autoHint: (label: string) => string
     agentSilhouette: string
     reveal: string
-    alwaysBothHint: string
   }
   artPanel: {
     image: string
@@ -93,7 +89,6 @@ type Strings = {
     chooseImage: string
     remove: string
     dragHint: string
-    frame: string
     zoom: string
     fit: string
     center: string
@@ -157,7 +152,7 @@ const STRINGS: Record<Language, Strings> = {
       defaultFileName: 'carta',
       language: 'Idioma',
     },
-    tabs: { art: 'Imagen', card: 'Encabezado', rules: 'Reglas' },
+    tabs: { front: 'Identidad', rules: 'Reglas' },
     doneBanner: {
       locked: 'Carta terminada, bloqueada para no tocarla de más.',
       unlock: 'Desbloquear',
@@ -185,7 +180,7 @@ const STRINGS: Record<Language, Strings> = {
     cardPanel: {
       name: 'Nombre',
       namePlaceholder: 'Duncan Idaho',
-      startingCard: 'Carta de mazo inicial',
+      startingCard: 'Inicial',
       faction: 'Facción',
       factionHint: 'Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas.',
       cost: 'Costo de compra',
@@ -215,15 +210,10 @@ const STRINGS: Record<Language, Strings> = {
     },
     rulesPanel: {
       agentIcons: 'Iconos de agente',
-      style: 'Estilo',
       playTurn: 'Turno de agente',
-      boxHeight: 'Alto de la caja',
-      autoAdjust: 'Ajuste automático',
-      autoHint: (label) => `Se ajusta sola según el contenido: por ahora, ${label.toLowerCase()}.`,
+      autoAdjust: 'Alto automático',
       agentSilhouette: 'Silueta del agente',
       reveal: 'Revelación',
-      alwaysBothHint:
-        'Las dos cajas van siempre, aunque queden vacías: toda carta tiene turno de agente y banda de revelación.',
     },
     artPanel: {
       image: 'Imagen',
@@ -231,7 +221,6 @@ const STRINGS: Record<Language, Strings> = {
       chooseImage: 'Elegir imagen…',
       remove: 'Quitar',
       dragHint: 'También podés arrastrar un archivo sobre la carta.',
-      frame: 'Encuadre',
       zoom: 'Zoom',
       fit: 'Ajustar',
       center: 'Centrar',
@@ -309,7 +298,7 @@ const STRINGS: Record<Language, Strings> = {
       defaultFileName: 'card',
       language: 'Language',
     },
-    tabs: { art: 'Image', card: 'Header', rules: 'Rules' },
+    tabs: { front: 'Identity', rules: 'Rules' },
     doneBanner: {
       locked: "Finished card, locked so it doesn't get edited by mistake.",
       unlock: 'Unlock',
@@ -337,7 +326,7 @@ const STRINGS: Record<Language, Strings> = {
     cardPanel: {
       name: 'Name',
       namePlaceholder: 'Duncan Idaho',
-      startingCard: 'Starting deck card',
+      startingCard: 'Starting',
       faction: 'Faction',
       factionHint: 'They stack downward in this same order, no matter what order you pick them in.',
       cost: 'Acquire Cost',
@@ -367,15 +356,10 @@ const STRINGS: Record<Language, Strings> = {
     },
     rulesPanel: {
       agentIcons: 'Agent Icons',
-      style: 'Style',
       playTurn: 'Agent Turn',
-      boxHeight: 'Box Height',
-      autoAdjust: 'Auto-adjust',
-      autoHint: (label) => `Adjusts itself to fit the content: currently, ${label.toLowerCase()}.`,
+      autoAdjust: 'Auto height',
       agentSilhouette: 'Agent Silhouette',
       reveal: 'Reveal',
-      alwaysBothHint:
-        'Both boxes are always there, even when empty: every card has an agent turn and a reveal band.',
     },
     artPanel: {
       image: 'Image',
@@ -383,7 +367,6 @@ const STRINGS: Record<Language, Strings> = {
       chooseImage: 'Choose image…',
       remove: 'Remove',
       dragHint: 'You can also drag a file onto the card.',
-      frame: 'Framing',
       zoom: 'Zoom',
       fit: 'Fit',
       center: 'Center',
@@ -444,6 +427,152 @@ const STRINGS: Record<Language, Strings> = {
       'card-canvas-failed': () => "Couldn't prepare the card canvas.",
     },
   },
+  pt: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      unsavedName: 'Baralho não salvo',
+      renameTitle: 'Renomear o baralho',
+      noNativeFsTooltip:
+        'Aqui não é possível sobrescrever arquivos, então «Salvar» e «Salvar como…» baixam uma cópia nova. A API só existe no Chrome e no Edge, e não na prévia incorporada do editor: abrindo o app numa janela do navegador, «Salvar» grava no arquivo aberto sem perguntar.',
+      noNativeFsBadge: 'Aqui, «Salvar» baixa uma cópia',
+      open: 'Abrir…',
+      save: 'Salvar',
+      saveAs: 'Salvar como…',
+      exporting: 'Exportando…',
+      export: 'Exportar PNG',
+      defaultFileName: 'carta',
+      language: 'Idioma',
+    },
+    tabs: { front: 'Identidade', rules: 'Regras' },
+    doneBanner: {
+      locked: 'Carta finalizada, bloqueada para não ser alterada por engano.',
+      unlock: 'Desbloquear',
+    },
+    doneBadge: {
+      done: '✓ Finalizada',
+      markDone: 'Marcar como finalizada',
+      reopenTitle: 'Finalizada — clique para reabrir',
+      markDoneTitle: 'Marcar como finalizada',
+    },
+    dialogs: { icons: 'Ícones próprios', print: 'Imprimir o baralho' },
+    deckFooter: { icons: 'Ícones…', print: 'Imprimir…' },
+    gallery: {
+      title: 'Baralho',
+      newCardTitle: 'Carta nova',
+      newButton: 'Nova',
+      unnamed: 'Sem nome',
+      duplicate: 'Duplicar',
+      remove: 'Excluir',
+      doneStamp: 'Finalizada',
+      reopenTitle: 'Finalizada — clique para reabrir',
+      markDoneTitle: 'Marcar como finalizada',
+      markPendingAria: 'Marcar como pendente',
+    },
+    cardPanel: {
+      name: 'Nome',
+      namePlaceholder: 'Duncan Idaho',
+      startingCard: 'Inicial',
+      faction: 'Facção',
+      factionHint: 'Empilham para baixo nessa mesma ordem, não importa em que ordem você as escolha.',
+      cost: 'Custo de aquisição',
+      hasCost: 'Tem custo',
+      persuasion: 'Persuasão',
+      purchaseBenefit: 'Bônus de aquisição',
+      none: 'Nenhum',
+      custom: (label) => `Próprio · ${label}`,
+      amount: 'Quantidade',
+      otherValue: 'Outro valor',
+    },
+    contentEditor: {
+      empty: 'Caixa vazia.',
+      textPlaceholder: 'Texto…',
+      lineBreak: '— quebra de linha —',
+      deletedIcon: 'Ícone excluído',
+      close: 'Fechar',
+      addIcon: 'Ícone…',
+      addText: 'Texto',
+      addLineBreak: 'Quebra de linha',
+      remove: 'Remover',
+      custom: 'Próprios',
+      core: 'Dune Imperium',
+      influence: 'Influência por facção',
+      decrease: (label) => `Diminuir ${label}`,
+      increase: (label) => `Aumentar ${label}`,
+    },
+    rulesPanel: {
+      agentIcons: 'Ícones de agente',
+      playTurn: 'Turno de agente',
+      autoAdjust: 'Altura automática',
+      agentSilhouette: 'Silhueta do agente',
+      reveal: 'Revelação',
+    },
+    artPanel: {
+      image: 'Imagem',
+      changeImage: 'Trocar imagem…',
+      chooseImage: 'Escolher imagem…',
+      remove: 'Remover',
+      dragHint: 'Você também pode arrastar um arquivo sobre a carta.',
+      zoom: 'Zoom',
+      fit: 'Ajustar',
+      center: 'Centralizar',
+      dragZoomHint: 'Arraste a imagem sobre a carta para movê-la; a roda faz zoom.',
+      placeholder: 'Arraste uma imagem aqui\nou toque para escolher',
+    },
+    iconPanel: {
+      emptyHint:
+        'Para regras que o jogo não traz. Ficam disponíveis em todos os seus baralhos e aparecem no final do seletor de ícones.',
+      nameLabel: (label) => `Nome de ${label}`,
+      heightTitle: 'Altura na carta, em % do ícone do jogo',
+      heightLabel: (label) => `Altura de ${label} na carta, em % do ícone do jogo`,
+      decreaseHeightLabel: (label) => `Diminuir ${label}`,
+      increaseHeightLabel: (label) => `Aumentar ${label}`,
+      showNumberText: 'Número',
+      showNumberLabel: (label) => `Mostrar número sobre ${label}`,
+      numberColorTitle: 'Cor do número',
+      numberColorLabel: (label) => `Cor do número de ${label}`,
+      upload: 'Enviar ícone…',
+      hint: 'PNGs com transparência, recortados automaticamente ao conteúdo. O % é a altura na carta comparada a um ícone do jogo. Ficam salvos neste navegador, e o baralho leva junto os que suas cartas usam.',
+      confirmRemove: (label, used) =>
+        `«${label}» está em ${pluralCards(used, 'pt')} deste baralho. Se você excluir, essas cartas o perdem.`,
+      removeLabel: (label) => `Excluir ${label}`,
+    },
+    printPanel: {
+      perSheetSuffix: 'por folha.',
+      fitsOnOne: 'O baralho cabe em uma.',
+      spansPages: (pages) => `O baralho ocupa ${pages}.`,
+      bleedToggle: 'Sangria de 3 mm (gráfica)',
+      bleedOnHint:
+        'Cada carta é desenhada 3 mm maior em preto de cada lado e cortada sozinha: se a guilhotina desviar, sai preto em vez de uma borda branca. Cabem menos por folha.',
+      bleedOffHint:
+        'As cartas ficam coladas e compartilham o corte, então um corte serve para duas. Cabem mais por folha, mas qualquer desvio aparece.',
+      buildingPdf: 'Montando o PDF…',
+      downloadPdf: 'Baixar PDF para imprimir',
+      pdfSizeHintBefore:
+        'O PDF leva o tamanho da folha embutido, então imprime em escala real. Mesmo assim, na caixa de diálogo de impressão escolha ',
+      pdfSizeHintBold: '100%',
+      pdfSizeHintAfter: ' ou «tamanho real», nunca «ajustar à página».',
+      cardSizeHint: (w, h) => `Cada carta solta sai em ${w} × ${h} px — 63,5 × 88 mm ao dobro de 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Não foi possível abrir o arquivo.',
+      artFailed: 'Não foi possível carregar a imagem.',
+      sheetFailed: 'Não foi possível montar a folha.',
+      iconFailed: 'Não foi possível carregar o ícone.',
+      permissionDenied: (fileName) =>
+        `O Chrome pede permissão para gravar em ${fileName}. Aperte Salvar de novo e escolha «Editar arquivo», ou use Salvar como… para escolher outro.`,
+      'not-a-card': () => 'O arquivo não é uma carta de Dune: Imperium.',
+      'no-cards': () => 'O arquivo não tem nenhuma carta.',
+      'empty-image': ({ name }) => `A imagem está vazia: ${name}`,
+      'read-failed': ({ name }) => `Não foi possível ler o arquivo: ${name}`,
+      'invalid-image': ({ name }) => `Não é uma imagem válida: ${name}`,
+      'canvas-failed': () => 'O navegador não conseguiu preparar a imagem.',
+      'png-failed': () => 'O navegador não conseguiu gerar o PNG.',
+      'sheet-canvas-failed': () => 'O navegador não conseguiu preparar a folha.',
+      'sheet-read-failed': () => 'O navegador não conseguiu ler a folha.',
+      'card-canvas-failed': () => 'Não foi possível preparar a tela da carta.',
+    },
+  },
 }
 
 /** El texto de una cantidad de cartas, con el número adelante. */
@@ -461,6 +590,7 @@ export function cardWord(n: number, language: Language): string {
 /** Cuántas cartas están marcadas como terminadas, con el número adelante. */
 export function pluralDone(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 finished' : `${n} finished`
+  if (language === 'pt') return n === 1 ? '1 finalizada' : `${n} finalizadas`
   return n === 1 ? '1 terminada' : `${n} terminadas`
 }
 

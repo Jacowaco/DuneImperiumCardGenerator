@@ -10,7 +10,7 @@ import {
 } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
-import { Field, Hint, MultiChoice, NumberField, Section, Select, TextInput, Toggle } from './controls'
+import { Field, MultiChoice, NumberField, Section, Select, TextInput, Toggle } from './controls'
 
 type Props = {
   card: Card
@@ -39,28 +39,29 @@ export function CardPanel({ card, onChange }: Props) {
 
   return (
     <>
-      {/* Sin título: sería "Nombre" arriba de un campo que ya se llama así, y
-          el interruptor de abajo se explica solo. */}
-      <Section>
-        <Field label={t.cardPanel.name}>
-          <TextInput
-            value={card.title}
-            placeholder={t.cardPanel.namePlaceholder}
-            onChange={(event) => onChange({ title: event.target.value })}
+      <Section
+        title={t.cardPanel.name}
+        action={
+          <Toggle
+            label={t.cardPanel.startingCard}
+            checked={card.starting}
+            onChange={(starting) => onChange({ starting })}
           />
-        </Field>
-
-        <Toggle
-          label={t.cardPanel.startingCard}
-          checked={card.starting}
-          onChange={(starting) => onChange({ starting })}
+        }
+      >
+        <TextInput
+          value={card.title}
+          placeholder={t.cardPanel.namePlaceholder}
+          onChange={(event) => onChange({ title: event.target.value })}
         />
       </Section>
 
-      <Section title={t.cardPanel.faction}>
+      <Section title={t.cardPanel.faction} hint={t.cardPanel.factionHint}>
         <MultiChoice<Faction>
           values={card.factions}
           onChange={(factions) => onChange({ factions })}
+          columns={4}
+          iconsOnly
           /*
             El emblema va con su placa negra y no pelado: el botón está pintado
             del color de la facción y el emblema solo se pierde ahí —medidos,
@@ -75,7 +76,6 @@ export function CardPanel({ card, onChange }: Props) {
             icon: AGENT_BADGE_URLS[id],
           }))}
         />
-        <Hint>{t.cardPanel.factionHint}</Hint>
       </Section>
 
       <Section title={t.cardPanel.cost}>

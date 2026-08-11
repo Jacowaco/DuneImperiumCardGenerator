@@ -29,14 +29,14 @@ import { CardGallery } from './ui/CardGallery'
 import { CardPanel } from './ui/CardPanel'
 import { Button } from './ui/controls'
 import { Dialog } from './ui/Dialog'
-import { CardIcon, DiamondIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { DiamondIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { IconPanel } from './ui/IconPanel'
 import { PrintPanel } from './ui/PrintPanel'
 import { RulesPanel } from './ui/RulesPanel'
 import { Tabs } from './ui/Tabs'
 import { TopBar } from './ui/TopBar'
 
-type TabId = 'art' | 'card' | 'rules'
+type TabId = 'front' | 'rules'
 
 /** Lo del mazo se abre en diálogo: se usa cada tanto y no gana lugar fijo. */
 type DialogId = 'icons' | 'print'
@@ -46,12 +46,11 @@ export function App() {
   const t = stringsFor(language)
 
   /**
-   * El orden es el de armar una carta: primero la imagen, que es lo que la
-   * hace ser algo, y por eso también es la pestaña con la que arranca.
+   * El orden es el de armar una carta: primero qué es —imagen, nombre,
+   * facción y costo—, y por eso también es la pestaña con la que arranca.
    */
   const TABS = [
-    { value: 'art' as const, label: t.tabs.art, icon: <ImageIcon /> },
-    { value: 'card' as const, label: t.tabs.card, icon: <CardIcon /> },
+    { value: 'front' as const, label: t.tabs.front, icon: <ImageIcon /> },
     { value: 'rules' as const, label: t.tabs.rules, icon: <RulesIcon /> },
   ]
 
@@ -65,7 +64,7 @@ export function App() {
     return saved ?? emptyDeck()
   })
   const [selected, setSelected] = useState(0)
-  const [tab, setTab] = useState<TabId>('art')
+  const [tab, setTab] = useState<TabId>('front')
   const [dialog, setDialog] = useState<DialogId | null>(null)
   const [exporting, setExporting] = useState(false)
   const [sheetExporting, setSheetExporting] = useState(false)
@@ -293,7 +292,7 @@ export function App() {
         />
 
         <div className="flex min-h-0 flex-1">
-          <aside className="flex w-[336px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
+          <aside className="flex w-[340px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
             {card.done && (
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-900/40 bg-emerald-950/20 px-4 py-2.5">
                 <p className="text-xs leading-relaxed text-emerald-400">{t.doneBanner.locked}</p>
@@ -313,15 +312,16 @@ export function App() {
               inert={card.done}
               className={`min-h-0 flex-1 overflow-y-auto ${card.done ? 'opacity-50' : ''}`}
             >
-              {tab === 'card' && <CardPanel card={card} onChange={patchCard} />}
-
-              {tab === 'art' && (
-                <ArtPanel
-                  art={card.art}
-                  onPick={() => fileInputRef.current?.click()}
-                  onTransform={setTransform}
-                  onClear={() => patchCard({ art: null })}
-                />
+              {tab === 'front' && (
+                <>
+                  <ArtPanel
+                    art={card.art}
+                    onPick={() => fileInputRef.current?.click()}
+                    onTransform={setTransform}
+                    onClear={() => patchCard({ art: null })}
+                  />
+                  <CardPanel card={card} onChange={patchCard} />
+                </>
               )}
 
               {tab === 'rules' && <RulesPanel card={card} onChange={patchCard} />}

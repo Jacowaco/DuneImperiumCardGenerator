@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useT } from '../i18n/strings'
 import { LANGUAGE_IDS, LANGUAGE_NAMES, type Language } from '../model/language'
 import { supportsFileSystem } from '../model/files'
 import { deckName as fileDeckName } from '../model/storage'
 import { Button } from './controls'
-import { DownloadIcon, EditIcon, FolderIcon, SaveIcon } from './icons'
+import { ChevronDownIcon, DownloadIcon, EditIcon, FolderIcon, GlobeIcon, SaveIcon } from './icons'
 
 type Props = {
   /** Nombre que eligió el usuario, o null si nunca lo tocó. */
@@ -70,6 +70,7 @@ export function TopBar({
   return (
     <header className="flex shrink-0 items-center gap-3 border-b border-zinc-800 bg-zinc-950 px-4 py-2.5">
       <div className="flex shrink-0 items-baseline gap-2">
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="size-5 self-center rounded-sm" />
         <h1 className="text-sm font-semibold tracking-wide text-sand-100">{t.topBar.title}</h1>
         <span className="text-[10px] tracking-[0.2em] text-zinc-500 uppercase">
           {t.topBar.subtitle}
@@ -79,7 +80,7 @@ export function TopBar({
 
       <div className="h-5 w-px shrink-0 bg-zinc-800" />
 
-      <LanguageSwitch language={language} onChange={onLanguageChange} />
+      <LanguageMenu language={language} onChange={onLanguageChange} />
 
       <div className="h-5 w-px shrink-0 bg-zinc-800" />
 
@@ -166,32 +167,82 @@ export function TopBar({
  * Es una preferencia del navegador, no del mazo (`src/model/language.ts`), así
  * que va en la barra de arriba junto al resto de lo que no es de una carta en
  * particular.
+ *
+ * Es un menú desplegable y no un grupo de botones —el diseño anterior— porque
+ * la lista de idiomas va a crecer: dos entran cómodos en un grupo, pero cinco
+ * o seis no.
  */
-function LanguageSwitch({
+function LanguageMenu({
   language,
   onChange,
 }: {
   language: Language
   onChange: (language: Language) => void
 }) {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!ref.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
   return (
-    <div className="flex shrink-0 overflow-hidden rounded-md border border-zinc-800">
-      {LANGUAGE_IDS.map((id) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onChange(id)}
-          title={LANGUAGE_NAMES[id]}
-          aria-pressed={language === id}
-          className={`px-2 py-1.5 text-xs font-semibold uppercase transition-colors ${
-            language === id
-              ? 'bg-sand-500 text-zinc-950'
-              : 'bg-zinc-900 text-zinc-400 hover:text-zinc-100'
-          }`}
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        title={t.topBar.language}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900 px-2 py-1.5 text-xs font-semibold text-zinc-300 transition-colors hover:text-zinc-100"
+      >
+        <GlobeIcon />
+        {LANGUAGE_NAMES[language]}
+        <ChevronDownIcon />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label={t.topBar.language}
+          className="absolute top-full left-0 z-10 mt-1 min-w-full overflow-hidden rounded-md border border-zinc-800 bg-zinc-950 py-1 shadow-2xl shadow-black/60"
         >
-          {id}
-        </button>
-      ))}
+          {LANGUAGE_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="menuitemradio"
+              aria-checked={language === id}
+              onClick={() => {
+                onChange(id)
+                setOpen(false)
+              }}
+              className={`block w-full px-3 py-1.5 text-left text-xs whitespace-nowrap transition-colors ${
+                language === id
+                  ? 'bg-sand-500 font-medium text-zinc-950'
+                  : 'text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100'
+              }`}
+            >
+              {LANGUAGE_NAMES[id]}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

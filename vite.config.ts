@@ -4,6 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { version } from './package.json' with { type: 'json' }
 
 export default defineConfig({
+  // GitHub Pages sirve el proyecto en /<repo>/, no en la raíz. El build de
+  // escritorio (Tauri) y el dev server sí van en la raíz, así que el base
+  // path sólo cambia cuando el workflow de deploy pone esta variable.
+  base: process.env.GH_PAGES ? '/DuneImperiumCardGenerator/' : '/',
   plugins: [react(), tailwindcss()],
   define: {
     __APP_VERSION__: JSON.stringify(version),

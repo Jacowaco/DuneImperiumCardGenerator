@@ -1,15 +1,18 @@
 import type Konva from 'konva'
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 
+import { exportCardsPng } from './export/exportPngBatch'
 import { exportCardPng } from './export/exportPng'
 import type { PaperId } from './export/paper'
 import { exportPrintSheets } from './export/printSheet'
 import { describeError, stringsFor } from './i18n/strings'
 import { loadArtFromFile } from './model/art'
 import { emptyCard, type ArtTransform, type Card } from './model/card'
+import { mergeFactions, sameFactions, type CustomFaction } from './model/customFaction'
 import { mergeIcons, sameIcons, type CustomIcon } from './model/customIcon'
-import { buildIconLibrary, IconLibraryProvider } from './model/iconLibrary'
-import { adoptIcons, syncLibrary } from './model/iconStore'
+import { warmFactionAgentIcons, warmFactionInfluenceIcons, warmFactionPickerBadges } from './model/factionArt'
+import { buildFactionLibrary, FactionLibraryProvider } from './model/factionLibrary'
+import { adoptFactions, syncFactionLibrary } from './model/factionStore'
 import {
   isCancelled,
   openDeck,
@@ -19,17 +22,21 @@ import {
   suggestedName,
   type OpenedDeck,
 } from './model/files'
+import { buildIconLibrary, IconLibraryProvider } from './model/iconLibrary'
+import { adoptIcons, syncLibrary } from './model/iconStore'
 import { LanguageProvider, useLanguageState } from './model/language'
 import { recallDeckFile, rememberDeckFile } from './model/recentFile'
-import { emptyDeck, loadAutosave, packIcons, saveAutosave, type Deck } from './model/storage'
+import { emptyDeck, loadAutosave, packFactions, packIcons, saveAutosave, type Deck } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
 import { CardGallery } from './ui/CardGallery'
+import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
-import { Button } from './ui/controls'
+import { Button, Toggle } from './ui/controls'
 import { Dialog } from './ui/Dialog'
-import { DiamondIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { BannerIcon, DiamondIcon, DownloadIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { FactionPanel } from './ui/FactionPanel'
 import { IconPanel } from './ui/IconPanel'
 import { PrintPanel } from './ui/PrintPanel'
 import { RulesPanel } from './ui/RulesPanel'
@@ -39,7 +46,21 @@ import { TopBar } from './ui/TopBar'
 type TabId = 'front' | 'rules'
 
 /** Lo del mazo se abre en diálogo: se usa cada tanto y no gana lugar fijo. */
-type DialogId = 'icons' | 'print'
+type DialogId = 'icons' | 'factions' | 'print'
+
+/** Un punto del historial de deshacer: el mazo y qué carta estaba abierta. */
+type HistoryPoint = { deck: Deck; selected: number }
+
+/** Cuántos pasos guarda el historial. El mazo no se clona —las ediciones ya
+ *  son inmutables—, así que guardar más no pesa: es sólo la referencia. */
+const HISTORY_LIMIT = 100
+
+/**
+ * Cambios seguidos con la misma `coalesceKey` (arrastrar la imagen, escribir
+ * en un campo) no abren un paso nuevo mientras no pase esta pausa: si no,
+ * deshacer un renglón de texto lo haría letra por letra.
+ */
+const COALESCE_MS = 700
 
 export function App() {
   const { language, setLanguage } = useLanguageState()
@@ -68,6 +89,7 @@ export function App() {
   const [dialog, setDialog] = useState<DialogId | null>(null)
   const [exporting, setExporting] = useState(false)
   const [sheetExporting, setSheetExporting] = useState(false)
+  const [cardsExporting, setCardsExporting] = useState(false)
 
   // Cómo se imprime es una preferencia del que imprime, no del mazo: no se
   // guarda en el archivo ni viaja con él.
@@ -81,16 +103,33 @@ export function App() {
   const [file, setFile] = useState<Pick<OpenedDeck, 'handle' | 'name'> | null>(null)
   const [dirty, setDirty] = useState(false)
 
+  // Deshacer/rehacer: una pila de mazos anteriores y una de los que se
+  // deshicieron, para poder rehacerlos. `coalesceRef` es lo que evita que
+  // arrastrar la imagen o escribir un campo abran un paso por cada frame o
+  // cada tecla — ver `mutate`.
+  const [past, setPast] = useState<HistoryPoint[]>([])
+  const [future, setFuture] = useState<HistoryPoint[]>([])
+  const coalesceRef = useRef<{ key: string; time: number } | null>(null)
+
   // Los iconos propios son del usuario y no del mazo: una sola lista, guardada
   // en el navegador y disponible en todos los mazos. El archivo del mazo se
   // lleva adentro los que sus cartas usan, para seguir abriendo igual en otra
   // máquina, pero la lista no se maneja desde ahí.
   const [myIcons, setMyIcons] = useState<CustomIcon[]>([])
+  // El toggle del pie de la galería: si el próximo Guardar/Guardar como suma
+  // las bibliotecas enteras (iconos y facciones propias) al archivo, no sólo
+  // lo que las cartas usan.
+  const [includeLibrary, setIncludeLibrary] = useState(false)
+
+  // Mismo patrón que los iconos propios: una lista del usuario, guardada en
+  // el navegador y disponible en todos los mazos.
+  const [myFactions, setMyFactions] = useState<CustomFaction[]>([])
 
   useEffect(() => {
     // El mazo recuperado del autoguardado puede traer iconos que la biblioteca
     // todavía no tiene: es la misma adopción que al abrir un archivo.
     void adoptIcons(deck.icons).then(setMyIcons)
+    void adoptFactions(deck.factions).then(setMyFactions)
     // Sólo al arrancar; después la biblioteca la mueve el panel.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -100,11 +139,43 @@ export function App() {
   // El catálogo que ven el render y los paneles: la biblioteca entera, más lo
   // que traiga el mazo abierto y todavía no se haya adoptado.
   const allIcons = useMemo(() => mergeIcons(deck.icons, myIcons), [deck.icons, myIcons])
-  const library = useMemo(() => buildIconLibrary(allIcons, language), [allIcons, language])
+  const allFactions = useMemo(() => mergeFactions(deck.factions, myFactions), [deck.factions, myFactions])
 
-  // El mazo carga los iconos que sus cartas usan, para que guardar sea copiar
-  // el objeto y nada más. No es un cambio del usuario, así que va con `setDeck`
-  // y no con `mutate`: no puede marcar el mazo como sin guardar.
+  // Los rombos de influencia, la placa del selector y el icono de agente de
+  // una facción propia se generan en canvas (`factionArt.ts`) y no están
+  // listos apenas se sube el emblema. Este contador fuerza un rebuild de las
+  // dos bibliotecas cuando terminan de calentar —si no, nada de eso
+  // aparecería hasta que algo más disparara un rebuild.
+  const [factionArtReady, setFactionArtReady] = useState(0)
+  useEffect(() => {
+    let alive = true
+    void Promise.all([
+      warmFactionInfluenceIcons(allFactions),
+      warmFactionPickerBadges(allFactions),
+      warmFactionAgentIcons(allFactions),
+    ]).then(() => {
+      if (alive) setFactionArtReady((count) => count + 1)
+    })
+    return () => {
+      alive = false
+    }
+  }, [allFactions])
+
+  const factionLibrary = useMemo(
+    () => buildFactionLibrary(allFactions, language),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allFactions, language, factionArtReady],
+  )
+  const library = useMemo(
+    () => buildIconLibrary(allIcons, allFactions, language),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [allIcons, allFactions, language, factionArtReady],
+  )
+
+  // El mazo carga los iconos y las facciones que sus cartas usan, para que
+  // guardar sea copiar el objeto y nada más. No es un cambio del usuario, así
+  // que van con `setDeck` y no con `mutate`: no pueden marcar el mazo como
+  // sin guardar.
   useEffect(() => {
     setDeck((current) => {
       const packed = packIcons(current.cards, mergeIcons(current.icons, myIcons))
@@ -112,10 +183,22 @@ export function App() {
     })
   }, [myIcons, cards])
 
+  useEffect(() => {
+    setDeck((current) => {
+      const packed = packFactions(current.cards, mergeFactions(current.factions, myFactions))
+      return sameFactions(current.factions, packed) ? current : { ...current, factions: packed }
+    })
+  }, [myFactions, cards])
+
   /** Todo cambio de la biblioteca pasa por acá: se edita y se baja a la base. */
   const updateIcons = (next: CustomIcon[]) => {
     void syncLibrary(myIcons, next)
     setMyIcons(next)
+  }
+
+  const updateFactions = (next: CustomFaction[]) => {
+    void syncFactionLibrary(myFactions, next)
+    setMyFactions(next)
   }
 
   // El índice puede quedar fuera de rango al abrir un mazo más corto.
@@ -143,21 +226,115 @@ export function App() {
   const previewRef = useRef<HTMLDivElement | null>(null)
   const previewScale = useFitScale(previewRef)
 
-  /** Todo cambio del mazo pasa por acá, para no olvidarse de marcar sin guardar. */
-  const mutate = (update: (current: Deck) => Deck) => {
+  // El panel de la izquierda es donde se arrastran iconos hacia las cajas de
+  // contenido (`ContentEditor`), y una fila destino más abajo del alto
+  // visible queda inalcanzable: el autoscroll nativo del navegador durante un
+  // drag HTML5 no confía en contenedores `overflow-y-auto` anidados, sólo en
+  // la ventana. Se captura el evento en el contenedor (fase de captura, para
+  // que llegue aunque una fila más adentro frene la propagación) y se mueve
+  // `scrollTop` a mano cuando el puntero está cerca del borde de arriba o de
+  // abajo.
+  const panelScrollRef = useRef<HTMLDivElement | null>(null)
+  const AUTOSCROLL_MARGIN = 48
+  const AUTOSCROLL_MAX_SPEED = 16
+  const handlePanelAutoScroll = (event: DragEvent) => {
+    const el = panelScrollRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const distanceToTop = event.clientY - rect.top
+    const distanceToBottom = rect.bottom - event.clientY
+    if (distanceToTop < AUTOSCROLL_MARGIN) {
+      el.scrollTop -= AUTOSCROLL_MAX_SPEED * (1 - Math.max(distanceToTop, 0) / AUTOSCROLL_MARGIN)
+    } else if (distanceToBottom < AUTOSCROLL_MARGIN) {
+      el.scrollTop +=
+        AUTOSCROLL_MAX_SPEED * (1 - Math.max(distanceToBottom, 0) / AUTOSCROLL_MARGIN)
+    }
+  }
+
+  /**
+   * Todo cambio del mazo pasa por acá, para no olvidarse de marcar sin
+   * guardar y para llevar el historial de deshacer.
+   *
+   * `coalesceKey` agrupa cambios seguidos en un solo paso: si el anterior
+   * tenía la misma clave y pasó hace menos de `COALESCE_MS`, no se abre un
+   * paso nuevo — así arrastrar la imagen o escribir un campo queda como un
+   * solo "deshacer" y no uno por frame o por tecla.
+   */
+  const mutate = (update: (current: Deck) => Deck, opts?: { coalesceKey?: string }) => {
+    const key = opts?.coalesceKey ?? null
+    const now = Date.now()
+    const last = coalesceRef.current
+    const coalescing = key !== null && last !== null && last.key === key && now - last.time < COALESCE_MS
+    if (!coalescing) {
+      setPast((current) => [...current.slice(-HISTORY_LIMIT + 1), { deck, selected }])
+      setFuture([])
+    }
+    coalesceRef.current = key ? { key, time: now } : null
     setDeck(update)
     setDirty(true)
   }
 
   /** Atajo para lo más común, que es cambiar sólo las cartas. */
-  const mutateCards = (update: (current: Card[]) => Card[]) =>
-    mutate((current) => ({ ...current, cards: update(current.cards) }))
+  const mutateCards = (update: (current: Card[]) => Card[], opts?: { coalesceKey?: string }) =>
+    mutate((current) => ({ ...current, cards: update(current.cards) }), opts)
 
-  /** Aplica un cambio sólo a la carta abierta. */
+  /**
+   * Aplica un cambio sólo a la carta abierta. La clave de agrupamiento sale
+   * sola de qué campos toca el patch —"title", "art", "playContent"— y de la
+   * carta: no hace falta que cada campo de cada panel la piense.
+   */
   const patchCard = (patch: Partial<Card>) =>
-    mutateCards((current) =>
-      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    mutateCards(
+      (current) => current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+      { coalesceKey: `card:${index}:${Object.keys(patch).sort().join(',')}` },
     )
+
+  const canUndo = past.length > 0
+  const canRedo = future.length > 0
+
+  const undo = () => {
+    if (past.length === 0) return
+    const point = past[past.length - 1]
+    setPast((current) => current.slice(0, -1))
+    setFuture((current) => [{ deck, selected }, ...current])
+    setDeck(point.deck)
+    setSelected(point.selected)
+    setDirty(true)
+    coalesceRef.current = null
+  }
+
+  const redo = () => {
+    if (future.length === 0) return
+    const point = future[0]
+    setFuture((current) => current.slice(1))
+    setPast((current) => [...current, { deck, selected }])
+    setDeck(point.deck)
+    setSelected(point.selected)
+    setDirty(true)
+    coalesceRef.current = null
+  }
+
+  // El listener queda enganchado una sola vez; los refs le pasan la versión
+  // vigente de undo/redo sin tener que desenganchar y reenganchar en cada
+  // cambio de mazo, que con el drag de la imagen sería en cada frame.
+  const undoRef = useRef(undo)
+  const redoRef = useRef(redo)
+  undoRef.current = undo
+  redoRef.current = redo
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return
+      // Adentro de un diálogo (iconos propios, imprimir) el atajo es del
+      // diálogo, no del mazo.
+      if ((event.target as HTMLElement | null)?.closest('dialog[open]')) return
+      event.preventDefault()
+      if (event.shiftKey) redoRef.current()
+      else undoRef.current()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   const addCard = (newCard: Card) => {
     mutateCards((current) => [...current, newCard])
@@ -183,11 +360,18 @@ export function App() {
   const loadDeck = (opened: OpenedDeck) => {
     setDeck(opened.deck)
     setSelected(0)
+    // Abrir otro mazo no debería dejar deshacer hacia el que estaba antes.
+    setPast([])
+    setFuture([])
+    coalesceRef.current = null
     openFile({ handle: opened.handle, name: opened.name })
     setDirty(false)
-    // Los iconos que traiga el mazo pasan a ser tuyos: si no, un mazo que te
-    // pasaron los tendría sólo mientras esté abierto.
-    void adoptIcons(opened.deck.icons).then(setMyIcons)
+    // Los iconos y facciones que traiga el mazo pasan a ser tuyos: si no, un
+    // mazo que te pasaron los tendría sólo mientras esté abierto. Si además
+    // trae las bibliotecas empaquetadas, se adoptan junto con lo que usan las
+    // cartas.
+    void adoptIcons([...opened.deck.icons, ...opened.library]).then(setMyIcons)
+    void adoptFactions([...opened.deck.factions, ...opened.factionLibrary]).then(setMyFactions)
   }
 
   /** Cancelar el diálogo no es un error que valga la pena mostrar. */
@@ -201,7 +385,12 @@ export function App() {
   }
 
   const saveAs = async () => {
-    const saved = await saveDeckAs(deck, suggestedName(deck))
+    const saved = await saveDeckAs(
+      deck,
+      suggestedName(deck),
+      includeLibrary ? myIcons : undefined,
+      includeLibrary ? myFactions : undefined,
+    )
     openFile(saved)
     setDirty(false)
   }
@@ -211,7 +400,12 @@ export function App() {
   const handleSave = () =>
     file?.handle
       ? run(async () => {
-          const result = await saveDeck(deck, file.handle!)
+          const result = await saveDeck(
+            deck,
+            file.handle!,
+            includeLibrary ? myIcons : undefined,
+            includeLibrary ? myFactions : undefined,
+          )
 
           // Si el archivo ya no está, preguntar dónde guardar es lo único que
           // queda. Si lo que falta es el permiso, decirlo: abrir el diálogo en
@@ -264,6 +458,17 @@ export function App() {
     }
   }
 
+  const handleExportAllPng = async () => {
+    setCardsExporting(true)
+    try {
+      await exportCardsPng(deck, { language })
+    } catch (cause) {
+      setError(describeError(cause, language, t.errors.cardsFailed))
+    } finally {
+      setCardsExporting(false)
+    }
+  }
+
   const handleDrop = (event: DragEvent) => {
     event.preventDefault()
     setDragging(false)
@@ -274,25 +479,22 @@ export function App() {
 
   return (
     <LanguageProvider value={{ language, setLanguage }}>
+    <FactionLibraryProvider value={factionLibrary}>
     <IconLibraryProvider value={library}>
       <div className="flex h-full flex-col">
         <TopBar
-          name={deck.name}
-          fileName={file?.name ?? null}
-          dirty={dirty}
           exporting={exporting}
           language={language}
           onLanguageChange={setLanguage}
-          onRename={(name) => mutate((current) => ({ ...current, name: name || null }))}
-          onSave={handleSave}
-          onSaveAs={handleSaveAs}
-          onOpen={handleOpen}
-          onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
           onExport={() => void handleExport()}
         />
 
         <div className="flex min-h-0 flex-1">
-          <aside className="flex w-[340px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
+          <aside className="flex w-[360px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
             {card.done && (
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-900/40 bg-emerald-950/20 px-4 py-2.5">
                 <p className="text-xs leading-relaxed text-emerald-400">{t.doneBanner.locked}</p>
@@ -309,7 +511,9 @@ export function App() {
               opacidad es sólo la señal visual de lo mismo.
             */}
             <div
+              ref={panelScrollRef}
               inert={card.done}
+              onDragOverCapture={handlePanelAutoScroll}
               className={`min-h-0 flex-1 overflow-y-auto ${card.done ? 'opacity-50' : ''}`}
             >
               {tab === 'front' && (
@@ -392,14 +596,50 @@ export function App() {
             onToggleDone={toggleDone}
           >
             {/* Lo del mazo entero, al pie de la columna del mazo. */}
-            <div className="grid grid-cols-2 gap-2">
-              <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
-                <DiamondIcon />
-                {t.deckFooter.icons}
-              </Button>
-              <Button onClick={() => setDialog('print')} className="px-2 text-xs">
-                <PrinterIcon />
-                {t.deckFooter.print}
+            <div className="flex flex-col gap-3">
+              <div className="border-b border-zinc-800 pb-3">
+                <DeckFileControls
+                  name={deck.name}
+                  fileName={file?.name ?? null}
+                  dirty={dirty}
+                  onRename={(name) => mutate((current) => ({ ...current, name: name || null }))}
+                  onSave={handleSave}
+                  onSaveAs={handleSaveAs}
+                  onOpen={handleOpen}
+                  onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
+                />
+              </div>
+              {(myIcons.length > 0 || myFactions.length > 0) && (
+                <span title={t.deckFooter.includeLibraryTooltip}>
+                  <Toggle
+                    label={t.deckFooter.includeLibrary(myIcons.length, myFactions.length)}
+                    checked={includeLibrary}
+                    onChange={setIncludeLibrary}
+                  />
+                </span>
+              )}
+              <div className="grid grid-cols-3 gap-2">
+                <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
+                  <DiamondIcon />
+                  {t.deckFooter.icons}
+                </Button>
+                <Button onClick={() => setDialog('factions')} className="px-2 text-xs">
+                  <BannerIcon />
+                  {t.deckFooter.factions}
+                </Button>
+                <Button onClick={() => setDialog('print')} className="px-2 text-xs">
+                  <PrinterIcon />
+                  {t.deckFooter.print}
+                </Button>
+              </div>
+              <Button
+                variant="primary"
+                onClick={() => void handleExportAllPng()}
+                disabled={cardsExporting}
+                className="text-xs"
+              >
+                <DownloadIcon />
+                {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
               </Button>
             </div>
           </CardGallery>
@@ -411,6 +651,17 @@ export function App() {
               icons={myIcons}
               cards={cards}
               onChange={updateIcons}
+              onError={setError}
+            />
+          </Dialog>
+        )}
+
+        {dialog === 'factions' && (
+          <Dialog title={t.dialogs.factions} size="wide" onClose={() => setDialog(null)}>
+            <FactionPanel
+              factions={myFactions}
+              cards={cards}
+              onChange={updateFactions}
               onError={setError}
             />
           </Dialog>
@@ -442,6 +693,7 @@ export function App() {
         />
       </div>
     </IconLibraryProvider>
+    </FactionLibraryProvider>
     </LanguageProvider>
   )
 }

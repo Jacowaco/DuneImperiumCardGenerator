@@ -1,5 +1,6 @@
 import type { IconId } from '../assets/icons'
 import type { AgentIcon, AgentIconStyle } from '../assets/icons/agents'
+import type { CustomFactionId } from './customFaction'
 import type { CustomIconId } from './customIcon'
 import type { Language } from './language'
 
@@ -38,6 +39,22 @@ export type CardArt = {
  * que aparece antes en esta lista.
  */
 export type Faction = 'emperor' | 'spacing-guild' | 'bene-gesserit' | 'fremen'
+
+/**
+ * Una facción del juego base o una propia, subida por el usuario
+ * (`customFaction.ts`). Las dos se nombran igual desde `card.factions`; quién
+ * es cuál lo resuelve el catálogo (`factionLibrary.ts`), mismo patrón que
+ * `AnyIconId`.
+ */
+export type AnyFactionId = Faction | CustomFactionId
+
+/**
+ * Un icono de agente del reglamento o una facción propia, usada como espacio
+ * del tablero — mismo patrón que `AnyFactionId`: se resuelve por catálogo
+ * (`factionLibrary.ts` para las propias, `AGENT_ICON_URLS` para las del
+ * reglamento), no por tipo.
+ */
+export type AnyAgentIcon = AgentIcon | CustomFactionId
 
 export const FACTIONS: Record<Faction, Record<Language, string>> = {
   emperor: { es: 'Emperador', en: 'Emperor', pt: 'Imperador' },
@@ -104,10 +121,11 @@ export type Card = {
   starting: boolean
   /**
    * Una carta puede pertenecer a más de una facción. Las bandas se apilan
-   * hacia abajo siempre en el orden de `FACTION_IDS`, no en el que se
-   * eligieron.
+   * hacia abajo siempre en el orden de `FACTION_IDS` primero y las propias
+   * después, no en el que se eligieron — y nunca más de cuatro, porque no hay
+   * arte para una quinta banda (`FactionBand.tsx`).
    */
-  factions: Faction[]
+  factions: AnyFactionId[]
   /** null = carta sin costo de compra (las del mazo inicial, por ejemplo). */
   cost: number | null
   /** Icono del beneficio de compra. Si hay uno, se dibuja la cinta larga. */
@@ -117,8 +135,12 @@ export type Card = {
    * que salen vacíos del PSD (`iconTakesNumber`); para el resto se ignora.
    */
   purchaseBenefitAmount: number
-  /** Dónde se puede mandar el agente. Se apilan en la columna izquierda. */
-  agentIcons: AgentIcon[]
+  /**
+   * Dónde se puede mandar el agente. Se apilan en la columna izquierda, los
+   * del reglamento primero y las facciones propias después, y nunca más de
+   * `AGENT_ICON_IDS.length` (7): la columna tiene exactamente esas ranuras.
+   */
+  agentIcons: AnyAgentIcon[]
   agentIconStyle: AgentIconStyle
   /**
    * Alto de la caja del turno de agente, en filas de iconos. La caja siempre

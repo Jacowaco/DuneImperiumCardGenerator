@@ -67,6 +67,18 @@ export const DiamondIcon = () => (
   </Icon>
 )
 
+/**
+ * Facciones propias. Un estandarte y no el rombo de `DiamondIcon`: ese ya
+ * habla de iconos, y este botón es de otra cosa — la banda de arriba de la
+ * carta.
+ */
+export const BannerIcon = () => (
+  <Icon>
+    <path d="M4.25 2.25v11.5" />
+    <path d="M4.25 2.75h7.5l-2 2.75 2 2.75h-7.5z" />
+  </Icon>
+)
+
 /** La carta como objeto: el marco, el nombre arriba y la caja de abajo. */
 export const CardIcon = () => (
   <Icon>
@@ -134,6 +146,22 @@ export const BreakIcon = () => (
   <Icon>
     <path d="M12.25 4.25v4a1 1 0 0 1-1 1h-6" />
     <path d="M7.25 7.5 4.75 9.5l2.5 2" />
+  </Icon>
+)
+
+/** Deshacer: la flecha sube desde abajo y da la vuelta para atrás. */
+export const UndoIcon = () => (
+  <Icon>
+    <path d="M12.25 11.75v-4a1 1 0 0 0-1-1h-6" />
+    <path d="M7.25 8.5 4.75 6.5l2.5-2" />
+  </Icon>
+)
+
+/** Rehacer: la misma flecha, mirando para el otro lado. */
+export const RedoIcon = () => (
+  <Icon>
+    <path d="M3.75 11.75v-4a1 1 0 0 1 1-1h6" />
+    <path d="M8.75 8.5 11.25 6.5l-2.5-2" />
   </Icon>
 )
 

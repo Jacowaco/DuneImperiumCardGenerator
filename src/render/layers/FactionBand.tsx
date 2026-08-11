@@ -1,42 +1,62 @@
 import { Image as KonvaImage } from 'react-konva'
 
 import { factionBandUrl } from '../../assets/layers/factionBands'
-import { FACTIONS, FACTION_IDS, type Faction } from '../../model/card'
-import { pick, useLanguage } from '../../model/language'
+import { FACTION_IDS, type AnyFactionId, type Faction } from '../../model/card'
+import { isCustomFactionId } from '../../model/customFaction'
+import { useTintedFactionBand } from '../../model/factionArt'
+import { findFaction, useFactionLibrary } from '../../model/factionLibrary'
 import { FACTION_BAND } from '../constants'
 import { useCardImage } from '../imageCache'
 import { layoutSmallCaps } from '../text'
 import { TextShape } from './TextShape'
 
 /**
- * Apila una banda por facción hacia abajo, siempre en el orden canónico
- * (no en el orden en que las eligió el usuario), igual que la columna de
- * iconos de agente.
+ * Apila una banda por facción hacia abajo, siempre en el orden canónico —
+ * las built-in primero, en el orden de `FACTION_IDS`, y las propias después
+ * en el orden en que se eligieron — no en el orden en que se eligieron las
+ * built-in, igual que la columna de iconos de agente.
  *
- * Cada facción ocupa la posición que le toca según cuántas la preceden
- * *entre las elegidas* — no su posición absoluta en `FACTION_IDS` — así que
- * si sólo se eligen dos, la primera sigue siendo la ancha de arriba.
+ * `.slice(0, 4)` no es sólo defensa contra un archivo ajeno con más de
+ * cuatro: `FACTION_BAND.offsets`/`.widths` sólo tienen las claves 1–4,
+ * porque no hay arte para una quinta banda — el panel ya clampea la
+ * selección, pero un `.dune.json` editado a mano podría no respetarlo.
  */
-export function FactionBand({ factions }: { factions: Faction[] }) {
-  const ordered = FACTION_IDS.filter((id) => factions.includes(id))
+export function FactionBand({ factions }: { factions: AnyFactionId[] }) {
+  const library = useFactionLibrary()
+
+  const ordered = [
+    ...FACTION_IDS.filter((id) => factions.includes(id)),
+    ...factions.filter(
+      (id): id is Exclude<AnyFactionId, Faction> => isCustomFactionId(id) && Boolean(library[id]),
+    ),
+  ].slice(0, 4)
 
   return (
     <>
       {ordered.map((id, index) => {
         const rank = index + 1
-        return <Band key={id} faction={id} rank={rank} y={FACTION_BAND.offsets[rank]} />
+        return <Band key={id} id={id} rank={rank} y={FACTION_BAND.offsets[rank]} />
       })}
     </>
   )
 }
 
-function Band({ faction, rank, y }: { faction: Faction; rank: number; y: number }) {
-  const { language } = useLanguage()
-  const band = useCardImage(factionBandUrl(faction, rank))
+function Band({ id, rank, y }: { id: AnyFactionId; rank: number; y: number }) {
+  const library = useFactionLibrary()
+  const entry = findFaction(library, id)
+  const custom = isCustomFactionId(id)
+
+  // Los dos hooks se llaman siempre, sin ramificar cuál se ejecuta — sólo
+  // cambia el argumento. Ramificar la llamada misma según `custom` pisaría
+  // las reglas de hooks en cuanto algo reordenara los renders.
+  const tinted = useTintedFactionBand(custom ? entry?.color : undefined, rank)
+  const band = useCardImage(custom ? tinted : factionBandUrl(id as Faction, rank))
+
+  if (!entry) return null
 
   const width = FACTION_BAND.widths[rank]
   const maxWidth = width - (FACTION_BAND.text.x - 25) - FACTION_BAND.text.rightPadding
-  const { glyphs } = layoutSmallCaps(pick(FACTIONS[faction], language), {
+  const { glyphs } = layoutSmallCaps(entry.label, {
     capHeight: FACTION_BAND.text.capHeight,
     smallCapRatio: 1,
     letterSpacing: 1,

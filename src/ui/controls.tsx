@@ -249,7 +249,7 @@ export function NumberField({
   const showInput = customOpen || !options.includes(value)
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1">
       {options.map((option) => {
         const selected = value === option
 
@@ -261,7 +261,7 @@ export function NumberField({
               setCustomOpen(false)
               onChange(option)
             }}
-            className={`flex size-5 shrink-0 items-center justify-center rounded text-[10px] transition ${
+            className={`flex size-[1.46rem] shrink-0 items-center justify-center rounded text-xs transition ${
               selected
                 ? 'bg-sand-500 font-medium text-zinc-950'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
@@ -310,7 +310,7 @@ export function NumberField({
           title={otherLabel}
           aria-label={otherLabel}
           onClick={() => setCustomOpen(true)}
-          className="flex size-5 shrink-0 items-center justify-center rounded bg-zinc-800 text-[10px] text-zinc-300 transition hover:bg-zinc-700"
+          className="flex size-[1.46rem] shrink-0 items-center justify-center rounded bg-zinc-800 text-xs text-zinc-300 transition hover:bg-zinc-700"
         >
           …
         </button>

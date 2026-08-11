@@ -1,4 +1,5 @@
 import { AppError } from '../model/errors'
+import { buildFactionLibrary } from '../model/factionLibrary'
 import { buildIconLibrary } from '../model/iconLibrary'
 import type { Language } from '../model/language'
 import type { Deck } from '../model/storage'
@@ -129,7 +130,11 @@ export async function exportPrintSheets(
   const pages = sheetCount(cards.length, imposition)
 
   const pdf = createPdf(PAPERS[paper].widthMm, PAPERS[paper].heightMm)
-  const renderer = createCardRenderer(buildIconLibrary(deck.icons, language), language)
+  const renderer = createCardRenderer(
+    buildIconLibrary(deck.icons, deck.factions, language),
+    buildFactionLibrary(deck.factions, language),
+    language,
+  )
 
   try {
     for (let page = 0; page < pages; page++) {

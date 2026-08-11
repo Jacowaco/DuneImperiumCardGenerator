@@ -16,6 +16,18 @@ type Strings = {
   topBar: {
     title: string
     subtitle: string
+    exporting: string
+    export: string
+    defaultFileName: string
+    language: string
+    undo: string
+    redo: string
+  }
+  tabs: { front: string; rules: string }
+  doneBanner: { locked: string; unlock: string }
+  doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
+  dialogs: { icons: string; factions: string; print: string }
+  deckFooter: {
     unsavedName: string
     renameTitle: string
     noNativeFsTooltip: string
@@ -23,16 +35,14 @@ type Strings = {
     open: string
     save: string
     saveAs: string
-    exporting: string
-    export: string
-    defaultFileName: string
-    language: string
+    icons: string
+    factions: string
+    print: string
+    includeLibrary: (icons: number, factions: number) => string
+    includeLibraryTooltip: string
+    exportAll: string
+    exportingAll: string
   }
-  tabs: { front: string; rules: string }
-  doneBanner: { locked: string; unlock: string }
-  doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
-  dialogs: { icons: string; print: string }
-  deckFooter: { icons: string; print: string }
   gallery: {
     title: string
     newCardTitle: string
@@ -82,6 +92,7 @@ type Strings = {
     autoAdjust: string
     agentSilhouette: string
     reveal: string
+    contentHint: string
   }
   artPanel: {
     image: string
@@ -111,6 +122,16 @@ type Strings = {
     confirmRemove: (label: string, used: number) => string
     removeLabel: (label: string) => string
   }
+  factionPanel: {
+    emptyHint: string
+    nameLabel: (label: string) => string
+    colorTitle: string
+    colorLabel: (label: string) => string
+    upload: string
+    hint: string
+    confirmRemove: (label: string, used: number) => string
+    removeLabel: (label: string) => string
+  }
   printPanel: {
     perSheetSuffix: string
     fitsOnOne: string
@@ -129,6 +150,7 @@ type Strings = {
     openFailed: string
     artFailed: string
     sheetFailed: string
+    cardsFailed: string
     iconFailed: string
     permissionDenied: (fileName: string) => string
   }
@@ -139,18 +161,12 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      unsavedName: 'Mazo sin guardar',
-      renameTitle: 'Cambiarle el nombre al mazo',
-      noNativeFsTooltip:
-        'Acá no se pueden sobrescribir archivos, así que «Guardar» y «Guardar como…» bajan una copia nueva. La API sólo está en Chrome y Edge, y no en la vista previa embebida del editor: abriendo la app en una ventana del navegador, «Guardar» escribe sobre el archivo abierto sin preguntar.',
-      noNativeFsBadge: 'Acá «Guardar» baja una copia',
-      open: 'Abrir…',
-      save: 'Guardar',
-      saveAs: 'Guardar como…',
       exporting: 'Exportando…',
       export: 'Exportar PNG',
       defaultFileName: 'carta',
       language: 'Idioma',
+      undo: 'Deshacer (Ctrl+Z)',
+      redo: 'Rehacer (Ctrl+Mayús+Z)',
     },
     tabs: { front: 'Identidad', rules: 'Reglas' },
     doneBanner: {
@@ -163,8 +179,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Terminada — clic para reabrir',
       markDoneTitle: 'Marcar como terminada',
     },
-    dialogs: { icons: 'Iconos propios', print: 'Imprimir el mazo' },
-    deckFooter: { icons: 'Iconos…', print: 'Imprimir…' },
+    dialogs: { icons: 'Iconos propios', factions: 'Facciones propias', print: 'Imprimir el mazo' },
+    deckFooter: {
+      unsavedName: 'Mazo sin guardar',
+      renameTitle: 'Cambiarle el nombre al mazo',
+      noNativeFsTooltip:
+        'Acá no se pueden sobrescribir archivos, así que «Guardar» y «Guardar como…» bajan una copia nueva. La API sólo está en Chrome y Edge, y no en la vista previa embebida del editor: abriendo la app en una ventana del navegador, «Guardar» escribe sobre el archivo abierto sin preguntar.',
+      noNativeFsBadge: 'Acá «Guardar» baja una copia',
+      open: 'Abrir…',
+      save: 'Guardar',
+      saveAs: 'Guardar como…',
+      icons: 'Iconos…',
+      factions: 'Facciones…',
+      print: 'Imprimir…',
+      includeLibrary: (icons, factions) => `Incluir biblioteca (${icons} iconos, ${factions} facciones)`,
+      includeLibraryTooltip:
+        'Suma al archivo tus bibliotecas enteras de iconos y facciones propias, no sólo los que usan estas cartas — así se puede abrir en otra computadora con las bibliotecas completas.',
+      exportAll: 'Exportar PNGs…',
+      exportingAll: 'Exportando…',
+    },
     gallery: {
       title: 'Mazo',
       newCardTitle: 'Carta nueva',
@@ -182,7 +215,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       startingCard: 'Inicial',
       faction: 'Facción',
-      factionHint: 'Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas.',
+      factionHint:
+        'Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas. Hasta 4 por carta.',
       cost: 'Costo de compra',
       hasCost: 'Tiene costo',
       persuasion: 'Persuasión',
@@ -214,6 +248,7 @@ const STRINGS: Record<Language, Strings> = {
       autoAdjust: 'Alto automático',
       agentSilhouette: 'Silueta del agente',
       reveal: 'Revelación',
+      contentHint: 'Arrastrá iconos, texto y renglones para agregarlos o para reordenarlos.',
     },
     artPanel: {
       image: 'Imagen',
@@ -245,6 +280,18 @@ const STRINGS: Record<Language, Strings> = {
         `«${label}» está en ${pluralCards(used, 'es')} de este mazo. Si lo borrás, esas cartas lo pierden.`,
       removeLabel: (label) => `Borrar ${label}`,
     },
+    factionPanel: {
+      emptyHint:
+        'Para mazos con facciones que el juego no trae. Quedan disponibles en todos tus mazos, y generan solas los 4 rombos de "+1/-1 Influencia" de esa facción para usar en el contenido de una carta.',
+      nameLabel: (label) => `Nombre de ${label}`,
+      colorTitle: 'Color de la banda',
+      colorLabel: (label) => `Color de la banda de ${label}`,
+      upload: 'Subir emblema…',
+      hint: 'PNG con transparencia, se recorta solo al contenido. Quedan guardadas en este navegador, y el mazo se lleva adentro las que sus cartas usan. Como icono de agente van sobre una placa negra simple, sin el marco de las del reglamento.',
+      confirmRemove: (label, used) =>
+        `«${label}» está en ${pluralCards(used, 'es')} de este mazo. Si la borrás, esas cartas pierden la banda, el icono de agente o el rombo que la nombra.`,
+      removeLabel: (label) => `Borrar ${label}`,
+    },
     printPanel: {
       perSheetSuffix: 'por hoja.',
       fitsOnOne: 'El mazo entra en una.',
@@ -266,6 +313,7 @@ const STRINGS: Record<Language, Strings> = {
       openFailed: 'No se pudo abrir el archivo.',
       artFailed: 'No se pudo cargar la imagen.',
       sheetFailed: 'No se pudo armar la hoja.',
+      cardsFailed: 'No se pudieron exportar las cartas.',
       iconFailed: 'No se pudo cargar el icono.',
       permissionDenied: (fileName) =>
         `Chrome pide permiso para escribir sobre ${fileName}. Apretá Guardar de nuevo y elegí «Editar archivo», o usá Guardar como… para elegir otro.`,
@@ -285,18 +333,12 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      unsavedName: 'Unsaved deck',
-      renameTitle: 'Rename the deck',
-      noNativeFsTooltip:
-        'Files can\'t be overwritten here, so "Save" and "Save as…" download a new copy. The API only exists in Chrome and Edge, and not in the editor\'s embedded preview: opening the app in a browser window makes "Save" write to the open file without asking.',
-      noNativeFsBadge: 'Here, "Save" downloads a copy',
-      open: 'Open…',
-      save: 'Save',
-      saveAs: 'Save as…',
       exporting: 'Exporting…',
       export: 'Export PNG',
       defaultFileName: 'card',
       language: 'Language',
+      undo: 'Undo (Ctrl+Z)',
+      redo: 'Redo (Ctrl+Shift+Z)',
     },
     tabs: { front: 'Identity', rules: 'Rules' },
     doneBanner: {
@@ -309,8 +351,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finished — click to reopen',
       markDoneTitle: 'Mark as finished',
     },
-    dialogs: { icons: 'Custom icons', print: 'Print the deck' },
-    deckFooter: { icons: 'Icons…', print: 'Print…' },
+    dialogs: { icons: 'Custom icons', factions: 'Custom factions', print: 'Print the deck' },
+    deckFooter: {
+      unsavedName: 'Unsaved deck',
+      renameTitle: 'Rename the deck',
+      noNativeFsTooltip:
+        'Files can\'t be overwritten here, so "Save" and "Save as…" download a new copy. The API only exists in Chrome and Edge, and not in the editor\'s embedded preview: opening the app in a browser window makes "Save" write to the open file without asking.',
+      noNativeFsBadge: 'Here, "Save" downloads a copy',
+      open: 'Open…',
+      save: 'Save',
+      saveAs: 'Save as…',
+      icons: 'Icons…',
+      factions: 'Factions…',
+      print: 'Print…',
+      includeLibrary: (icons, factions) => `Include library (${icons} icons, ${factions} factions)`,
+      includeLibraryTooltip:
+        'Bundles your whole custom icon and faction libraries into the file, not just the ones these cards use — so it opens on another computer with the full libraries.',
+      exportAll: 'Export PNGs…',
+      exportingAll: 'Exporting…',
+    },
     gallery: {
       title: 'Deck',
       newCardTitle: 'New card',
@@ -328,7 +387,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       startingCard: 'Starting',
       faction: 'Faction',
-      factionHint: 'They stack downward in this same order, no matter what order you pick them in.',
+      factionHint:
+        'They stack downward in this same order, no matter what order you pick them in. Up to 4 per card.',
       cost: 'Acquire Cost',
       hasCost: 'Has a cost',
       persuasion: 'Persuasion',
@@ -360,6 +420,7 @@ const STRINGS: Record<Language, Strings> = {
       autoAdjust: 'Auto height',
       agentSilhouette: 'Agent Silhouette',
       reveal: 'Reveal',
+      contentHint: 'Drag icons, text and line breaks to add them or to reorder them.',
     },
     artPanel: {
       image: 'Image',
@@ -391,6 +452,18 @@ const STRINGS: Record<Language, Strings> = {
         `"${label}" is used in ${pluralCards(used, 'en')} of this deck. Deleting it removes it from those cards.`,
       removeLabel: (label) => `Delete ${label}`,
     },
+    factionPanel: {
+      emptyHint:
+        "For decks with factions the game doesn't include. They stay available in all your decks, and their emblem alone generates the 4 \"+1/-1 Influence\" diamonds for that faction, ready to use as card content.",
+      nameLabel: (label) => `Name of ${label}`,
+      colorTitle: 'Band color',
+      colorLabel: (label) => `Band color for ${label}`,
+      upload: 'Upload emblem…',
+      hint: "Transparent PNG, auto-cropped to content. They're saved in this browser, and the deck carries along the ones its cards use. As an agent icon they sit on a plain black plate, without the frame the rulebook ones have.",
+      confirmRemove: (label, used) =>
+        `"${label}" is used in ${pluralCards(used, 'en')} of this deck. Deleting it removes the band, agent icon, or diamond that names it from those cards.`,
+      removeLabel: (label) => `Delete ${label}`,
+    },
     printPanel: {
       perSheetSuffix: 'per sheet.',
       fitsOnOne: 'The deck fits on one.',
@@ -412,6 +485,7 @@ const STRINGS: Record<Language, Strings> = {
       openFailed: "Couldn't open the file.",
       artFailed: "Couldn't load the image.",
       sheetFailed: "Couldn't build the sheet.",
+      cardsFailed: "Couldn't export the cards.",
       iconFailed: "Couldn't load the icon.",
       permissionDenied: (fileName) =>
         `Chrome needs permission to write to ${fileName}. Press Save again and choose "Edit file", or use Save as… to pick another.`,
@@ -431,18 +505,12 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      unsavedName: 'Baralho não salvo',
-      renameTitle: 'Renomear o baralho',
-      noNativeFsTooltip:
-        'Aqui não é possível sobrescrever arquivos, então «Salvar» e «Salvar como…» baixam uma cópia nova. A API só existe no Chrome e no Edge, e não na prévia incorporada do editor: abrindo o app numa janela do navegador, «Salvar» grava no arquivo aberto sem perguntar.',
-      noNativeFsBadge: 'Aqui, «Salvar» baixa uma cópia',
-      open: 'Abrir…',
-      save: 'Salvar',
-      saveAs: 'Salvar como…',
       exporting: 'Exportando…',
       export: 'Exportar PNG',
       defaultFileName: 'carta',
       language: 'Idioma',
+      undo: 'Desfazer (Ctrl+Z)',
+      redo: 'Refazer (Ctrl+Shift+Z)',
     },
     tabs: { front: 'Identidade', rules: 'Regras' },
     doneBanner: {
@@ -455,8 +523,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finalizada — clique para reabrir',
       markDoneTitle: 'Marcar como finalizada',
     },
-    dialogs: { icons: 'Ícones próprios', print: 'Imprimir o baralho' },
-    deckFooter: { icons: 'Ícones…', print: 'Imprimir…' },
+    dialogs: { icons: 'Ícones próprios', factions: 'Facções próprias', print: 'Imprimir o baralho' },
+    deckFooter: {
+      unsavedName: 'Baralho não salvo',
+      renameTitle: 'Renomear o baralho',
+      noNativeFsTooltip:
+        'Aqui não é possível sobrescrever arquivos, então «Salvar» e «Salvar como…» baixam uma cópia nova. A API só existe no Chrome e no Edge, e não na prévia incorporada do editor: abrindo o app numa janela do navegador, «Salvar» grava no arquivo aberto sem perguntar.',
+      noNativeFsBadge: 'Aqui, «Salvar» baixa uma cópia',
+      open: 'Abrir…',
+      save: 'Salvar',
+      saveAs: 'Salvar como…',
+      icons: 'Ícones…',
+      factions: 'Facções…',
+      print: 'Imprimir…',
+      includeLibrary: (icons, factions) => `Incluir biblioteca (${icons} ícones, ${factions} facções)`,
+      includeLibraryTooltip:
+        'Inclui no arquivo as suas bibliotecas inteiras de ícones e facções próprias, não só os que estas cartas usam — assim ele abre em outro computador com as bibliotecas completas.',
+      exportAll: 'Exportar PNGs…',
+      exportingAll: 'Exportando…',
+    },
     gallery: {
       title: 'Baralho',
       newCardTitle: 'Carta nova',
@@ -474,7 +559,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       startingCard: 'Inicial',
       faction: 'Facção',
-      factionHint: 'Empilham para baixo nessa mesma ordem, não importa em que ordem você as escolha.',
+      factionHint:
+        'Empilham para baixo nessa mesma ordem, não importa em que ordem você as escolha. Até 4 por carta.',
       cost: 'Custo de aquisição',
       hasCost: 'Tem custo',
       persuasion: 'Persuasão',
@@ -506,6 +592,7 @@ const STRINGS: Record<Language, Strings> = {
       autoAdjust: 'Altura automática',
       agentSilhouette: 'Silhueta do agente',
       reveal: 'Revelação',
+      contentHint: 'Arraste ícones, texto e quebras de linha para adicioná-los ou reordená-los.',
     },
     artPanel: {
       image: 'Imagem',
@@ -537,6 +624,18 @@ const STRINGS: Record<Language, Strings> = {
         `«${label}» está em ${pluralCards(used, 'pt')} deste baralho. Se você excluir, essas cartas o perdem.`,
       removeLabel: (label) => `Excluir ${label}`,
     },
+    factionPanel: {
+      emptyHint:
+        'Para baralhos com facções que o jogo não traz. Ficam disponíveis em todos os seus baralhos, e o emblema sozinho gera os 4 losangos de "+1/-1 Influência" dessa facção, prontos para usar como conteúdo de carta.',
+      nameLabel: (label) => `Nome de ${label}`,
+      colorTitle: 'Cor da faixa',
+      colorLabel: (label) => `Cor da faixa de ${label}`,
+      upload: 'Enviar emblema…',
+      hint: 'PNG com transparência, recortado automaticamente ao conteúdo. Ficam salvas neste navegador, e o baralho leva junto as que suas cartas usam. Como ícone de agente ficam sobre uma placa preta simples, sem a moldura das do regulamento.',
+      confirmRemove: (label, used) =>
+        `«${label}» está em ${pluralCards(used, 'pt')} deste baralho. Se você excluir, essas cartas perdem a faixa, o ícone de agente ou o losango que a nomeia.`,
+      removeLabel: (label) => `Excluir ${label}`,
+    },
     printPanel: {
       perSheetSuffix: 'por folha.',
       fitsOnOne: 'O baralho cabe em uma.',
@@ -558,6 +657,7 @@ const STRINGS: Record<Language, Strings> = {
       openFailed: 'Não foi possível abrir o arquivo.',
       artFailed: 'Não foi possível carregar a imagem.',
       sheetFailed: 'Não foi possível montar a folha.',
+      cardsFailed: 'Não foi possível exportar as cartas.',
       iconFailed: 'Não foi possível carregar o ícone.',
       permissionDenied: (fileName) =>
         `O Chrome pede permissão para gravar em ${fileName}. Aperte Salvar de novo e escolha «Editar arquivo», ou use Salvar como… para escolher outro.`,

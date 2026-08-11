@@ -57,7 +57,7 @@ export function CardGallery({
   }, [selected])
 
   return (
-    <aside className="flex w-[340px] shrink-0 flex-col border-l border-zinc-800 bg-zinc-950">
+    <aside className="flex w-[360px] shrink-0 flex-col border-l border-zinc-800 bg-zinc-950">
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-800 px-3 py-2.5">
         <div className="min-w-0">
           <h2 className="text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">

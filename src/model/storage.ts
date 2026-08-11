@@ -3,12 +3,15 @@ import {
   cardIconIds,
   emptyCard,
   PLAY_ROWS,
+  type AnyFactionId,
   type Card,
   type ContentPart,
   type Faction,
 } from './card'
+import { isCustomFactionId, type CustomFaction } from './customFaction'
 import type { CustomIcon } from './customIcon'
 import { AppError } from './errors'
+import { factionIdFromInfluenceIconId } from './factionArt'
 
 /**
  * El mazo se guarda como JSON plano. Las imágenes viajan adentro como data
@@ -31,16 +34,26 @@ export type Deck = {
   name: string | null
   cards: Card[]
   icons: CustomIcon[]
+  factions: CustomFaction[]
 }
 
-export const emptyDeck = (): Deck => ({ name: null, cards: [emptyCard()], icons: [] })
+export const emptyDeck = (): Deck => ({ name: null, cards: [emptyCard()], icons: [], factions: [] })
 
 type SavedFile = {
   format: 'dune-imperium-card'
-  version: 5
+  version: 8
   name: string | null
   cards: Card[]
   icons: CustomIcon[]
+  factions: CustomFaction[]
+  /**
+   * Las bibliotecas enteras, y no sólo lo que las cartas usan — opcionales,
+   * para cuando el usuario elige compartir un solo archivo con mazo y
+   * bibliotecas juntos (el toggle "Incluir biblioteca" del pie de la
+   * galería). Ausentes en un guardado normal.
+   */
+  library?: CustomIcon[]
+  factionLibrary?: CustomFaction[]
 }
 
 /** La versión 1 guardaba una sola carta. */
@@ -60,13 +73,41 @@ export function packIcons(cards: Card[], icons: CustomIcon[]): CustomIcon[] {
   return icons.filter((icon) => used.has(icon.id))
 }
 
-export function serializeDeck(deck: Deck): string {
+/**
+ * Las facciones propias que el archivo tiene que llevar: las que alguna
+ * carta nombra, como banda (`card.factions`), como icono de agente
+ * (`card.agentIcons`), o **sólo a través de uno de sus rombos de influencia
+ * generados** en una caja de contenido, sin banda ni icono de agente. Ese
+ * tercer caso importa: si se mirara nada más que las dos listas, guardar
+ * descartaría una facción usada así, y al reabrir el rombo ya colocado se
+ * volvería "icono borrado".
+ */
+export function packFactions(cards: Card[], factions: CustomFaction[]): CustomFaction[] {
+  const used = new Set<AnyFactionId>()
+  for (const card of cards) {
+    for (const id of card.factions) if (isCustomFactionId(id)) used.add(id)
+    for (const id of card.agentIcons) if (isCustomFactionId(id)) used.add(id)
+    for (const id of cardIconIds(card)) {
+      const factionId = factionIdFromInfluenceIconId(id)
+      if (factionId) used.add(factionId)
+    }
+  }
+  return factions.filter((faction) => used.has(faction.id))
+}
+
+export function serializeDeck(
+  deck: Deck,
+  options?: { library?: CustomIcon[]; factionLibrary?: CustomFaction[] },
+): string {
   const file: SavedFile = {
     format: 'dune-imperium-card',
-    version: 5,
+    version: 8,
     name: deck.name,
     cards: deck.cards,
     icons: packIcons(deck.cards, deck.icons),
+    factions: packFactions(deck.cards, deck.factions),
+    library: options?.library,
+    factionLibrary: options?.factionLibrary,
   }
   return JSON.stringify(file, null, 2)
 }
@@ -76,7 +117,9 @@ export function serializeDeck(deck: Deck): string {
  * archivos guardados con versiones viejas siguen abriendo cuando el modelo
  * crece.
  */
-export function parseDeck(json: string): Deck {
+export function parseDeck(
+  json: string,
+): { deck: Deck; library: CustomIcon[]; factionLibrary: CustomFaction[] } {
   const parsed: unknown = JSON.parse(json)
 
   if (
@@ -91,13 +134,20 @@ export function parseDeck(json: string): Deck {
   const cards = file.cards ?? (file.card ? [file.card] : [])
   if (!cards.length) throw new AppError('no-cards')
 
-  // Hasta la versión 3 no había iconos propios, y hasta la 4 no había nombre
-  // propio: los archivos viejos abren con el catálogo del PSD y sin nombre, así
-  // que la barra de arriba cae al del archivo.
+  // Hasta la versión 3 no había iconos propios, hasta la 4 no había nombre
+  // propio y hasta la 7 no había facciones propias: los archivos viejos abren
+  // con el catálogo del PSD y sin nombre, así que la barra de arriba cae al
+  // del archivo.
   return {
-    name: file.name ?? null,
-    cards: cards.map((card) => migrate({ ...emptyCard(), ...card })),
-    icons: file.icons ?? [],
+    deck: {
+      name: file.name ?? null,
+      cards: cards.map((card) => migrate({ ...emptyCard(), ...card })),
+      icons: file.icons ?? [],
+      factions: file.factions ?? [],
+    },
+    // Sólo las trae un archivo guardado con el toggle de biblioteca prendido.
+    library: file.library ?? [],
+    factionLibrary: file.factionLibrary ?? [],
   }
 }
 
@@ -132,11 +182,11 @@ function migrate(card: LegacyCard): Card {
   return card
 }
 
-export function downloadDeck(deck: Deck) {
+export function downloadDeck(deck: Deck, library?: CustomIcon[], factionLibrary?: CustomFaction[]) {
   // Un mazo de una sola carta se guarda con el nombre de esa carta; varios,
   // con un nombre genérico, porque no hay uno mejor que elegir.
   const name = deck.cards.length === 1 ? deck.cards[0].title.trim() || 'carta' : 'mazo'
-  const blob = new Blob([serializeDeck(deck)], { type: 'application/json' })
+  const blob = new Blob([serializeDeck(deck, { library, factionLibrary })], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
@@ -175,7 +225,7 @@ export function loadAutosave(): Deck | null {
   const json = localStorage.getItem(AUTOSAVE_KEY)
   if (!json) return null
   try {
-    return parseDeck(json)
+    return parseDeck(json).deck
   } catch {
     return null
   }

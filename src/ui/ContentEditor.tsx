@@ -1,8 +1,7 @@
 import { useState, type ReactNode } from 'react'
-import { IMMORTALITY_ICON_IDS, INFLUENCE_ICON_IDS, IX_ICON_IDS } from '../assets/icons'
 import { useT } from '../i18n/strings'
 import { iconPart, textPart, type AnyIconId, type ContentPart } from '../model/card'
-import { useIconLibrary, type IconLibrary } from '../model/iconLibrary'
+import { groupIconIds, useIconLibrary, type IconLibrary } from '../model/iconLibrary'
 import { Action, Hint } from './controls'
 import { BreakIcon, DiamondIcon, GripIcon, MinusIcon, PlusIcon, TextIcon } from './icons'
 
@@ -59,20 +58,7 @@ export function ContentEditor({ parts, onChange }: Props) {
   const [dragSource, setDragSource] = useState<DragSource | null>(null)
   const [dropTarget, setDropTarget] = useState<{ index: number; before: boolean } | null>(null)
   const library = useIconLibrary()
-
-  const ids = Object.keys(library) as AnyIconId[]
-  const custom = ids.filter((id) => library[id].custom)
-  const builtin = ids.filter((id) => !library[id].custom)
-  const ix = builtin.filter((id) => (IX_ICON_IDS as readonly AnyIconId[]).includes(id))
-  const immortality = builtin.filter((id) =>
-    (IMMORTALITY_ICON_IDS as readonly AnyIconId[]).includes(id),
-  )
-  const influence = builtin.filter((id) =>
-    (INFLUENCE_ICON_IDS as readonly AnyIconId[]).includes(id),
-  )
-  const core = builtin.filter(
-    (id) => !ix.includes(id) && !immortality.includes(id) && !influence.includes(id),
-  )
+  const { custom, core, ix, immortality, influence } = groupIconIds(library)
 
   const update = (index: number, part: ContentPart) =>
     onChange(parts.map((item, i) => (i === index ? part : item)))
@@ -389,7 +375,12 @@ export function ContentEditor({ parts, onChange }: Props) {
   )
 }
 
-function Grid({
+/**
+ * Grilla de iconos para elegir uno: se reusa tal cual en `CardPanel` para el
+ * beneficio de compra, que no necesita arrastrar — ahí `onDragStart`/
+ * `onDragEnd` quedan sin pasar.
+ */
+export function Grid({
   ids,
   library,
   onPick,
@@ -399,8 +390,8 @@ function Grid({
   ids: AnyIconId[]
   library: IconLibrary
   onPick: (icon: AnyIconId) => void
-  onDragStart: (icon: AnyIconId) => void
-  onDragEnd: () => void
+  onDragStart?: (icon: AnyIconId) => void
+  onDragEnd?: () => void
 }) {
   return (
     <div className="grid grid-cols-6 gap-1">
@@ -409,13 +400,13 @@ function Grid({
           key={icon}
           title={library[icon].label}
           onClick={() => onPick(icon)}
-          draggable
+          draggable={onDragStart !== undefined}
           onDragStart={(event) => {
             event.dataTransfer.effectAllowed = 'copy'
-            onDragStart(icon)
+            onDragStart?.(icon)
           }}
           onDragEnd={onDragEnd}
-          className="flex aspect-square cursor-grab items-center justify-center rounded p-1 transition-colors hover:bg-zinc-700 active:cursor-grabbing"
+          className={`flex aspect-square items-center justify-center rounded p-1 transition-colors hover:bg-zinc-700 ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
         >
           <img
             src={library[icon].url}

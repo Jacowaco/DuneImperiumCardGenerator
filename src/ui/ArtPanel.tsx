@@ -39,14 +39,9 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
           {art ? t.artPanel.changeImage : t.artPanel.chooseImage}
         </Button>
         {art && (
-          <>
-            <Button onClick={onClear} title={t.artPanel.remove} aria-label={t.artPanel.remove}>
-              ×
-            </Button>
-            <Hint>
-              {art.width} × {art.height} px
-            </Hint>
-          </>
+          <Button onClick={onClear} title={t.artPanel.remove} aria-label={t.artPanel.remove}>
+            ×
+          </Button>
         )}
       </div>
       {!art && <Hint>{t.artPanel.dragHint}</Hint>}

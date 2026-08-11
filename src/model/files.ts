@@ -1,3 +1,5 @@
+import type { CustomFaction } from './customFaction'
+import type { CustomIcon } from './customIcon'
 import {
   downloadDeck,
   FILE_EXTENSION,
@@ -63,7 +65,13 @@ const FILE_TYPES = [
 export const isCancelled = (error: unknown) =>
   error instanceof DOMException && error.name === 'AbortError'
 
-export type OpenedDeck = { deck: Deck; handle: Handle | null; name: string }
+export type OpenedDeck = {
+  deck: Deck
+  library: CustomIcon[]
+  factionLibrary: CustomFaction[]
+  handle: Handle | null
+  name: string
+}
 
 /**
  * Abre con el diálogo nativo si se puede, para quedarse con el handle. Si no,
@@ -75,34 +83,38 @@ export async function openDeck(): Promise<OpenedDeck | null> {
 
   const [handle] = await show({ types: FILE_TYPES })
   const file = await handle.getFile()
-  return { deck: parseDeck(await file.text()), handle, name: file.name }
+  const { deck, library, factionLibrary } = parseDeck(await file.text())
+  return { deck, library, factionLibrary, handle, name: file.name }
 }
 
 export async function openDeckFromFile(file: File): Promise<OpenedDeck> {
-  return { deck: parseDeck(await file.text()), handle: null, name: file.name }
+  const { deck, library, factionLibrary } = parseDeck(await file.text())
+  return { deck, library, factionLibrary, handle: null, name: file.name }
 }
 
 /** Pide dónde guardar y devuelve el handle nuevo. */
 export async function saveDeckAs(
   deck: Deck,
   suggestedName: string,
+  library?: CustomIcon[],
+  factionLibrary?: CustomFaction[],
 ): Promise<{ handle: Handle | null; name: string }> {
   const show = picker().showSaveFilePicker
   if (!show || writesBlocked) {
-    downloadDeck(deck)
+    downloadDeck(deck, library, factionLibrary)
     return { handle: null, name: suggestedName }
   }
 
   const handle = await show({ suggestedName, types: FILE_TYPES })
 
   try {
-    await write(handle, deck)
+    await write(handle, deck, library, factionLibrary)
   } catch (cause) {
     if (!isUnwritable(cause)) throw cause
     // El diálogo lo dio pero la escritura no: este entorno no sirve para
     // sobrescribir. Queda el camino viejo, bajar una copia.
     writesBlocked = true
-    downloadDeck(deck)
+    downloadDeck(deck, library, factionLibrary)
     return { handle: null, name: suggestedName }
   }
   return { handle, name: handle.name }
@@ -116,11 +128,16 @@ export async function saveDeckAs(
  */
 export type SaveResult = 'saved' | 'denied' | 'missing'
 
-export async function saveDeck(deck: Deck, handle: Handle): Promise<SaveResult> {
+export async function saveDeck(
+  deck: Deck,
+  handle: Handle,
+  library?: CustomIcon[],
+  factionLibrary?: CustomFaction[],
+): Promise<SaveResult> {
   if (!(await ensureWritable(handle))) return 'denied'
 
   try {
-    await write(handle, deck)
+    await write(handle, deck, library, factionLibrary)
   } catch (cause) {
     if (!isUnwritable(cause)) throw cause
     return (cause as DOMException).name === 'NotFoundError' ? 'missing' : 'denied'
@@ -160,9 +177,14 @@ async function ensureWritable(handle: Handle) {
   }
 }
 
-async function write(handle: Handle, deck: Deck) {
+async function write(
+  handle: Handle,
+  deck: Deck,
+  library?: CustomIcon[],
+  factionLibrary?: CustomFaction[],
+) {
   const writable = await handle.createWritable()
-  await writable.write(serializeDeck(deck))
+  await writable.write(serializeDeck(deck, { library, factionLibrary }))
   await writable.close()
 }
 

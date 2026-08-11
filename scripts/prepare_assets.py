@@ -140,6 +140,62 @@ INFLUENCE_FACTIONS = ['emperor', 'spacing-guild', 'bene-gesserit', 'fremen']
 # Qué porción del ancho del rombo ocupa el emblema.
 EMBLEM_FILL = 0.58
 
+# Contenedores para el icono de agente y el botón de facción de una facción
+# propia (subida por el usuario, sin arte del PSD). No viene en psd-exports/
+# como el resto —se exportó aparte, a la raíz del repo— así que se lee de ahí
+# en vez de SRC. Es una sola hoja con las cinco piezas sueltas; los rangos son
+# el bbox exacto de cada una, medido sobre esa hoja (alpha > 8).
+FACTION_BADGES_SOURCE = ROOT / 'factionbg.png'
+FACTION_BADGE_REGIONS = {
+    # Fondo del icono de agente estilo Normal (equivalente a locations/), a
+    # recolorear entero con el color de la facción: reemplaza el marco crema
+    # del reglamento, que no existe para una facción sin arte propia.
+    'normal-container': (29, 143, 128, 213),
+    # Fondo fijo (no se recolorea) para el botón del selector de facción y del
+    # selector de icono de agente: el emblema se dibuja encima.
+    'picker-container': (39, 241, 117, 292),
+    # Estilo Infiltración (equivalente a infiltrate/), separado en dos capas
+    # para poder recolorear el relleno y dejar el borde blanco fijo encima.
+    'infiltrate-fill': (27, 460, 135, 531),
+    'infiltrate-border': (26, 541, 137, 615),
+}
+
+
+def slice_faction_badges():
+    """
+    Recorta las piezas sueltas de FACTION_BADGES_SOURCE a su bbox exacto.
+
+    `infiltrate-fill` e `infiltrate-border` se guardan además centradas en un
+    lienzo común, del tamaño del borde (que es la más grande, ya que el
+    borde sobresale ~1,5 px del relleno por lado): así componerlas en tiempo
+    de ejecución es dibujar las dos en (0, 0), sin repetir la cuenta del
+    centrado ahí.
+    """
+    if not FACTION_BADGES_SOURCE.exists():
+        print(f'  (sin {FACTION_BADGES_SOURCE.name}, se saltea faction-badges/)')
+        return
+
+    image = Image.open(FACTION_BADGES_SOURCE).convert('RGBA')
+    out = LAYERS_OUT / 'faction-badges'
+    out.mkdir(parents=True, exist_ok=True)
+
+    pieces = {
+        name: image.crop((x0, y0, x1 + 1, y1 + 1))
+        for name, (x0, y0, x1, y1) in FACTION_BADGE_REGIONS.items()
+    }
+
+    fill, border = pieces['infiltrate-fill'], pieces['infiltrate-border']
+    centered_fill = Image.new('RGBA', border.size, (0, 0, 0, 0))
+    centered_fill.alpha_composite(
+        fill, ((border.width - fill.width) // 2, (border.height - fill.height) // 2)
+    )
+    pieces['infiltrate-fill'] = centered_fill
+
+    for name, piece in pieces.items():
+        piece.save(out / f'{name}.png')
+
+    print(f'  recortado faction-badges/: {len(pieces)} piezas')
+
 
 def runs(mask, min_gap):
     """Rangos contiguos de True, uniendo los separados por menos de min_gap."""
@@ -409,6 +465,7 @@ def main():
 
     compose_influence()
     compose_faction_bands()
+    slice_faction_badges()
     write_icon_sizes()
 
     print('\nListo.')

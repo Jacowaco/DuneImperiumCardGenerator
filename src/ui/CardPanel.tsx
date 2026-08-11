@@ -1,16 +1,17 @@
+import { useState } from 'react'
 import { AGENT_BADGE_URLS } from '../assets/icons/agents'
 import { useT } from '../i18n/strings'
-import {
-  FACTION_COLORS,
-  FACTION_IDS,
-  FACTIONS,
-  type AnyIconId,
-  type Card,
-  type Faction,
-} from '../model/card'
-import { useIconLibrary } from '../model/iconLibrary'
+import { FACTION_COLORS, FACTION_IDS, FACTIONS, type AnyFactionId, type Card } from '../model/card'
+import { isCustomFactionId } from '../model/customFaction'
+import { useFactionLibrary } from '../model/factionLibrary'
+import { groupIconIds, useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
-import { Field, MultiChoice, NumberField, Section, Select, TextInput, Toggle } from './controls'
+import { Field, MultiChoice, NumberField, Section, TextInput, Toggle } from './controls'
+import { ChevronDownIcon } from './icons'
+import { Grid } from './ContentEditor'
+
+/** Ninguna banda tiene arte para una posición 5: no hay dónde apilarla. */
+const MAX_FACTIONS = 4
 
 type Props = {
   card: Card
@@ -35,7 +36,11 @@ export function CardPanel({ card, onChange }: Props) {
   const t = useT()
   const { language } = useLanguage()
   const library = useIconLibrary()
+  const factionLibrary = useFactionLibrary()
   const benefit = card.purchaseBenefit ? library[card.purchaseBenefit] : undefined
+  const [picking, setPicking] = useState(false)
+  const { custom, core, ix, immortality, influence } = groupIconIds(library)
+  const customFactionIds = (Object.keys(factionLibrary) as AnyFactionId[]).filter(isCustomFactionId)
 
   return (
     <>
@@ -57,24 +62,44 @@ export function CardPanel({ card, onChange }: Props) {
       </Section>
 
       <Section title={t.cardPanel.faction} hint={t.cardPanel.factionHint}>
-        <MultiChoice<Faction>
+        <MultiChoice<AnyFactionId>
           values={card.factions}
-          onChange={(factions) => onChange({ factions })}
+          onChange={(next) => {
+            // No hay arte para una quinta banda: un click de más que agregaría
+            // se ignora en silencio, en vez de dejarlo entrar y romper el render.
+            if (next.length > card.factions.length && next.length > MAX_FACTIONS) return
+            onChange({ factions: next })
+          }}
           columns={4}
           iconsOnly
-          /*
-            El emblema va con su placa negra y no pelado: el botón está pintado
-            del color de la facción y el emblema solo se pierde ahí —medidos,
-            los cuatro quedan a menos de 1,1 de contraste contra su propio
-            color, porque el color del botón sale de la banda de esa misma
-            facción—. El negro lo despega de cualquier color que tenga atrás.
-          */
-          options={FACTION_IDS.map((id) => ({
-            value: id,
-            label: pick(FACTIONS[id], language),
-            color: FACTION_COLORS[id],
-            icon: AGENT_BADGE_URLS[id],
-          }))}
+          options={[
+            /*
+              Las built-in van con su placa negra y no el emblema pelado: el
+              botón está pintado del color de la facción y el emblema solo se
+              pierde ahí —medidos, los cuatro quedan a menos de 1,1 de
+              contraste contra su propio color—. El negro lo despega de
+              cualquier color que tenga atrás.
+            */
+            ...FACTION_IDS.map((id) => ({
+              value: id as AnyFactionId,
+              label: pick(FACTIONS[id], language),
+              color: FACTION_COLORS[id],
+              icon: AGENT_BADGE_URLS[id],
+            })),
+            /*
+              Las propias van con el mismo tratamiento: el color que eligió
+              el usuario pinta el botón, y el emblema se dibuja sobre una
+              placa negra generada (`factionArt.ts`) en vez de la del PSD —
+              mientras esa placa todavía se está calentando, cae al emblema
+              crudo, mejor que un botón vacío.
+            */
+            ...customFactionIds.map((id) => ({
+              value: id,
+              label: factionLibrary[id].label,
+              color: factionLibrary[id].color,
+              icon: factionLibrary[id].badge ?? factionLibrary[id].emblem,
+            })),
+          ]}
         />
       </Section>
 
@@ -99,20 +124,121 @@ export function CardPanel({ card, onChange }: Props) {
             </Field>
 
             <Field label={t.cardPanel.purchaseBenefit}>
-              <Select
-                value={card.purchaseBenefit ?? ''}
-                onChange={(event) =>
-                  onChange({ purchaseBenefit: (event.target.value || null) as AnyIconId | null })
-                }
+              <button
+                type="button"
+                onClick={() => setPicking(!picking)}
+                className="flex w-full items-center gap-2 rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none hover:border-sand-500"
               >
-                <option value="">{t.cardPanel.none}</option>
-                {Object.entries(library).map(([id, icon]) => (
-                  <option key={id} value={id}>
-                    {icon.custom ? t.cardPanel.custom(icon.label) : icon.label}
-                  </option>
-                ))}
-              </Select>
+                {benefit ? (
+                  <img src={benefit.url} alt="" className="size-6 shrink-0 object-contain" />
+                ) : null}
+                <span className={`min-w-0 flex-1 truncate text-left ${benefit ? '' : 'text-zinc-400'}`}>
+                  {benefit
+                    ? benefit.custom
+                      ? t.cardPanel.custom(benefit.label)
+                      : benefit.label
+                    : t.cardPanel.none}
+                </span>
+                <span className="shrink-0 text-zinc-500">
+                  <ChevronDownIcon />
+                </span>
+              </button>
             </Field>
+
+            {picking && (
+              <div className="flex flex-col gap-2 rounded-md bg-zinc-900 p-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange({ purchaseBenefit: null })
+                    setPicking(false)
+                  }}
+                  className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                    card.purchaseBenefit === null
+                      ? 'bg-sand-500 font-medium text-zinc-950'
+                      : 'text-zinc-300 hover:bg-zinc-700'
+                  }`}
+                >
+                  {t.cardPanel.none}
+                </button>
+
+                {custom.length > 0 && (
+                  <>
+                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
+                      {t.contentEditor.custom}
+                    </p>
+                    <Grid
+                      ids={custom}
+                      library={library}
+                      onPick={(icon) => {
+                        onChange({ purchaseBenefit: icon })
+                        setPicking(false)
+                      }}
+                    />
+                  </>
+                )}
+
+                <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
+                  {t.contentEditor.core}
+                </p>
+                <Grid
+                  ids={core}
+                  library={library}
+                  onPick={(icon) => {
+                    onChange({ purchaseBenefit: icon })
+                    setPicking(false)
+                  }}
+                />
+
+                {ix.length > 0 && (
+                  <>
+                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
+                      Rise of Ix
+                    </p>
+                    <Grid
+                      ids={ix}
+                      library={library}
+                      onPick={(icon) => {
+                        onChange({ purchaseBenefit: icon })
+                        setPicking(false)
+                      }}
+                    />
+                  </>
+                )}
+
+                {immortality.length > 0 && (
+                  <>
+                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
+                      Immortality
+                    </p>
+                    <Grid
+                      ids={immortality}
+                      library={library}
+                      onPick={(icon) => {
+                        onChange({ purchaseBenefit: icon })
+                        setPicking(false)
+                      }}
+                    />
+                  </>
+                )}
+
+                {influence.length > 0 && (
+                  <>
+                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
+                      {t.contentEditor.influence}
+                    </p>
+                    <Grid
+                      ids={influence}
+                      library={library}
+                      onPick={(icon) => {
+                        onChange({ purchaseBenefit: icon })
+                        setPicking(false)
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+            )}
 
             {benefit?.numberColor && (
               <Field label={t.cardPanel.amount}>

@@ -346,15 +346,16 @@ La app se usa en una pantalla de computadora: **ancha y baja**. Todo el layout
 sale de ahí, porque lo que escasea es el alto y lo que sobra es el ancho.
 
 ```
-┌─ TopBar ─ mazo abierto · Abrir/Guardar/Guardar como · Exportar PNG ─┐
-├──────────────┬─────────────────────────────────────┬───────────────┤
-│ pestañas     │                                     │ galería       │
-│ Imagen       │            preview                  │ (el mazo,     │
-│ Carta        │                                     │  en columna)  │
-│ Reglas       │                                     │               │
-│              │                                     ├───────────────┤
-│              │                                     │ Iconos│Imprim │
-└──────────────┴─────────────────────────────────────┴───────────────┘
+┌─ TopBar ─ idioma · deshacer/rehacer · Exportar PNG ──────────────────┐
+├──────────────┬─────────────────────────────────────┬────────────────┤
+│ pestañas     │                                     │ galería        │
+│ Imagen       │            preview                  │ (el mazo,      │
+│ Carta        │                                     │  en columna)   │
+│ Reglas       │                                     ├────────────────┤
+│              │                                     │ nombre · Abrir │
+│              │                                     │ Guardar/Como…  │
+│              │                                     │ Iconos│Imprim  │
+└──────────────┴─────────────────────────────────────┴────────────────┘
 ```
 
 **La columna izquierda es la carta abierta y la derecha es el mazo**, de punta
@@ -365,9 +366,16 @@ las que tenía al lado.
 
 De ahí salen cuatro decisiones, todas para no gastar alto:
 
-- **Lo que se usa siempre va arriba.** Guardar, abrir y exportar no son de una
-  carta en particular; al final de la columna izquierda había que pasar por
-  todos los campos de la carta para llegar.
+- **Todo lo que es del mazo va en su columna, no en la barra de arriba.**
+  Nombre, Abrir, Guardar y Guardar como (`DeckFileControls`) viven al pie de
+  la galería, junto con Iconos propios, Facciones propias e Imprimir —que
+  además abren en diálogo (`src/ui/Dialog.tsx`, para lo que se usa cada
+  tanto)— y exportar el mazo entero en PNGs sueltos. Antes Guardar y Abrir
+  vivían arriba, por lo seguido que se usan, pero eso mezclaba en la misma
+  barra cosas del mazo con cosas de la sesión de edición; agrupar por qué es
+  cada cosa resultó más claro que agrupar por qué tan seguido se toca. La
+  barra de arriba se quedó con lo que no es ni de una carta ni del mazo como
+  archivo: deshacer/rehacer, el idioma, y exportar la carta abierta.
 - **El panel va en pestañas** (`src/ui/Tabs.tsx`). Eran trece secciones
   apiladas en una sola columna. Cada pestaña agrupa una decisión distinta sobre
   la carta, y van en el orden en que se arma una: **Imagen** (`ArtPanel`),
@@ -392,8 +400,8 @@ De ahí salen cuatro decisiones, todas para no gastar alto:
   `CardGallery`, para que la galería siga siendo sólo cartas.
 
 Donde el navegador no tiene la File System Access API, el aviso de que
-«Guardar» baja una copia va en la barra de arriba, al lado de los botones que
-explica; la versión larga está en su `title`.
+«Guardar» baja una copia va al lado de `DeckFileControls`, en el pie de la
+galería; la versión larga está en su `title`.
 
 Entra sin scroll horizontal en 1024 × 640, que es la ventana más chica en la
 que tiene sentido usarla.
@@ -454,16 +462,14 @@ grilla siguen ocupando la celda entera.
   - [x] galería de cartas, guardar y abrir el mazo entero, autoguardado
   - [x] Guardar / Guardar como con diálogo nativo, recordando el archivo
   - [x] hoja de impresión 3×3
-  - [ ] export en lote
+  - [x] export en lote
 - [ ] Fase 6 — empaquetado de escritorio
 
 ### Lo próximo
 
 En orden de valor, y ninguno depende de exportar nada más del PSD:
 
-1. **Export en lote** — bajar todas las cartas del mazo como PNG sueltos. Con
-   el renderizador fuera de pantalla ya hecho es iterar la galería.
-2. **Conectar `unload.png`** — la banderola roja de Rise of Ix. En las cartas
+1. **Conectar `unload.png`** — la banderola roja de Rise of Ix. En las cartas
    reales lleva texto y un icono adentro, así que se resuelve con el mismo
    `ContentPart` que ya existe.
 
@@ -561,6 +567,32 @@ miniatura.
 Si se agrega un tipo de imagen nuevo a la carta, hay que sumarlo a `prepare()`.
 Es el único lugar donde el export sabe qué cargar, y olvidarse no rompe nada
 visible: sale un hueco.
+
+## El export en lote
+
+`src/export/exportPngBatch.ts` baja **todas las cartas del mazo, cada una como
+PNG suelto, dentro de un único `.zip`**. Reusa `prepare()` y
+`createCardRenderer()` de `renderCard.tsx` —el mismo renderizador fuera de
+pantalla de la hoja de impresión— y sólo itera la galería en vez de componer
+una grilla.
+
+Sale a **2× (600 DPI)**, la escala de un PNG suelto (`EXPORT_SCALE` en
+`exportPng.ts`) y no la 1× de la hoja: acá no hay una hoja física que fije la
+resolución, así que se mantiene la de exportar la carta abierta desde arriba.
+`createCardRenderer()` recibe la escala como parámetro justo por esto —la hoja
+sigue pidiendo 1×, sin tocarla.
+
+Un archivo por carta bajado uno por uno abriría un diálogo de descarga por
+cada uno, y varios navegadores bloquean las descargas después de la primera:
+por eso salen empaquetadas juntas, en el mismo espíritu que la hoja de
+impresión sale en un solo PDF y no en PNG sueltos. `src/export/zip.ts` escribe
+el `.zip` a mano, igual que `pdf.ts` con el PDF, y sin comprimir (`STORE`): lo
+que entra ya es PNG, así que deflatearlo de nuevo apenas lo achica y no vale la
+complicación.
+
+Dos cartas con el mismo nombre —o sin nombre— no pueden pisarse en el zip:
+`uniqueName()` agrega `-2`, `-3`… al repetirse, y una carta sin título cae a
+`carta-N` por posición.
 
 ## Guardar
 
@@ -664,18 +696,34 @@ constante.
 
 ## La galería
 
-El archivo guardado pasó a tener un **mazo** (`version: 5`, con `name`,
-`cards[]` y `icons[]`). `migrate()` en `src/model/storage.ts` sube los
-archivos viejos al abrirlos: la versión 1 tenía una sola carta en `card`, la 2
-guardaba el contenido de las cajas como listas de iconos sueltos (`playIcons`
-/ `revealIcons`) en vez de piezas mezcladas con texto, la 3 no tenía iconos
-propios y la 4 no tenía nombre propio — un mazo así muestra en la barra de
-arriba el nombre del archivo, hasta que se edita.
+El archivo guardado pasó a tener un **mazo** (`version: 8`, con `name`,
+`cards[]`, `icons[]` y `factions[]`). `migrate()` en `src/model/storage.ts`
+sube los archivos viejos al abrirlos: la versión 1 tenía una sola carta en
+`card`, la 2 guardaba el contenido de las cajas como listas de iconos sueltos
+(`playIcons` / `revealIcons`) en vez de piezas mezcladas con texto, la 3 no
+tenía iconos propios, la 4 no tenía nombre propio y la 7 no tenía facciones
+propias — un mazo así muestra en el pie de la galería el nombre del archivo,
+hasta que se edita.
+
+La 6 sumó `library?: CustomIcon[]` y la 8 sumó `factionLibrary?:
+CustomFaction[]`, los dos opcionales: las bibliotecas enteras del que guardó,
+no sólo lo que las cartas usan (eso lo siguen llevando `icons[]`/`factions[]`,
+vía `packIcons`/`packFactions`). Es lo que arma el toggle "Incluir biblioteca"
+al pie de la columna del mazo, junto a "Iconos…", "Facciones…" e
+"Imprimir…" —es del mazo entero y se usa cada tanto, no algo que se mire en
+cada guardado, así que no va en la `TopBar`—, sólo visible si hay algo en
+alguna de las dos bibliotecas para ofrecer, para compartir mazo y bibliotecas
+en un solo archivo sin que el guardado de todos los días —incluido el
+autoguardado— arrastre iconos o facciones que esa carta no usa. El contador
+del toggle suma las dos listas. Al abrir un archivo con `library`/
+`factionLibrary`, esos iconos y facciones se adoptan igual que los de
+`icons[]`/`factions[]` (`adoptIcons` en `src/model/iconStore.ts`,
+`adoptFactions` en `src/model/factionStore.ts`).
 
 El nombre del mazo (`deck.name`) es del usuario, no del archivo: se edita
-clickeando el nombre en la barra de arriba y no tiene por qué coincidir con
-cómo se guardó. Si nunca se tocó, la barra cae al nombre del archivo abierto
-(`deckName()`), y si tampoco hay archivo muestra "Mazo sin guardar".
+clickeando el nombre al pie de la galería (`DeckFileControls`) y no tiene por
+qué coincidir con cómo se guardó. Si nunca se tocó, cae al nombre del archivo
+abierto (`deckName()`), y si tampoco hay archivo muestra "Mazo sin guardar".
 
 Las miniaturas son el mismo `CardStage` que el preview grande, a escala chica
 y sin `onArtChange` — ese prop es lo que decide si la carta es interactiva. Se

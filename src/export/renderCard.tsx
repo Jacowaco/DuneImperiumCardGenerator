@@ -7,6 +7,13 @@ import { ICONS } from '../assets/icons'
 import { AGENT_ICON_URLS } from '../assets/icons/agents'
 import type { Card } from '../model/card'
 import { AppError } from '../model/errors'
+import {
+  warmAllFactionBandTints,
+  warmFactionAgentIcons,
+  warmFactionInfluenceIcons,
+  warmFactionPickerBadges,
+} from '../model/factionArt'
+import { FactionLibraryProvider, type FactionLibrary } from '../model/factionLibrary'
 import { IconLibraryProvider, type IconLibrary } from '../model/iconLibrary'
 import { LanguageProvider, type Language } from '../model/language'
 import type { Deck } from '../model/storage'
@@ -34,7 +41,7 @@ const templateLayers = import.meta.glob('../assets/layers/*.png', {
   import: 'default',
 }) as Record<string, string>
 
-export async function prepare({ cards, icons }: Deck): Promise<void> {
+export async function prepare({ cards, icons, factions }: Deck): Promise<void> {
   const art = cards.map((card) => card.art?.src).filter((src): src is string => Boolean(src))
 
   await Promise.all([
@@ -51,6 +58,14 @@ export async function prepare({ cards, icons }: Deck): Promise<void> {
       ...icons.map((icon) => icon.url),
       ...art,
     ]),
+    // Las facciones propias del mazo: la banda tintada de cada color × rango,
+    // los 4 rombos de influencia, la placa del selector y el icono de agente
+    // (los dos estilos) de cada una, generados en canvas — mismo motivo que
+    // los iconos, sin esto salen como un hueco en la hoja.
+    warmAllFactionBandTints(factions),
+    warmFactionInfluenceIcons(factions),
+    warmFactionPickerBadges(factions),
+    warmFactionAgentIcons(factions),
   ])
 }
 
@@ -65,7 +80,13 @@ export type CardRenderer = {
  * montar el stage. Queda fuera de la pantalla en vez de `display: none`
  * porque un contenedor oculto mide 0.
  */
-export function createCardRenderer(library: IconLibrary, language: Language): CardRenderer {
+export function createCardRenderer(
+  library: IconLibrary,
+  factionLibrary: FactionLibrary,
+  language: Language,
+  /** 1× para la hoja de impresión (300 DPI real); 2× para PNG suelto. */
+  pixelRatio = 1,
+): CardRenderer {
   const host = document.createElement('div')
   host.style.cssText =
     'position:fixed;left:-10000px;top:0;width:750px;height:1039px;pointer-events:none;opacity:0'
@@ -83,9 +104,11 @@ export function createCardRenderer(library: IconLibrary, language: Language): Ca
         // mazo desaparecerían al imprimir.
         root.render(
           <LanguageProvider value={{ language, setLanguage: () => {} }}>
-            <IconLibraryProvider value={library}>
-              <CardStage card={card} scale={1} stageRef={stageRef} />
-            </IconLibraryProvider>
+            <FactionLibraryProvider value={factionLibrary}>
+              <IconLibraryProvider value={library}>
+                <CardStage card={card} scale={1} stageRef={stageRef} />
+              </IconLibraryProvider>
+            </FactionLibraryProvider>
           </LanguageProvider>,
         )
       })
@@ -95,7 +118,7 @@ export function createCardRenderer(library: IconLibrary, language: Language): Ca
 
       // `toCanvas` dibuja la escena en un canvas nuevo, así que no depende del
       // redibujado diferido de Konva ni se pisa con la carta siguiente.
-      return stage.toCanvas({ pixelRatio: 1 }) as HTMLCanvasElement
+      return stage.toCanvas({ pixelRatio }) as HTMLCanvasElement
     },
 
     dispose() {

@@ -95,6 +95,7 @@ export function App() {
   // guarda en el archivo ni viaja con él.
   const [paper, setPaper] = useState<PaperId>('a4')
   const [bleed, setBleed] = useState(false)
+  const [copies, setCopies] = useState(1)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -461,7 +462,7 @@ export function App() {
   const handleExportSheets = async () => {
     setSheetExporting(true)
     try {
-      await exportPrintSheets(deck, { paper, bleed, language })
+      await exportPrintSheets(deck, { paper, bleed, copies, language })
     } catch (cause) {
       setError(describeError(cause, language, t.errors.sheetFailed))
     } finally {
@@ -685,8 +686,10 @@ export function App() {
               cards={cards.length}
               paper={paper}
               bleed={bleed}
+              copies={copies}
               onPaper={setPaper}
               onBleed={setBleed}
+              onCopies={setCopies}
               busy={sheetExporting}
               onExportSheets={() => void handleExportSheets()}
             />

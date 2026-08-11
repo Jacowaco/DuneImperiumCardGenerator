@@ -138,6 +138,11 @@ type Strings = {
     perSheetSuffix: string
     fitsOnOne: string
     spansPages: (pages: number) => string
+    copies: string
+    copiesOtherValue: string
+    copiesDecrease: string
+    copiesIncrease: string
+    copiesHint: (total: number) => string
     bleedToggle: string
     bleedOnHint: string
     bleedOffHint: string
@@ -301,6 +306,11 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'por hoja.',
       fitsOnOne: 'El mazo entra en una.',
       spansPages: (pages) => `El mazo ocupa ${pages}.`,
+      copies: 'Copias por carta',
+      copiesOtherValue: 'Otra cantidad',
+      copiesDecrease: 'Restar una copia',
+      copiesIncrease: 'Sumar una copia',
+      copiesHint: (total) => `${pluralCards(total, 'es')} en total.`,
       bleedToggle: 'Sangrado de 3 mm (imprenta)',
       bleedOnHint:
         'Cada carta se dibuja 3 mm más grande de negro por lado y se corta sola: si la guillotina se corre, sale negro y no un filo blanco. Entran menos por hoja.',
@@ -475,6 +485,11 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'per sheet.',
       fitsOnOne: 'The deck fits on one.',
       spansPages: (pages) => `The deck spans ${pages}.`,
+      copies: 'Copies per card',
+      copiesOtherValue: 'Custom amount',
+      copiesDecrease: 'Remove one copy',
+      copiesIncrease: 'Add one copy',
+      copiesHint: (total) => `${pluralCards(total, 'en')} in total.`,
       bleedToggle: '3 mm bleed (print shop)',
       bleedOnHint:
         "Each card is drawn 3 mm bigger in black on every side and cut on its own: if the guillotine drifts, it cuts into black instead of a white edge. Fewer fit per sheet.",
@@ -650,6 +665,11 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'por folha.',
       fitsOnOne: 'O baralho cabe em uma.',
       spansPages: (pages) => `O baralho ocupa ${pages}.`,
+      copies: 'Cópias por carta',
+      copiesOtherValue: 'Outra quantidade',
+      copiesDecrease: 'Tirar uma cópia',
+      copiesIncrease: 'Somar uma cópia',
+      copiesHint: (total) => `${pluralCards(total, 'pt')} no total.`,
       bleedToggle: 'Sangria de 3 mm (gráfica)',
       bleedOnHint:
         'Cada carta é desenhada 3 mm maior em preto de cada lado e cortada sozinha: se a guilhotina desviar, sai preto em vez de uma borda branca. Cabem menos por folha.',

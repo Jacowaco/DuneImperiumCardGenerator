@@ -32,6 +32,8 @@ type Strings = {
     renameTitle: string
     noNativeFsTooltip: string
     noNativeFsBadge: string
+    new: string
+    confirmNew: string
     open: string
     save: string
     saveAs: string
@@ -186,6 +188,9 @@ const STRINGS: Record<Language, Strings> = {
       noNativeFsTooltip:
         'Acá no se pueden sobrescribir archivos, así que «Guardar» y «Guardar como…» bajan una copia nueva. La API sólo está en Chrome y Edge, y no en la vista previa embebida del editor: abriendo la app en una ventana del navegador, «Guardar» escribe sobre el archivo abierto sin preguntar.',
       noNativeFsBadge: 'Acá «Guardar» baja una copia',
+      new: 'Nuevo',
+      confirmNew:
+        'Hay cambios sin guardar en este mazo. ¿Empezar un mazo nuevo de todas formas?',
       open: 'Abrir…',
       save: 'Guardar',
       saveAs: 'Guardar como…',
@@ -201,7 +206,7 @@ const STRINGS: Record<Language, Strings> = {
     gallery: {
       title: 'Mazo',
       newCardTitle: 'Carta nueva',
-      newButton: 'Nueva',
+      newButton: 'Nueva carta',
       unnamed: 'Sin nombre',
       duplicate: 'Duplicar',
       remove: 'Eliminar',
@@ -358,6 +363,8 @@ const STRINGS: Record<Language, Strings> = {
       noNativeFsTooltip:
         'Files can\'t be overwritten here, so "Save" and "Save as…" download a new copy. The API only exists in Chrome and Edge, and not in the editor\'s embedded preview: opening the app in a browser window makes "Save" write to the open file without asking.',
       noNativeFsBadge: 'Here, "Save" downloads a copy',
+      new: 'New',
+      confirmNew: 'This deck has unsaved changes. Start a new deck anyway?',
       open: 'Open…',
       save: 'Save',
       saveAs: 'Save as…',
@@ -373,7 +380,7 @@ const STRINGS: Record<Language, Strings> = {
     gallery: {
       title: 'Deck',
       newCardTitle: 'New card',
-      newButton: 'New',
+      newButton: 'New card',
       unnamed: 'Unnamed',
       duplicate: 'Duplicate',
       remove: 'Delete',
@@ -530,6 +537,9 @@ const STRINGS: Record<Language, Strings> = {
       noNativeFsTooltip:
         'Aqui não é possível sobrescrever arquivos, então «Salvar» e «Salvar como…» baixam uma cópia nova. A API só existe no Chrome e no Edge, e não na prévia incorporada do editor: abrindo o app numa janela do navegador, «Salvar» grava no arquivo aberto sem perguntar.',
       noNativeFsBadge: 'Aqui, «Salvar» baixa uma cópia',
+      new: 'Novo',
+      confirmNew:
+        'Este baralho tem alterações não salvas. Começar um baralho novo mesmo assim?',
       open: 'Abrir…',
       save: 'Salvar',
       saveAs: 'Salvar como…',
@@ -545,7 +555,7 @@ const STRINGS: Record<Language, Strings> = {
     gallery: {
       title: 'Baralho',
       newCardTitle: 'Carta nova',
-      newButton: 'Nova',
+      newButton: 'Nova carta',
       unnamed: 'Sem nome',
       duplicate: 'Duplicar',
       remove: 'Excluir',

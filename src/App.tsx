@@ -374,6 +374,17 @@ export function App() {
     void adoptFactions([...opened.deck.factions, ...opened.factionLibrary]).then(setMyFactions)
   }
 
+  const newDeck = () => {
+    if (dirty && !confirm(t.deckFooter.confirmNew)) return
+    setDeck(emptyDeck())
+    setSelected(0)
+    setPast([])
+    setFuture([])
+    coalesceRef.current = null
+    openFile(null)
+    setDirty(false)
+  }
+
   /** Cancelar el diálogo no es un error que valga la pena mostrar. */
   const run = async (action: () => Promise<void>) => {
     try {
@@ -603,6 +614,7 @@ export function App() {
                   fileName={file?.name ?? null}
                   dirty={dirty}
                   onRename={(name) => mutate((current) => ({ ...current, name: name || null }))}
+                  onNew={newDeck}
                   onSave={handleSave}
                   onSaveAs={handleSaveAs}
                   onOpen={handleOpen}

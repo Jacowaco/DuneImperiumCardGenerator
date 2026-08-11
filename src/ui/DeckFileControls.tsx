@@ -3,7 +3,7 @@ import { useT } from '../i18n/strings'
 import { supportsFileSystem } from '../model/files'
 import { deckName as fileDeckName } from '../model/storage'
 import { Button } from './controls'
-import { EditIcon, FolderIcon, SaveIcon } from './icons'
+import { EditIcon, FolderIcon, PlusIcon, SaveIcon } from './icons'
 
 type Props = {
   /** Nombre que eligió el usuario, o null si nunca lo tocó. */
@@ -12,6 +12,7 @@ type Props = {
   fileName: string | null
   dirty: boolean
   onRename: (name: string) => void
+  onNew: () => void
   onSave: () => void
   onSaveAs: () => void
   onOpen: () => void
@@ -28,6 +29,7 @@ export function DeckFileControls({
   fileName,
   dirty,
   onRename,
+  onNew,
   onSave,
   onSaveAs,
   onOpen,
@@ -97,7 +99,11 @@ export function DeckFileControls({
         </span>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
+        <Button onClick={onNew} className="px-2 text-xs">
+          <PlusIcon />
+          {t.deckFooter.new}
+        </Button>
         <Button onClick={() => (native ? onOpen() : inputRef.current?.click())} className="px-2 text-xs">
           <FolderIcon />
           {t.deckFooter.open}

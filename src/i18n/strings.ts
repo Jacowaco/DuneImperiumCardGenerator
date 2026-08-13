@@ -222,6 +222,9 @@ type Strings = {
     removeLabel: (label: string) => string
   }
   libraryFile: {
+    /** Cuando la biblioteca todavía no tiene nombre. */
+    unnamed: string
+    renameTitle: string
     export: string
     exportTitle: string
     import: string
@@ -490,6 +493,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Borrar ${label}`,
     },
     libraryFile: {
+      unnamed: 'Biblioteca sin nombre',
+      renameTitle: 'Ponerle nombre a tu biblioteca',
       export: 'Exportar…',
       exportTitle:
         'Guarda tu biblioteca entera —iconos y facciones— en un archivo, para llevarla a otra computadora o tener una copia. La biblioteca vive en este navegador nada más.',
@@ -769,6 +774,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Delete ${label}`,
     },
     libraryFile: {
+      unnamed: 'Unnamed library',
+      renameTitle: 'Name your library',
       export: 'Export…',
       exportTitle:
         'Saves your whole library —icons and factions— to a file, to carry it to another computer or keep a backup. The library lives in this browser only.',
@@ -1049,6 +1056,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Excluir ${label}`,
     },
     libraryFile: {
+      unnamed: 'Biblioteca sem nome',
+      renameTitle: 'Dar um nome à sua biblioteca',
       export: 'Exportar…',
       exportTitle:
         'Salva sua biblioteca inteira —ícones e facções— em um arquivo, para levá-la a outro computador ou ter uma cópia. A biblioteca vive só neste navegador.',
@@ -1330,6 +1339,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Supprimer ${label}`,
     },
     libraryFile: {
+      unnamed: 'Bibliothèque sans nom',
+      renameTitle: 'Nommer votre bibliothèque',
       export: 'Exporter…',
       exportTitle:
         "Enregistre toute votre bibliothèque — icônes et factions — dans un fichier, pour l'emporter sur un autre ordinateur ou en garder une copie. La bibliothèque ne vit que dans ce navigateur.",
@@ -1611,6 +1622,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `${label} löschen`,
     },
     libraryFile: {
+      unnamed: 'Bibliothek ohne Namen',
+      renameTitle: 'Deiner Bibliothek einen Namen geben',
       export: 'Exportieren…',
       exportTitle:
         'Speichert deine ganze Bibliothek — Symbole und Fraktionen — in einer Datei, um sie auf einen anderen Rechner mitzunehmen oder eine Kopie zu haben. Die Bibliothek lebt nur in diesem Browser.',
@@ -1892,6 +1905,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Cancella ${label}`,
     },
     libraryFile: {
+      unnamed: 'Libreria senza nome',
+      renameTitle: 'Dare un nome alla tua libreria',
       export: 'Esporta…',
       exportTitle:
         'Salva tutta la tua libreria — icone e fazioni — in un file, per portarla su un altro computer o averne una copia. La libreria vive solo in questo browser.',
@@ -2173,6 +2188,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Skasuj ${label}`,
     },
     libraryFile: {
+      unnamed: 'Biblioteka bez nazwy',
+      renameTitle: 'Nazwij swoją bibliotekę',
       export: 'Eksportuj…',
       exportTitle:
         'Zapisuje całą twoją bibliotekę — ikony i frakcje — do pliku, żeby przenieść ją na inny komputer albo mieć kopię. Biblioteka żyje tylko w tej przeglądarce.',
@@ -2453,6 +2470,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Smazat ${label}`,
     },
     libraryFile: {
+      unnamed: 'Knihovna bez názvu',
+      renameTitle: 'Pojmenuj svou knihovnu',
       export: 'Exportovat…',
       exportTitle:
         'Uloží celou tvou knihovnu — symboly a frakce — do souboru, abys ji přenesl na jiný počítač nebo měl kopii. Knihovna žije jen v tomhle prohlížeči.',
@@ -2732,6 +2751,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `${label} törlése`,
     },
     libraryFile: {
+      unnamed: 'Névtelen könyvtár',
+      renameTitle: 'Nevezd el a könyvtáradat',
       export: 'Exportálás…',
       exportTitle:
         'Az egész könyvtáradat — ikonokat és frakciókat — fájlba menti, hogy másik gépre vidd, vagy legyen róla másolatod. A könyvtár csak ebben a böngészőben él.',
@@ -3012,6 +3033,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Удалить ${label}`,
     },
     libraryFile: {
+      unnamed: 'Библиотека без названия',
+      renameTitle: 'Дать библиотеке название',
       export: 'Экспорт…',
       exportTitle:
         'Сохраняет всю вашу библиотеку — символы и фракции — в файл, чтобы перенести её на другой компьютер или иметь копию. Библиотека живёт только в этом браузере.',
@@ -3292,6 +3315,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Видалити ${label}`,
     },
     libraryFile: {
+      unnamed: 'Бібліотека без назви',
+      renameTitle: 'Дати бібліотеці назву',
       export: 'Експорт…',
       exportTitle:
         'Зберігає всю вашу бібліотеку — символи й фракції — у файл, щоб перенести її на інший комп’ютер або мати копію. Бібліотека живе лише в цьому браузері.',
@@ -3572,6 +3597,8 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Изтриване на ${label}`,
     },
     libraryFile: {
+      unnamed: 'Библиотека без име',
+      renameTitle: 'Дайте име на библиотеката си',
       export: 'Експортиране…',
       exportTitle:
         'Запазва цялата ви библиотека — символи и фракции — във файл, за да я пренесете на друг компютър или да имате копие. Библиотеката живее само в този браузър.',

@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useT } from '../i18n/strings'
 import { supportsFileSystem } from '../model/files'
 import { deckName as fileDeckName } from '../model/storage'
 import { Button } from './controls'
-import { EditIcon, FolderIcon, PlusIcon, SaveIcon } from './icons'
+import { FolderIcon, PlusIcon, SaveIcon } from './icons'
+import { NameField } from './NameField'
 
 type Props = {
   /** Título del grupo, al costado del nombre. Ver abajo. */
@@ -47,67 +48,28 @@ export function DeckFileControls({
   // sentido en vez de "Mazo sin guardar".
   const displayName = name ?? (fileName ? fileDeckName(fileName) : null)
 
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState('')
-
-  const startEdit = () => {
-    setDraft(displayName ?? '')
-    setEditing(true)
-  }
-
-  const commit = () => {
-    onRename(draft.trim())
-    setEditing(false)
-  }
-
   return (
     <div className="flex flex-col gap-2">
       {/* El nombre va en el renglón del título del grupo y no debajo: es el
           nombre *de eso*, y así el pie se ahorra un renglón entero — que en
-          una pantalla baja es justo lo que escasea.
+          una pantalla baja es justo lo que escasea. Es el mismo renglón que el
+          de la biblioteca, más abajo, y por eso el campo es el mismo
+          componente.
 
           El punto ámbar dice que hay cambios sin guardar; el archivo completo,
-          con extensión, va en el tooltip.
-
-          El nombre lleva fondo y borde propios aunque no se esté editando: es
-          un campo, y sin nada atrás no se lee como algo que se pueda tocar. La
-          caja es la misma que la del input —mismo padding, mismo borde—, así
-          que al entrar a editar no se mueve nada. */}
+          con extensión, va en el tooltip. */}
       <div className="flex min-w-0 items-center gap-2">
         <h2 className="shrink-0 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
           {title}
         </h2>
 
-        {editing ? (
-        <input
-          autoFocus
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onFocus={(event) => event.target.select()}
-          onBlur={commit}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') commit()
-            if (event.key === 'Escape') setEditing(false)
-          }}
+        <NameField
+          name={displayName}
           placeholder={t.deckFooter.unsavedName}
-          className="min-w-0 flex-1 rounded border border-sand-500 bg-zinc-900 px-1.5 py-1 text-sm text-zinc-100 outline-none"
-        />
-        ) : (
-        <button
-          type="button"
-          onClick={startEdit}
           title={fileName ?? t.deckFooter.renameTitle}
-          className={`group flex min-w-0 flex-1 items-center gap-1.5 rounded border border-zinc-800 bg-zinc-900 px-1.5 py-1 text-sm transition-colors hover:border-zinc-700 hover:bg-zinc-800 ${
-            displayName ? 'text-zinc-100' : 'text-zinc-500 italic'
-          }`}
-        >
-          {dirty && <span className="size-1.5 shrink-0 rounded-full bg-amber-400" />}
-          <span className="truncate">{displayName ?? t.deckFooter.unsavedName}</span>
-          <span className="ml-auto shrink-0 text-zinc-500">
-            <EditIcon />
-          </span>
-        </button>
-        )}
+          dirty={dirty}
+          onRename={onRename}
+        />
       </div>
 
       {!native && (

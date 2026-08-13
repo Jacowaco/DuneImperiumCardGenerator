@@ -11,11 +11,13 @@
  */
 
 const DB_NAME = 'dune-card-generator'
-const VERSION = 3
+const VERSION = 4
 
 export const FILES_STORE = 'files'
 export const ICONS_STORE = 'icons'
 export const FACTIONS_STORE = 'factions'
+/** Lo que es de la biblioteca entera y no de un icono ni de una facción: hoy, su nombre. */
+export const LIBRARY_STORE = 'library'
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -30,6 +32,9 @@ function openDb(): Promise<IDBDatabase> {
         db.createObjectStore(ICONS_STORE, { keyPath: 'id' })
       if (!db.objectStoreNames.contains(FACTIONS_STORE))
         db.createObjectStore(FACTIONS_STORE, { keyPath: 'id' })
+      // Sin `keyPath`: guarda valores sueltos —un string— con la clave afuera,
+      // como `files`. Los otros dos guardan objetos que traen su propio `id`.
+      if (!db.objectStoreNames.contains(LIBRARY_STORE)) db.createObjectStore(LIBRARY_STORE)
     }
 
     request.onsuccess = () => resolve(request.result)

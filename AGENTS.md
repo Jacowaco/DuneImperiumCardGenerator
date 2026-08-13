@@ -301,6 +301,40 @@ parece que el botón no hizo nada. Ese aviso verde es el mismo lugar y la misma
 forma que el error rojo del preview: es el mismo canal, y lo único que cambia
 es si salió bien o mal.
 
+### El nombre de la biblioteca
+
+La biblioteca se puede bautizar, y el nombre va **al costado del título
+BIBLIOTECA** del pie de la galería, en el mismo renglón y con el mismo campo
+que el del mazo cuatro filas más arriba (`src/ui/NameField.tsx`, que los dos
+usan). A esa distancia, cualquier diferencia entre los dos se leería como que
+hacen cosas distintas.
+
+**No está para distinguir, está para reconocer.** El nombre del mazo separa un
+mazo de otro; la biblioteca es una sola por navegador, así que el suyo no
+desempata nada — sirve cuando el archivo exportado llega a otra máquina, o
+cuando abrís la app en la computadora del laburo y querés saber cuál de tus
+bibliotecas es ésta. De ahí sale todo lo demás:
+
+- **Vive en IndexedDB** (`src/model/libraryName.ts`, store `library`, versión 4
+  de la base) y no en el localStorage donde vive el idioma, para ser parte de
+  la misma cosa que nombra: borrar los datos del sitio se lleva la biblioteca y
+  el nombre juntos. Aparte quedaría una biblioteca vacía pero bautizada.
+- **Viaja en el archivo** (`.dunelib.json` versión 2; la 1 no lo tenía y se lee
+  igual, sin nombre). Al importar sigue la regla de adoptar y no pisar, así que
+  **sólo entra si no tenías uno**: la biblioteca que recibe es la tuya y lo de
+  afuera se le suma, así que renombrártela sería el archivo decidiendo sobre lo
+  tuyo.
+- **De ahí sale el nombre del archivo exportado**, con la fecha igual:
+  `Mis iconos-2026-08-13.dunelib.json`. La fecha hace falta *aunque* haya
+  nombre, porque lo que se repite son las exportaciones: dos respaldos de la
+  misma biblioteca se llaman igual justamente porque es la misma. Va la fecha
+  local y no `toISOString()`, que es UTC — a la noche el respaldo diría el día
+  siguiente.
+
+Como el resto de la biblioteca, el nombre **no pasa por `mutate`**: no se
+deshace con Ctrl+Z ni marca el mazo como sin guardar. Y «sin nombre» es no
+tener el dato, no tener `''`, así que borrarlo borra la clave.
+
 En `files.ts`, exportar e importar no usan el camino del mazo: `saveTextAs` y
 `openText` guardan y leen sin quedarse con el *handle*, porque la biblioteca se
 exporta de a una vez y no se sobrescribe seguido como el mazo. Donde no está la

@@ -31,6 +31,7 @@ import {
   type OpenedDeck,
 } from './model/files'
 import { parseLibrary, serializeLibrary, suggestedLibraryName } from './model/libraryFile'
+import { loadLibraryName, saveLibraryName } from './model/libraryName'
 import { buildIconLibrary, IconLibraryProvider } from './model/iconLibrary'
 import { adoptIcons, listLibraryIcons, saveLibraryIcon, syncLibrary } from './model/iconStore'
 import { LanguageProvider, useLanguageState } from './model/language'
@@ -52,6 +53,7 @@ import { Dialog } from './ui/Dialog'
 import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, FolderIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon, SaveIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
 import { IconPanel } from './ui/IconPanel'
+import { NameField } from './ui/NameField'
 import { PrintPanel } from './ui/PrintPanel'
 import { RulesPanel } from './ui/RulesPanel'
 import { Tabs } from './ui/Tabs'
@@ -144,12 +146,29 @@ export function App() {
   // Mismo patrón que los iconos propios: una lista del usuario, guardada en
   // el navegador y disponible en todos los mazos.
   const [myFactions, setMyFactions] = useState<CustomFaction[]>([])
+  /**
+   * Cómo bautizaste tu biblioteca. Es una sola por navegador, así que el
+   * nombre no está para distinguirla de otra sino para reconocerla —en el pie,
+   * y sobre todo cuando el archivo exportado llega a otra máquina—.
+   */
+  const [libraryName, setLibraryName] = useState<string | null>(null)
 
   useEffect(() => {
     // La biblioteca se lee una vez al arrancar; después la mueven los paneles.
     void listLibraryIcons().then(setMyIcons)
     void listLibraryFactions().then(setMyFactions)
+    void loadLibraryName().then(setLibraryName)
   }, [])
+
+  /**
+   * El nombre es del navegador, como el resto de la biblioteca: no pasa por
+   * `mutate`, así que no se deshace con Ctrl+Z ni marca el mazo como sin
+   * guardar. Vacío es no tener nombre, no tener `''`.
+   */
+  const renameLibrary = (name: string) => {
+    setLibraryName(name || null)
+    void saveLibraryName(name)
+  }
 
   const { cards } = deck
 
@@ -244,14 +263,23 @@ export function App() {
    * navegador y que hasta ahora no había forma de mudar ni de respaldar.
    */
   const exportLibrary = () =>
-    run(() => saveTextAs(serializeLibrary(myIcons, myFactions), suggestedLibraryName()))
+    run(() =>
+      saveTextAs(
+        serializeLibrary(myIcons, myFactions, libraryName),
+        suggestedLibraryName(libraryName),
+      ),
+    )
 
   const importLibraryText = async (json: string) => {
-    const { icons, factions } = parseLibrary(json)
+    const { icons, factions, name } = parseLibrary(json)
     // Adoptar y no pisar: lo que ya tenías con ese id es el que vale, igual
     // que al abrir un mazo con biblioteca adentro.
     if (icons.length) setMyIcons(await adoptIcons(icons))
     if (factions.length) setMyFactions(await adoptFactions(factions))
+    // El nombre sigue la misma regla, y por eso sólo entra si no tenías: la
+    // biblioteca que recibe es la tuya —lo de afuera se le suma—, así que
+    // renombrártela sería el archivo decidiendo sobre tu biblioteca.
+    if (name && !libraryName) renameLibrary(name)
     setNotice(t.libraryFile.imported(icons.length, factions.length))
   }
 
@@ -940,9 +968,19 @@ export function App() {
                 />
               </div>
 
-              <GroupTitle hint={t.deckFooter.libraryGroupHint}>
-                {t.deckFooter.libraryGroup}
-              </GroupTitle>
+              {/* Mismo renglón que el del mazo, cuatro filas más arriba: el
+                  título del grupo y, al costado, el nombre de eso. */}
+              <div className="flex min-w-0 items-center gap-2">
+                <GroupTitle hint={t.deckFooter.libraryGroupHint}>
+                  {t.deckFooter.libraryGroup}
+                </GroupTitle>
+                <NameField
+                  name={libraryName}
+                  placeholder={t.libraryFile.unnamed}
+                  title={t.libraryFile.renameTitle}
+                  onRename={renameLibrary}
+                />
+              </div>
               {/*
                 Los dos diálogos y, debajo, el archivo de la biblioteca entera.
 
@@ -1144,7 +1182,7 @@ function OnlyDoneFilter({
  */
 function GroupTitle({ children, hint }: { children: string; hint?: string }) {
   return (
-    <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+    <h2 className="flex shrink-0 items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
       {children}
       {hint && <HintMark label={hint} />}
     </h2>

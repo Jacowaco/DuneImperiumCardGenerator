@@ -46,7 +46,7 @@ import { CardGallery } from './ui/CardGallery'
 import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
-import { Button } from './ui/controls'
+import { Button, Toggle } from './ui/controls'
 import { Dialog } from './ui/Dialog'
 import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
@@ -109,6 +109,12 @@ export function App() {
   const [paper, setPaper] = useState<PaperId>('a4')
   const [bleed, setBleed] = useState(false)
   const [copies, setCopies] = useState(1)
+  /**
+   * Dejar afuera las que todavía no están terminadas. Vale para las dos formas
+   * de sacar el mazo —el PDF y el zip—, y por eso vive acá y se prende al pie
+   * de la galería, junto a los dos botones, y no adentro del diálogo de uno.
+   */
+  const [onlyDone, setOnlyDone] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Lo que salió bien también hay que decirlo: importar una biblioteca no
@@ -261,10 +267,29 @@ export function App() {
   const card = cards[index]
 
   // Autoguardado: recargar la página no debería costar el trabajo hecho.
+  //
+  // Si el mazo no entra en el cupo del navegador —unos 5 MB, y las imágenes
+  // van como data URL adentro— hay que decirlo: el trabajo sigue en memoria,
+  // pero recargar se lo lleva. Se avisa una sola vez por sesión, porque el
+  // autoguardado corre con cada cambio y el cartel taparía la carta.
+  const autosaveWarned = useRef(false)
   useEffect(() => {
-    const timer = setTimeout(() => saveAutosave(deck), 500)
+    const timer = setTimeout(() => {
+      if (saveAutosave(deck) || autosaveWarned.current) return
+      autosaveWarned.current = true
+      setError(t.errors.autosaveFull)
+    }, 500)
     return () => clearTimeout(timer)
-  }, [deck])
+  }, [deck, t])
+
+  // Cerrar la pestaña con cambios sin guardar. El navegador muestra su propio
+  // cartel; lo único que se puede hacer es pedirlo.
+  useEffect(() => {
+    if (!dirty) return
+    const onBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault()
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [dirty])
 
   // El handle sobrevive a la recarga, así que "Guardar" sigue yendo al mismo
   // archivo. El permiso de escritura no sobrevive: se vuelve a pedir al
@@ -378,23 +403,86 @@ export function App() {
   undoRef.current = undo
   redoRef.current = redo
 
+  // El resto de los atajos también va por ref, por lo mismo: el listener se
+  // engancha una vez y adentro siempre está la versión vigente. Se llena más
+  // abajo, cuando ya existen las funciones de guardar y abrir.
+  const shortcutsRef = useRef<{ save: () => void; open: () => void; step: (by: number) => void }>({
+    save: () => {},
+    open: () => {},
+    step: () => {},
+  })
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return
-      // Adentro de un diálogo (iconos propios, imprimir) el atajo es del
+      // Adentro de un diálogo (iconos propios, imprimir) los atajos son del
       // diálogo, no del mazo.
       if ((event.target as HTMLElement | null)?.closest('dialog[open]')) return
-      event.preventDefault()
-      if (event.shiftKey) redoRef.current()
-      else undoRef.current()
+
+      if (event.ctrlKey || event.metaKey) {
+        const key = event.key.toLowerCase()
+        if (key === 'z') {
+          event.preventDefault()
+          if (event.shiftKey) redoRef.current()
+          else undoRef.current()
+        } else if (key === 's') {
+          // Guardar es lo que más se repite y era lo único que había que ir a
+          // buscar con el mouse.
+          event.preventDefault()
+          shortcutsRef.current.save()
+        } else if (key === 'o') {
+          event.preventDefault()
+          shortcutsRef.current.open()
+        }
+        return
+      }
+
+      // Cambiar de carta va con Alt y no con las flechas solas: las flechas
+      // solas son del campo de texto, del slider de zoom y de la lista que
+      // esté enfocada, y peleárselas rompería más de lo que arregla.
+      if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        event.preventDefault()
+        shortcutsRef.current.step(event.key === 'ArrowLeft' ? -1 : 1)
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  const addCard = (newCard: Card) => {
-    mutateCards((current) => [...current, newCard])
-    setSelected(cards.length)
+  /**
+   * Pegar la imagen del jugador. Recortar de una web o de una captura y pegar
+   * es el camino más corto que hay para traerla, y era el único que faltaba —
+   * ya estaban elegir el archivo y arrastrarlo.
+   *
+   * Va sobre el documento y no sobre el preview porque un pegado sin foco en
+   * ningún lado no llega a un elemento en particular. Un pegado dentro de un
+   * campo de texto no se toca: ahí el usuario está escribiendo.
+   */
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.closest('input, textarea, [contenteditable="true"]')) return
+
+      const file = [...(event.clipboardData?.files ?? [])].find((item) =>
+        item.type.startsWith('image/'),
+      )
+      if (!file) return
+      event.preventDefault()
+      // Carta terminada: está bloqueada para editar, y pegar es editar.
+      if (cards[index]?.done) return
+      void setArtFromFile(file)
+    }
+    document.addEventListener('paste', onPaste)
+    return () => document.removeEventListener('paste', onPaste)
+    // Sin lista de dependencias a propósito: se reengancha en cada dibujo, que
+    // es lo que mantiene fresca la carta abierta. Acá sí se puede —un pegado
+    // por minuto, no uno por frame como el arrastre de la imagen—, y una lista
+    // incompleta dejaría el arte cayendo en la carta equivocada.
+  })
+
+  /** `at` es dónde entra; sin eso va al final, que es lo que hace «Nueva». */
+  const addCard = (newCard: Card, at = cards.length) => {
+    mutateCards((current) => [...current.slice(0, at), newCard, ...current.slice(at)])
+    setSelected(at)
   }
 
   const toggleDone = (target: number) =>
@@ -405,6 +493,24 @@ export function App() {
   const removeCard = (target: number) => {
     mutateCards((current) => current.filter((_, i) => i !== target))
     setSelected((current) => (target < current ? current - 1 : current))
+  }
+
+  /**
+   * Mover una carta a otro lugar del mazo. `to` es el hueco al que se la
+   * arrastró, contado sobre la lista **con** la carta todavía adentro: si el
+   * hueco está más adelante, sacarla corre todo un lugar hacia atrás.
+   *
+   * El orden importa porque es el de la hoja de impresión y el del zip, así
+   * que la carta movida queda seleccionada: es la que se estaba mirando.
+   */
+  const moveCard = (from: number, to: number) => {
+    const target = to > from ? to - 1 : to
+    if (target === from) return
+    mutateCards((current) => {
+      const rest = current.filter((_, i) => i !== from)
+      return [...rest.slice(0, target), current[from], ...rest.slice(target)]
+    })
+    setSelected(target)
   }
 
   /** Todo cambio del archivo abierto pasa por acá, para recordarlo. */
@@ -479,6 +585,15 @@ export function App() {
       if (opened) loadDeck(opened)
     })
 
+  // Recién acá, que es donde ya existen las tres. El listener del teclado se
+  // enganchó una sola vez y siempre lee esta versión.
+  shortcutsRef.current = {
+    save: handleSave,
+    open: handleOpen,
+    /** Moverse por el mazo sin ir al mouse: la galería puede ser larga. */
+    step: (by) => setSelected(Math.min(cards.length - 1, Math.max(0, index + by))),
+  }
+
   const setArtFromFile = async (file: File | undefined) => {
     if (!file?.type.startsWith('image/')) return
     try {
@@ -517,10 +632,31 @@ export function App() {
     }
   }
 
+  /**
+   * El mazo tal como sale afuera. Es lo único que ven el PDF y el zip: el
+   * tilde de terminada era hasta ahora una anotación que no llegaba a ningún
+   * lado, y la carta a medio hacer se colaba igual en la hoja.
+   *
+   * Se filtra el mazo entero y no sólo las cartas porque `prepare()` necesita
+   * los iconos y las facciones para dibujarlas.
+   */
+  const doneCount = cards.filter((item) => item.done).length
+  const exportedDeck = onlyDone ? { ...deck, cards: cards.filter((item) => item.done) } : deck
+  const exportedCards = exportedDeck.cards
+  const exportedUnits = exportedCards.reduce((total, item) => total + item.copies, 0)
+
+  /** Con el filtro prendido y ninguna terminada no hay nada que sacar. */
+  const guardEmptyExport = () => {
+    if (exportedCards.length) return false
+    setError(t.errors.noneFinished)
+    return true
+  }
+
   const handleExportSheets = async () => {
+    if (guardEmptyExport()) return
     setSheetExporting(true)
     try {
-      await exportPrintSheets(deck, { paper, bleed, copies, language })
+      await exportPrintSheets(exportedDeck, { paper, bleed, copies, language })
     } catch (cause) {
       setError(describeError(cause, language, t.errors.sheetFailed))
     } finally {
@@ -529,9 +665,10 @@ export function App() {
   }
 
   const handleExportAllPng = async () => {
+    if (guardEmptyExport()) return
     setCardsExporting(true)
     try {
-      await exportCardsPng(deck, { language })
+      await exportCardsPng(exportedDeck, { language })
     } catch (cause) {
       setError(describeError(cause, language, t.errors.cardsFailed))
     } finally {
@@ -719,10 +856,13 @@ export function App() {
             selected={index}
             onSelect={setSelected}
             onAdd={() => addCard(emptyCard())}
-            // La copia arranca pendiente: se duplica una carta para cambiarla.
-            onDuplicate={(target) => addCard({ ...cards[target], done: false })}
+            // La copia arranca pendiente —se duplica una carta para cambiarla—
+            // y entra al lado de la original: es con la que se la va a
+            // comparar, y al final del mazo quedaba lejos.
+            onDuplicate={(target) => addCard({ ...cards[target], done: false }, target + 1)}
             onRemove={removeCard}
             onToggleDone={toggleDone}
+            onMove={moveCard}
           >
             {/* Lo del mazo entero, al pie de la columna del mazo.
 
@@ -765,6 +905,18 @@ export function App() {
                     {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
                   </Button>
                 </div>
+
+                {/* Vale para los dos botones de arriba —el PDF y el zip son
+                    las dos formas de sacar el mazo—, así que va con ellos y no
+                    adentro del diálogo de uno solo. Sin ninguna terminada no
+                    hay nada que filtrar: el tilde de la galería es el que lo
+                    habilita. */}
+                <Toggle
+                  label={t.deckFooter.onlyDone(doneCount)}
+                  checked={onlyDone}
+                  disabled={doneCount === 0}
+                  onChange={setOnlyDone}
+                />
               </div>
 
               <GroupTitle>{t.deckFooter.libraryGroup}</GroupTitle>
@@ -829,7 +981,9 @@ export function App() {
         {dialog === 'print' && (
           <Dialog title={t.dialogs.print} onClose={() => setDialog(null)}>
             <PrintPanel
-              cards={cards.length}
+              cards={exportedCards.length}
+              units={exportedUnits}
+              onlyDone={onlyDone}
               paper={paper}
               bleed={bleed}
               copies={copies}

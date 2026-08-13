@@ -1,5 +1,12 @@
 import type { IconId } from '../assets/icons'
-import { emptyCard, PLAY_ROWS, type Card, type ContentPart, type Faction } from './card'
+import {
+  clampCopies,
+  emptyCard,
+  PLAY_ROWS,
+  type Card,
+  type ContentPart,
+  type Faction,
+} from './card'
 import type { CustomFaction } from './customFaction'
 import type { CustomIcon } from './customIcon'
 import { AppError } from './errors'
@@ -39,7 +46,7 @@ export const emptyDeck = (): Deck => ({ name: null, cards: [emptyCard()], icons:
 
 type SavedFile = {
   format: 'dune-imperium-card'
-  version: 8
+  version: 9
   name: string | null
   cards: Card[]
   icons: CustomIcon[]
@@ -63,7 +70,7 @@ type LegacyFile = { format: string; version?: number; card?: Card }
 export function serializeDeck(deck: Deck): string {
   const file: SavedFile = {
     format: 'dune-imperium-card',
-    version: 8,
+    version: 9,
     name: deck.name,
     cards: deck.cards,
     icons: deck.icons,
@@ -130,6 +137,11 @@ function migrate(card: LegacyCard): Card {
   if (!PLAY_ROWS.includes(card.playRows)) card.playRows = 1
   delete card.revealBox
 
+  // Hasta la versión 8 no había copias por carta. El valor de una carta vieja
+  // lo pone `emptyCard()`; esto es para un archivo editado a mano, donde un 0
+  // dejaría la carta afuera de la hoja de impresión sin decir por qué.
+  card.copies = clampCopies(card.copies)
+
   const toParts = (icons: { icon: IconId; amount: number }[]): ContentPart[] =>
     icons.map(({ icon, amount }) => ({ type: 'icon', icon, amount }))
 
@@ -182,11 +194,20 @@ export function deckName(fileName: string) {
   return bare.trim() || fileName
 }
 
-export function saveAutosave(deck: Deck) {
+/**
+ * Devuelve si pudo guardar. El caso que falla es el probable —las imágenes
+ * viajan como data URL y el cupo de localStorage son unos 5 MB—, y es
+ * justamente el que hay que decir: creerse respaldado y no estarlo es peor que
+ * saber que hay que guardar a archivo.
+ */
+export function saveAutosave(deck: Deck): boolean {
   try {
     localStorage.setItem(AUTOSAVE_KEY, serializeDeck(deck))
+    return true
   } catch {
-    // Se llenó la cuota (imágenes grandes). No es motivo para romper la app.
+    // Se llenó la cuota. No es motivo para romper la app: el mazo sigue entero
+    // en memoria y se puede guardar a archivo, que es lo que hay que avisar.
+    return false
   }
 }
 

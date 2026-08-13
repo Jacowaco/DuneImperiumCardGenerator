@@ -69,6 +69,39 @@ un porcentaje fijo. Una imagen más chica que el recorte necesita más de
 `MAX_ART_SCALE` sólo para cubrirlo, así que el techo también se calcula por
 imagen (`maxArtScale`).
 
+**Girar y espejar es parte del encuadre, no una edición de la imagen.** El
+`ArtTransform` lleva `rotation` (0/90/180/270) y `flip`, los dos opcionales
+para no engordar el archivo en el caso común, y el PNG no se vuelve a
+codificar: girar una foto no le baja calidad ni le cambia el peso al mazo.
+
+De ahí salen dos reglas que hay que respetar en cualquier cuenta de encuadre:
+
+- **Las medidas son siempre las de la imagen ya girada** (`orientedSize` /
+  `artSize`): con 90 o 270 el alto pasa a ser el ancho, así que el cover, el
+  techo del zoom y los límites del arrastre cambian. Pasarle a `coverScale` el
+  tamaño del archivo dejaría destapar el fondo con la imagen de costado.
+- **Konva gira alrededor de la posición del nodo**, así que con 90° el nodo
+  queda fuera de la caja que ocupa la imagen. `artPlacement` devuelve dónde
+  ponerlo: calcula las cuatro esquinas ya transformadas y corre el nodo por la
+  diferencia. El modelo guarda siempre la esquina de la **caja girada**, que es
+  lo que ve el usuario; el `dragBoundFunc` y el `onDragMove` suman y restan esa
+  diferencia (`minX`/`minY`).
+
+El espejado va **después** del giro —espeja lo que se ve— y en Konva eso es un
+`scaleX` negativo con el giro al revés, porque `R(-r)·F = F·R(r)`. Con el giro
+tal cual, espejar y después girar 90° daría el resultado de girar 270°.
+
+Girar reencuadra de cero (ajustar y centrar): al girar, el recorte muestra una
+parte completamente distinta de la imagen, así que no hay un "mismo encuadre"
+que conservar. Espejar sí lo conserva —el tamaño no cambia—, reflejando la
+posición dentro del recorte.
+
+La imagen entra de tres formas y las tres terminan en `loadArtFromFile`:
+elegir el archivo, arrastrarlo sobre el preview y **pegarlo con Ctrl+V**. El
+pegado escucha en el documento, porque un pegado sin foco en ningún lado no
+llega a ningún elemento en particular, y se hace a un lado si el foco está en
+un campo de texto: ahí el usuario está escribiendo.
+
 El arrastre además necesita `dragBoundFunc`: Konva mueve el nodo por su cuenta
 mientras se arrastra, sin pasar por el estado de React, así que limitarlo sólo
 al guardar el transform dejaría ver el borde durante el movimiento.
@@ -90,6 +123,22 @@ hace que funcione, y es el mismo del PSD.
 Las dos cajas van **siempre**: toda carta tiene turno de agente y banda de
 revelación, aunque queden vacías. Lo único que se elige es el alto de la de
 play (1, 2 o 3 filas).
+
+**Unload** (`card.unload`, Rise of Ix) es una marca de la banda de revelación y
+no una caja aparte: dice que la revelación también se cobra al descartar y al
+destruir la carta, y no cambia lo que la banda dice. Por eso `unload.png` se
+dibuja **encima** de `reveal-box.png` y no en su lugar — el PNG es sólo la
+placa roja con sus dos iconos y el parche que tapa las cartas del símbolo de
+revelación (alpha de y=850 a 1009, contra 809 a 1023 de la banda), así que solo
+dejaría media banda sin dibujar.
+
+La placa es opaca, así que el contenido de la banda tiene que arrancar después:
+`Box` lleva un `left` opcional y `revealBox(rows, unload)` lo pone en
+`CONTENT.reveal.unloadLeft` = 213, que es la punta del chevrón (medida sobre el
+PNG a la altura donde cae la fila; el cuerpo de la placa termina antes, en
+189). Ese `left` lo usan el layout, las zonas de arrastre sobre la carta y el
+cursor de inserción — si sólo lo usara uno, el cursor quedaría corrido de lo
+que se ve.
 
 La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
 carta terminada queda casi tapada por los iconos de contenido; sola se ve más
@@ -297,10 +346,6 @@ Alianza, Fremen Bond y el requisito de influencia tipo "2 Influence" **no son
 iconos sueltos**: en las cartas reales son texto con un icono al lado, dentro
 de la caja de contenido. Ya se pueden armar con el editor.
 
-De las expansiones falta conectar `unload.png`, que ya está en `layers/` pero
-sin usar (es el Unload de Rise of Ix: una caja de revelación que además se
-dispara al descartar o destruir la carta).
-
 El icono que se creía que era el Dreadnought (nave) en realidad es el de
 Carguero (`freighter`, el escudo con el chevrón claro adentro): el reglamento
 de Ix lo confirma. `expansion icons.png` no trae un icono de Dreadnought
@@ -312,13 +357,18 @@ se necesita el símbolo suelto.
 Los reglamentos de Rise of Ix e Immortality están en `reference/`, y de ahí
 salen los nombres de los iconos de `expansion icons.png`.
 
-Dos cosas que aclara el reglamento de Ix y conviene no volver a deducir:
+Tres cosas que aclara el reglamento de Ix y conviene no volver a deducir:
 
 - Los iconos de la carpeta `icons/infiltrate/` son la **Infiltración** de Rise
   of Ix, no un estilo alternativo: dejan mandar un agente a un espacio que ya
   ocupa un rival. Por eso son los mismos siete iconos con otro marco.
 - `unit` es "tropa o dreadnought" — por eso el icono es un cubo fusionado con
   el casco de un dreadnought.
+- **Unload** es una marca de la caja de revelación, no una caja aparte: la
+  revelación se cobra también al descartar y al destruir la carta. Los dos
+  iconos de la placa roja son ésos dos. Si la carta se revela en un turno de
+  revelación, se ignora la marca y se cobra normal — y la carta **no** da por
+  sí misma la opción de descartarse ni destruirse.
 
 ## Cómo trabajar acá
 
@@ -598,22 +648,32 @@ grilla siguen ocupando la celda entera.
   - [x] Guardar / Guardar como con diálogo nativo, recordando el archivo
   - [x] hoja de impresión 3×3
   - [x] export en lote
+  - [x] reordenar las cartas arrastrándolas, ejemplares por carta y sacar
+        afuera sólo las terminadas
 - [ ] Fase 6 — empaquetado de escritorio
 
 ### Lo próximo
 
-En orden de valor, y ninguno depende de exportar nada más del PSD:
+Lo que queda está trabado esperando arte del PSD — ver "Falta exportar" —, más
+el empaquetado de escritorio de la Fase 6.
 
-1. **Conectar `unload.png`** — la banderola roja de Rise of Ix. En las cartas
-   reales lleva texto y un icono adentro, así que se resuelve con el mismo
-   `ContentPart` que ya existe.
-
-Y lo que sigue trabado esperando arte del PSD está en "Falta exportar".
+Lo más grande que se puede hacer sin arte nueva es el **reverso de carta**,
+para imprimir a doble faz: necesita una segunda cara en el modelo y páginas
+alternadas en el PDF, con la vuelta espejada para que al dar vuelta la hoja
+cada reverso caiga sobre su carta.
 
 ## Las hojas de impresión
 
 `src/export/printSheet.ts` arma la grilla de cartas que entra en el papel
 elegido y la baja como **un PDF con todas las páginas**, no como PNG sueltos.
+
+Las copias se multiplican y son dos cosas distintas: `card.copies` son los
+**ejemplares que el mazo tiene de esa carta** —parte del mazo, se guardan en el
+archivo y se editan con la carta abierta—, y el número del diálogo de imprimir
+es **cuántas veces se imprime el mazo entero**, que es de esta impresión y no
+viaja. `sheetCards()` las junta, dejando las copias de una carta seguidas para
+poder cortarlas de una. El zip del export en lote ignora las dos: saca un PNG
+por carta, porque el mismo archivo repetido no agrega nada.
 
 Lo que aporta el PDF es el **tamaño físico**: la hoja viaja declarada en puntos,
 así que se imprime 1:1 y no hay forma de que un "ajustar a la página" deje las
@@ -767,7 +827,22 @@ como que "Guardar" ignoró el mazo abierto, que fue justamente el bug.
 
 El estado "sin guardar" se marca en `mutate()` (`src/App.tsx`), que es el único
 lugar por donde pasan los cambios del mazo — comparar el mazo serializado
-contra el último guardado sería carísimo con las imágenes embebidas.
+contra el último guardado sería carísimo con las imágenes embebidas. Con ese
+estado prendido, cerrar la pestaña pasa por el cartel del navegador
+(`beforeunload`).
+
+**El autoguardado puede fallar y hay que decirlo.** Va a `localStorage`, que
+son unos 5 MB, y las imágenes viajan adentro como data URL: un mazo con varias
+fotos no entra. `saveAutosave` devuelve si pudo, y la app avisa una sola vez
+por sesión — creerse respaldado y no estarlo es peor que saber que hay que
+guardar a archivo. Antes el error se tragaba en silencio.
+
+Los atajos son **Ctrl+S** (guardar), **Ctrl+O** (abrir), **Ctrl+Z / Ctrl+Mayús+Z**
+y **Alt+←/→** para moverse entre cartas. Todos salen del mismo listener, que se
+engancha una vez y lee las funciones vigentes por ref. Cambiar de carta va con
+Alt y no con las flechas solas porque las flechas solas son del campo de texto,
+del slider de zoom y de la lista que esté enfocada. Adentro de un diálogo los
+atajos son del diálogo.
 
 El diálogo nativo no se puede automatizar con Playwright, así que las pruebas
 end-to-end cubren el camino de respaldo (borrando `window.showSaveFilePicker`)
@@ -841,14 +916,25 @@ constante.
 
 ## La galería
 
-El archivo guardado pasó a tener un **mazo** (`version: 8`, con `name`,
+El archivo guardado pasó a tener un **mazo** (`version: 9`, con `name`,
 `cards[]`, `icons[]` y `factions[]`). `migrate()` en `src/model/storage.ts`
 sube los archivos viejos al abrirlos: la versión 1 tenía una sola carta en
 `card`, la 2 guardaba el contenido de las cajas como listas de iconos sueltos
 (`playIcons` / `revealIcons`) en vez de piezas mezcladas con texto, la 3 no
-tenía iconos propios, la 4 no tenía nombre propio y la 7 no tenía facciones
-propias — un mazo así muestra en el pie de la galería el nombre del archivo,
-hasta que se edita.
+tenía iconos propios, la 4 no tenía nombre propio, la 7 no tenía facciones
+propias —un mazo así muestra en el pie de la galería el nombre del archivo,
+hasta que se edita— y la 8 no tenía ejemplares por carta.
+
+**El orden de la galería es el orden del mazo**: el de la hoja de impresión y
+el de los PNG del zip. Por eso las cartas se arrastran para reordenarlas —
+antes, cambiar el orden salía sólo borrando y rehaciendo—, y por eso duplicar
+mete la copia **al lado** de la original y no al final: se duplica una carta
+para compararla con la que salió.
+
+El destino del arrastre es un hueco *entre* cartas, de 0 a `cards.length`, y no
+la carta de al lado: así el borde de la primera y el de la última también son
+destinos. `moveCard` descuenta uno cuando el hueco está más adelante, porque
+sacar la carta corre todo un lugar hacia atrás.
 
 La 6 sumó `library?: CustomIcon[]` y la 8 sumó `factionLibrary?:
 CustomFaction[]`, las bibliotecas enteras del que guardó. **Hoy sólo se leen.**
@@ -882,6 +968,11 @@ pueda verse distinta de como se va a exportar.
 trabajo: viaja en el archivo del mazo pero **el render no la mira**, así que no
 sale en el PNG — el sello de la galería y el tilde de la casilla son HTML
 aparte del `Stage` de Konva, no capas de la carta.
+
+Lo que sí la mira es **sacar el mazo afuera**: el toggle «Sólo las terminadas»
+del pie de la galería deja la carta a medio hacer fuera del PDF y del zip. Va
+con los dos botones y no adentro del diálogo de uno, porque el PDF y el zip son
+las dos formas de lo mismo, y se apaga solo mientras no haya ninguna terminada.
 
 La marca vive en tres lugares, y los tres son siempre visibles (nada depende
 de pasar el mouse — la primera versión sí, y el resultado fue que la función

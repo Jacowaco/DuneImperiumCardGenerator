@@ -3,7 +3,12 @@ import type { IconLibrary } from '../model/iconLibrary'
 import { CONTENT } from './constants'
 import { fontSizeForCapHeight, textWidth } from './text'
 
-export type Box = { top: number; bottom: number }
+/**
+ * El área donde entra el contenido de una caja. El ancho es el de la carta
+ * salvo que algo lo coma: la banderola de Unload ocupa el arranque de la banda
+ * de revelación, y ahí el contenido empieza más a la derecha (`left`).
+ */
+export type Box = { top: number; bottom: number; left?: number }
 
 /**
  * De qué pieza de la lista salió lo que se dibujó, y en qué renglón cayó.
@@ -147,7 +152,8 @@ export function layoutContent(
   const items = measure(parts, library, placeholder)
   if (!items.length) return []
 
-  const maxWidth = CONTENT.right - CONTENT.left - CONTENT.paddingX * 2
+  const left = box.left ?? CONTENT.left
+  const maxWidth = CONTENT.right - left - CONTENT.paddingX * 2
   const maxHeight = box.bottom - box.top - CONTENT.padding * 2
 
   let scale = 1
@@ -157,7 +163,7 @@ export function layoutContent(
     lines = wrap(items, maxWidth / scale)
   }
 
-  const centerX = (CONTENT.left + CONTENT.right) / 2
+  const centerX = (left + CONTENT.right) / 2
   const placements: Placement[] = []
   let y = (box.top + box.bottom) / 2 - (blockHeight(lines) * scale) / 2
 
@@ -248,10 +254,14 @@ export const playBox = (rows: number): Box => ({
  * Área útil de la banda de revelación: lo que queda debajo de la caja de play.
  * Con una sola fila la caja termina antes de que empiece la banda, así que ahí
  * manda el tope de la banda.
+ *
+ * Con Unload el contenido arranca después de la banderola roja: es una placa
+ * opaca, no un fondo, así que el texto que le cayera encima no se leería.
  */
-export const revealBox = (rows: number): Box => ({
+export const revealBox = (rows: number, unload = false): Box => ({
   top: Math.max(CONTENT.play.bottoms[rows], CONTENT.reveal.top),
   bottom: CONTENT.reveal.bottom,
+  left: unload ? CONTENT.reveal.unloadLeft : undefined,
 })
 
 /**

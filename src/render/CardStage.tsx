@@ -8,7 +8,7 @@ import blackBorderUrl from '../assets/layers/black-border.png'
 import cardArtContainerUrl from '../assets/layers/card-art-container.png'
 import { NO_EXPORT } from '../export/exportPng'
 import { useT } from '../i18n/strings'
-import { clampArtScale, clampArtTransform } from '../model/art'
+import { artPlacement, artSize, clampArtScale, clampArtTransform } from '../model/art'
 import type { ArtTransform, Card } from '../model/card'
 import { ART_RECT, CARD_HEIGHT, CARD_WIDTH } from './constants'
 import { useCardImage } from './imageCache'
@@ -77,7 +77,9 @@ export function CardStage({
     const py = pointer.y / scale
 
     const { x, y, scale: current } = card.art.transform
-    const { width, height } = card.art
+    // Las cuentas de encuadre van sobre la imagen ya girada, no sobre el
+    // archivo: con 90° o 270° el alto y el ancho están cambiados.
+    const { width, height } = artSize(card.art)
     const next = clampArtScale(
       current * Math.exp(-event.evt.deltaY * ZOOM_SPEED),
       width,
@@ -101,11 +103,16 @@ export function CardStage({
 
   const handleDrag = (event: KonvaEventObject<DragEvent>) => {
     if (!card.art || !onArtChange || card.art.locked) return
+    // El nodo está corrido respecto de la caja que ocupa la imagen cuando hay
+    // giro (`artPlacement`), así que se le suma la misma diferencia para volver
+    // a la esquina de la caja, que es lo que guarda el modelo.
+    const { minX, minY } = artPlacement(card.art)
+    const { width, height } = artSize(card.art)
     onArtChange(
       clampArtTransform(
-        { ...card.art.transform, x: event.target.x(), y: event.target.y() },
-        card.art.width,
-        card.art.height,
+        { ...card.art.transform, x: event.target.x() + minX, y: event.target.y() + minY },
+        width,
+        height,
       ),
     )
   }
@@ -167,27 +174,30 @@ function ArtImage({
   onDrag: (event: KonvaEventObject<DragEvent>) => void
 }) {
   const image = useCardImage(art.src)
+  const { konvaX, konvaY, minX, minY, rotation, scaleX, scaleY } = artPlacement(art)
+  const { width, height } = artSize(art)
   if (!image) return null
 
   return (
     <KonvaImage
       image={image}
-      x={art.transform.x}
-      y={art.transform.y}
-      scaleX={art.transform.scale}
-      scaleY={art.transform.scale}
+      x={konvaX}
+      y={konvaY}
+      rotation={rotation}
+      scaleX={scaleX}
+      scaleY={scaleY}
       draggable={draggable}
       // Konva mueve el nodo por su cuenta durante el arrastre, así que el
       // límite tiene que aplicarse acá y no sólo al guardar el transform.
       // La posición viene en píxeles de pantalla; el modelo está en píxeles
-      // de carta.
+      // de carta, y apunta a la esquina de la imagen girada y no a la del nodo.
       dragBoundFunc={(pos) => {
         const clamped = clampArtTransform(
-          { ...art.transform, x: pos.x / stageScale, y: pos.y / stageScale },
-          art.width,
-          art.height,
+          { ...art.transform, x: pos.x / stageScale + minX, y: pos.y / stageScale + minY },
+          width,
+          height,
         )
-        return { x: clamped.x * stageScale, y: clamped.y * stageScale }
+        return { x: (clamped.x - minX) * stageScale, y: (clamped.y - minY) * stageScale }
       }}
       onDragMove={onDrag}
       onDragEnd={onDrag}

@@ -65,6 +65,8 @@ type Strings = {
     exportingAll: string
     /** Igual que `topBar.exportTitle`: el formato, que ya no va en la etiqueta. */
     exportAllTitle: string
+    /** Vale para los dos botones de sacar el mazo: el PDF y el zip. */
+    onlyDone: (done: number) => string
   }
   gallery: {
     /**
@@ -83,6 +85,8 @@ type Strings = {
     reopenTitle: string
     markDoneTitle: string
     markPendingAria: string
+    /** El «×N» de la miniatura: cuántos ejemplares lleva el mazo. */
+    copiesStamp: (copies: number) => string
   }
   cardPanel: {
     name: string
@@ -101,6 +105,8 @@ type Strings = {
     amount: string
     otherValue: string
     agentIcons: string
+    copies: string
+    copiesHint: string
   }
   contentEditor: {
     empty: string
@@ -127,6 +133,8 @@ type Strings = {
     agentSilhouette: string
     reveal: string
     contentHint: string
+    unload: string
+    unloadHint: string
   }
   artPanel: {
     image: string
@@ -136,6 +144,8 @@ type Strings = {
     zoom: string
     fit: string
     center: string
+    rotate: string
+    flip: string
     dragZoomHint: string
     placeholder: string
     frame: string
@@ -204,7 +214,13 @@ type Strings = {
     perSheetSuffix: string
     fitsOnOne: string
     spansPages: (pages: number) => string
-    copies: string
+    /**
+     * Cuántas veces se imprime el mazo entero. Las copias de **cada carta** se
+     * eligen en la carta (`cardPanel.copies`), porque son parte del mazo y
+     * viajan en el archivo; esto es de esta impresión nada más.
+     */
+    deckCopies: string
+    onlyDoneHint: (cards: number) => string
     copiesOtherValue: string
     copiesDecrease: string
     copiesIncrease: string
@@ -225,6 +241,10 @@ type Strings = {
     sheetFailed: string
     cardsFailed: string
     iconFailed: string
+    /** El autoguardado no entró en el cupo del navegador. */
+    autosaveFull: string
+    /** Se pidió sacar el mazo con el filtro puesto y no hay ninguna terminada. */
+    noneFinished: string
     permissionDenied: (fileName: string) => string
   }
 }
@@ -293,6 +313,7 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Exportar mazo…',
       exportingAll: 'Exportando mazo…',
       exportAllTitle: 'Exportar todas las cartas como PNGs sueltos, en un zip',
+      onlyDone: (done) => `Sólo las terminadas (${done})`,
     },
     gallery: {
       title: 'Cartas',
@@ -305,6 +326,7 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Terminada — clic para reabrir',
       markDoneTitle: 'Marcar como terminada',
       markPendingAria: 'Marcar como pendiente',
+      copiesStamp: (copies) => `${copies} ejemplares en el mazo`,
     },
     cardPanel: {
       name: 'Nombre',
@@ -323,6 +345,9 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Cantidad',
       otherValue: 'Otro valor',
       agentIcons: 'Iconos de agente',
+      copies: 'Ejemplares',
+      copiesHint:
+        'Cuántas veces está esta carta en el mazo. Se guarda en el archivo y lo usa la hoja de impresión; el zip de PNGs saca uno solo por carta.',
     },
     contentEditor: {
       empty: 'Caja vacía.',
@@ -348,6 +373,9 @@ const STRINGS: Record<Language, Strings> = {
       agentSilhouette: 'Silueta del agente',
       reveal: 'Revelación',
       contentHint: 'Arrastrá iconos, texto y renglones para agregarlos o para reordenarlos.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: la revelación también se cobra al descartar y al destruir la carta. La banderola ocupa el arranque de la banda, así que el contenido entra más angosto.',
     },
     artPanel: {
       image: 'Imagen',
@@ -357,7 +385,10 @@ const STRINGS: Record<Language, Strings> = {
       zoom: 'Zoom',
       fit: 'Ajustar',
       center: 'Centrar',
-      dragZoomHint: 'Arrastrá la imagen sobre la carta para moverla; la rueda hace zoom.',
+      rotate: 'Girar un cuarto de vuelta',
+      flip: 'Espejar',
+      dragZoomHint:
+        'Arrastrá la imagen sobre la carta para moverla; la rueda hace zoom. También podés pegar una imagen con Ctrl+V.',
       placeholder: 'Arrastrá una imagen acá\no tocá para elegirla',
       frame: 'Encuadre',
       frameFree: 'Encuadre libre',
@@ -438,7 +469,9 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'por hoja.',
       fitsOnOne: 'El mazo entra en una.',
       spansPages: (pages) => `El mazo ocupa ${pages}.`,
-      copies: 'Copias por carta',
+      deckCopies: 'Copias del mazo entero',
+      onlyDoneHint: (cards) =>
+        `Se imprimen sólo las terminadas: ${pluralCards(cards, 'es')} del mazo.`,
       copiesOtherValue: 'Otra cantidad',
       copiesDecrease: 'Restar una copia',
       copiesIncrease: 'Sumar una copia',
@@ -462,6 +495,9 @@ const STRINGS: Record<Language, Strings> = {
       sheetFailed: 'No se pudo armar la hoja.',
       cardsFailed: 'No se pudieron exportar las cartas.',
       iconFailed: 'No se pudo cargar el icono.',
+      autosaveFull:
+        'El mazo no entra en el guardado automático del navegador: si recargás la página, se pierde lo que no hayas guardado. Guardalo en un archivo.',
+      noneFinished: 'No hay ninguna carta terminada para sacar. Destildá «Sólo las terminadas».',
       permissionDenied: (fileName) =>
         `Chrome pide permiso para escribir sobre ${fileName}. Apretá Guardar de nuevo y elegí «Editar archivo», o usá Guardar como… para elegir otro.`,
       'not-a-card': () => 'El archivo no es una carta de Dune: Imperium.',
@@ -540,6 +576,7 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Export deck…',
       exportingAll: 'Exporting deck…',
       exportAllTitle: 'Export every card as a loose PNG, inside a zip',
+      onlyDone: (done) => `Finished cards only (${done})`,
     },
     gallery: {
       title: 'Cards',
@@ -552,6 +589,7 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finished — click to reopen',
       markDoneTitle: 'Mark as finished',
       markPendingAria: 'Mark as pending',
+      copiesStamp: (copies) => `${copies} copies in the deck`,
     },
     cardPanel: {
       name: 'Name',
@@ -570,6 +608,9 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Amount',
       otherValue: 'Custom value',
       agentIcons: 'Agent Icons',
+      copies: 'Copies',
+      copiesHint:
+        'How many times this card is in the deck. It is saved in the file and used by the print sheet; the PNG zip exports one file per card.',
     },
     contentEditor: {
       empty: 'Empty box.',
@@ -595,6 +636,9 @@ const STRINGS: Record<Language, Strings> = {
       agentSilhouette: 'Agent Silhouette',
       reveal: 'Reveal',
       contentHint: 'Drag icons, text and line breaks to add them or to reorder them.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: the Reveal box also pays out when the card is discarded or trashed. The banner takes up the start of the band, so the content fits in a narrower space.',
     },
     artPanel: {
       image: 'Image',
@@ -604,7 +648,10 @@ const STRINGS: Record<Language, Strings> = {
       zoom: 'Zoom',
       fit: 'Fit',
       center: 'Center',
-      dragZoomHint: 'Drag the image over the card to move it; the wheel zooms.',
+      rotate: 'Rotate a quarter turn',
+      flip: 'Mirror',
+      dragZoomHint:
+        'Drag the image over the card to move it; the wheel zooms. You can also paste an image with Ctrl+V.',
       placeholder: 'Drag an image here\nor tap to choose one',
       frame: 'Frame',
       frameFree: 'Free frame',
@@ -685,7 +732,9 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'per sheet.',
       fitsOnOne: 'The deck fits on one.',
       spansPages: (pages) => `The deck spans ${pages}.`,
-      copies: 'Copies per card',
+      deckCopies: 'Copies of the whole deck',
+      onlyDoneHint: (cards) =>
+        `Only finished cards get printed: ${pluralCards(cards, 'en')} of the deck.`,
       copiesOtherValue: 'Custom amount',
       copiesDecrease: 'Remove one copy',
       copiesIncrease: 'Add one copy',
@@ -709,6 +758,9 @@ const STRINGS: Record<Language, Strings> = {
       sheetFailed: "Couldn't build the sheet.",
       cardsFailed: "Couldn't export the cards.",
       iconFailed: "Couldn't load the icon.",
+      autosaveFull:
+        "The deck doesn't fit in the browser's autosave: if you reload the page, anything unsaved is lost. Save it to a file.",
+      noneFinished: 'There are no finished cards to export. Uncheck "Finished cards only".',
       permissionDenied: (fileName) =>
         `Chrome needs permission to write to ${fileName}. Press Save again and choose "Edit file", or use Save as… to pick another.`,
       'not-a-card': () => "The file isn't a Dune: Imperium card.",
@@ -788,6 +840,7 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Exportar baralho…',
       exportingAll: 'Exportando baralho…',
       exportAllTitle: 'Exportar todas as cartas como PNGs soltos, dentro de um zip',
+      onlyDone: (done) => `Só as finalizadas (${done})`,
     },
     gallery: {
       title: 'Cartas',
@@ -800,6 +853,7 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finalizada — clique para reabrir',
       markDoneTitle: 'Marcar como finalizada',
       markPendingAria: 'Marcar como pendente',
+      copiesStamp: (copies) => `${copies} exemplares no baralho`,
     },
     cardPanel: {
       name: 'Nome',
@@ -818,6 +872,9 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Quantidade',
       otherValue: 'Outro valor',
       agentIcons: 'Ícones de agente',
+      copies: 'Exemplares',
+      copiesHint:
+        'Quantas vezes esta carta está no baralho. Fica salvo no arquivo e é usado pela folha de impressão; o zip de PNGs sai com um por carta.',
     },
     contentEditor: {
       empty: 'Caixa vazia.',
@@ -843,6 +900,9 @@ const STRINGS: Record<Language, Strings> = {
       agentSilhouette: 'Silhueta do agente',
       reveal: 'Revelação',
       contentHint: 'Arraste ícones, texto e quebras de linha para adicioná-los ou reordená-los.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: a revelação também é cobrada ao descartar e ao destruir a carta. A faixa ocupa o começo da banda, então o conteúdo entra mais estreito.',
     },
     artPanel: {
       image: 'Imagem',
@@ -852,7 +912,10 @@ const STRINGS: Record<Language, Strings> = {
       zoom: 'Zoom',
       fit: 'Ajustar',
       center: 'Centralizar',
-      dragZoomHint: 'Arraste a imagem sobre a carta para movê-la; a roda faz zoom.',
+      rotate: 'Girar um quarto de volta',
+      flip: 'Espelhar',
+      dragZoomHint:
+        'Arraste a imagem sobre a carta para movê-la; a roda faz zoom. Você também pode colar uma imagem com Ctrl+V.',
       placeholder: 'Arraste uma imagem aqui\nou toque para escolher',
       frame: 'Moldura',
       frameFree: 'Moldura livre',
@@ -933,7 +996,9 @@ const STRINGS: Record<Language, Strings> = {
       perSheetSuffix: 'por folha.',
       fitsOnOne: 'O baralho cabe em uma.',
       spansPages: (pages) => `O baralho ocupa ${pages}.`,
-      copies: 'Cópias por carta',
+      deckCopies: 'Cópias do baralho inteiro',
+      onlyDoneHint: (cards) =>
+        `Só as finalizadas são impressas: ${pluralCards(cards, 'pt')} do baralho.`,
       copiesOtherValue: 'Outra quantidade',
       copiesDecrease: 'Tirar uma cópia',
       copiesIncrease: 'Somar uma cópia',
@@ -957,6 +1022,9 @@ const STRINGS: Record<Language, Strings> = {
       sheetFailed: 'Não foi possível montar a folha.',
       cardsFailed: 'Não foi possível exportar as cartas.',
       iconFailed: 'Não foi possível carregar o ícone.',
+      autosaveFull:
+        'O baralho não cabe no salvamento automático do navegador: se você recarregar a página, perde o que não tiver salvo. Salve em um arquivo.',
+      noneFinished: 'Não há nenhuma carta finalizada para exportar. Desmarque «Só as finalizadas».',
       permissionDenied: (fileName) =>
         `O Chrome pede permissão para gravar em ${fileName}. Aperte Salvar de novo e escolha «Editar arquivo», ou use Salvar como… para escolher outro.`,
       'not-a-card': () => 'O arquivo não é uma carta de Dune: Imperium.',

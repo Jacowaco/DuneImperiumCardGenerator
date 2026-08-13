@@ -54,11 +54,16 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
       {
         box: 'reveal',
         label: t.rulesPanel.reveal,
-        area: revealBox(rows),
-        placements: layoutContent(card.revealContent, revealBox(rows), library, placeholder),
+        area: revealBox(rows, card.unload),
+        placements: layoutContent(
+          card.revealContent,
+          revealBox(rows, card.unload),
+          library,
+          placeholder,
+        ),
       },
     ],
-    [card.playContent, card.revealContent, rows, library, placeholder, t],
+    [card.playContent, card.revealContent, card.unload, rows, library, placeholder, t],
   )
 
   const dragging = dragSource !== null
@@ -124,7 +129,7 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                 const rect = event.currentTarget.getBoundingClientRect()
                 setCaret(
                   insertionAt(placements, area, {
-                    x: (event.clientX - rect.left) / scale + CONTENT.left,
+                    x: (event.clientX - rect.left) / scale + (area.left ?? CONTENT.left),
                     y: (event.clientY - rect.top) / scale + area.top,
                   }),
                 )
@@ -168,8 +173,8 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
 type Caret = { index: number; x: number; top: number; height: number }
 
 const boxStyle = (area: Box, scale: number) => ({
-  left: CONTENT.left * scale,
-  width: (CONTENT.right - CONTENT.left) * scale,
+  left: (area.left ?? CONTENT.left) * scale,
+  width: (CONTENT.right - (area.left ?? CONTENT.left)) * scale,
   top: area.top * scale,
   height: (area.bottom - area.top) * scale,
 })
@@ -187,7 +192,7 @@ function insertionAt(placements: Placement[], area: Box, pointer: { x: number; y
   if (!placements.length) {
     return {
       index: 0,
-      x: (CONTENT.left + CONTENT.right) / 2,
+      x: ((area.left ?? CONTENT.left) + CONTENT.right) / 2,
       top: middle - CONTENT.text.lineHeight / 2,
       height: CONTENT.text.lineHeight,
     }

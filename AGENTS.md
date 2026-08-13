@@ -69,6 +69,39 @@ un porcentaje fijo. Una imagen más chica que el recorte necesita más de
 `MAX_ART_SCALE` sólo para cubrirlo, así que el techo también se calcula por
 imagen (`maxArtScale`).
 
+**Girar y espejar es parte del encuadre, no una edición de la imagen.** El
+`ArtTransform` lleva `rotation` (0/90/180/270) y `flip`, los dos opcionales
+para no engordar el archivo en el caso común, y el PNG no se vuelve a
+codificar: girar una foto no le baja calidad ni le cambia el peso al mazo.
+
+De ahí salen dos reglas que hay que respetar en cualquier cuenta de encuadre:
+
+- **Las medidas son siempre las de la imagen ya girada** (`orientedSize` /
+  `artSize`): con 90 o 270 el alto pasa a ser el ancho, así que el cover, el
+  techo del zoom y los límites del arrastre cambian. Pasarle a `coverScale` el
+  tamaño del archivo dejaría destapar el fondo con la imagen de costado.
+- **Konva gira alrededor de la posición del nodo**, así que con 90° el nodo
+  queda fuera de la caja que ocupa la imagen. `artPlacement` devuelve dónde
+  ponerlo: calcula las cuatro esquinas ya transformadas y corre el nodo por la
+  diferencia. El modelo guarda siempre la esquina de la **caja girada**, que es
+  lo que ve el usuario; el `dragBoundFunc` y el `onDragMove` suman y restan esa
+  diferencia (`minX`/`minY`).
+
+El espejado va **después** del giro —espeja lo que se ve— y en Konva eso es un
+`scaleX` negativo con el giro al revés, porque `R(-r)·F = F·R(r)`. Con el giro
+tal cual, espejar y después girar 90° daría el resultado de girar 270°.
+
+Girar reencuadra de cero (ajustar y centrar): al girar, el recorte muestra una
+parte completamente distinta de la imagen, así que no hay un "mismo encuadre"
+que conservar. Espejar sí lo conserva —el tamaño no cambia—, reflejando la
+posición dentro del recorte.
+
+La imagen entra de tres formas y las tres terminan en `loadArtFromFile`:
+elegir el archivo, arrastrarlo sobre el preview y **pegarlo con Ctrl+V**. El
+pegado escucha en el documento, porque un pegado sin foco en ningún lado no
+llega a ningún elemento en particular, y se hace a un lado si el foco está en
+un campo de texto: ahí el usuario está escribiendo.
+
 El arrastre además necesita `dragBoundFunc`: Konva mueve el nodo por su cuenta
 mientras se arrastra, sin pasar por el estado de React, así que limitarlo sólo
 al guardar el transform dejaría ver el borde durante el movimiento.
@@ -90,6 +123,22 @@ hace que funcione, y es el mismo del PSD.
 Las dos cajas van **siempre**: toda carta tiene turno de agente y banda de
 revelación, aunque queden vacías. Lo único que se elige es el alto de la de
 play (1, 2 o 3 filas).
+
+**Unload** (`card.unload`, Rise of Ix) es una marca de la banda de revelación y
+no una caja aparte: dice que la revelación también se cobra al descartar y al
+destruir la carta, y no cambia lo que la banda dice. Por eso `unload.png` se
+dibuja **encima** de `reveal-box.png` y no en su lugar — el PNG es sólo la
+placa roja con sus dos iconos y el parche que tapa las cartas del símbolo de
+revelación (alpha de y=850 a 1009, contra 809 a 1023 de la banda), así que solo
+dejaría media banda sin dibujar.
+
+La placa es opaca, así que el contenido de la banda tiene que arrancar después:
+`Box` lleva un `left` opcional y `revealBox(rows, unload)` lo pone en
+`CONTENT.reveal.unloadLeft` = 213, que es la punta del chevrón (medida sobre el
+PNG a la altura donde cae la fila; el cuerpo de la placa termina antes, en
+189). Ese `left` lo usan el layout, las zonas de arrastre sobre la carta y el
+cursor de inserción — si sólo lo usara uno, el cursor quedaría corrido de lo
+que se ve.
 
 La silueta del agente (`agent-icon.png`) va encima de la caja de play y en la
 carta terminada queda casi tapada por los iconos de contenido; sola se ve más
@@ -297,10 +346,6 @@ Alianza, Fremen Bond y el requisito de influencia tipo "2 Influence" **no son
 iconos sueltos**: en las cartas reales son texto con un icono al lado, dentro
 de la caja de contenido. Ya se pueden armar con el editor.
 
-De las expansiones falta conectar `unload.png`, que ya está en `layers/` pero
-sin usar (es el Unload de Rise of Ix: una caja de revelación que además se
-dispara al descartar o destruir la carta).
-
 El icono que se creía que era el Dreadnought (nave) en realidad es el de
 Carguero (`freighter`, el escudo con el chevrón claro adentro): el reglamento
 de Ix lo confirma. `expansion icons.png` no trae un icono de Dreadnought
@@ -312,13 +357,18 @@ se necesita el símbolo suelto.
 Los reglamentos de Rise of Ix e Immortality están en `reference/`, y de ahí
 salen los nombres de los iconos de `expansion icons.png`.
 
-Dos cosas que aclara el reglamento de Ix y conviene no volver a deducir:
+Tres cosas que aclara el reglamento de Ix y conviene no volver a deducir:
 
 - Los iconos de la carpeta `icons/infiltrate/` son la **Infiltración** de Rise
   of Ix, no un estilo alternativo: dejan mandar un agente a un espacio que ya
   ocupa un rival. Por eso son los mismos siete iconos con otro marco.
 - `unit` es "tropa o dreadnought" — por eso el icono es un cubo fusionado con
   el casco de un dreadnought.
+- **Unload** es una marca de la caja de revelación, no una caja aparte: la
+  revelación se cobra también al descartar y al destruir la carta. Los dos
+  iconos de la placa roja son ésos dos. Si la carta se revela en un turno de
+  revelación, se ignora la marca y se cobra normal — y la carta **no** da por
+  sí misma la opción de descartarse ni destruirse.
 
 ## Cómo trabajar acá
 
@@ -348,12 +398,22 @@ const browser = await chromium.launch({
 })
 ```
 
-Con eso se llena el panel, se saca screenshot y se dispara "Exportar PNG"
+Con eso se llena el panel, se saca screenshot y se dispara "Exportar carta"
 capturando el evento `download` — o sea que se puede revisar el PNG exportado
 de verdad, no sólo el preview. Conviene siempre escuchar `pageerror` y
 `console` para no dar por bueno un render que tiró excepciones.
 
+`playwright-core` no está en el proyecto: se instala en el scratchpad
+(`npm install playwright-core`) y los scripts se corren desde ahí. Ojo con el
+heredoc de bash para escribirlos — se come los `\\` de la ruta del Edge y el
+launch falla diciendo que el ejecutable no existe; conviene escribir el `.mjs`
+con la herramienta de archivos, o usar barras normales en la ruta.
+
 Detalles que hacen perder tiempo si no se saben:
+- **Una clase `opacity-0` con `transition-opacity` no se puede medir en el mismo
+  tick que la disparó**: `getComputedStyle` justo después de un `.focus()`
+  devuelve el `0` del arranque de la transición, no el `1` del final. Hay que
+  esperar antes de leer, o el test reprueba un fix que anda.
 - **El panel está en pestañas**: antes de buscar un control hay que abrir la
   suya con `page.getByRole('tab', { name: 'Reglas' }).click()`. Un control que
   "no aparece" casi siempre está en otra pestaña, o adentro de un diálogo —
@@ -402,15 +462,18 @@ La app se usa en una pantalla de computadora: **ancha y baja**. Todo el layout
 sale de ahí, porque lo que escasea es el alto y lo que sobra es el ancho.
 
 ```
-┌─ TopBar ─ idioma · deshacer/rehacer · Exportar PNG ──────────────────┐
+┌─ TopBar ─ (i) · idioma · deshacer/rehacer · Exportar carta ──────────┐
 ├──────────────┬─────────────────────────────────────┬────────────────┤
-│ pestañas     │                                     │ galería        │
-│ Imagen       │            preview                  │ (el mazo,      │
-│ Carta        │                                     │  en columna)   │
-│ Reglas       │                                     ├────────────────┤
-│              │                                     │ nombre · Abrir │
+│ pestañas     │                                     │ Cartas         │
+│ Identidad    │            preview                  │ (el mazo,      │
+│ Reglas       │                                     │  en columna)   │
+│              │                                     ├────────────────┤
+│              │                                     │ Mazo: nombre   │
+│              │                                     │ Nuevo│Abrir…   │
 │              │                                     │ Guardar/Como…  │
-│              │                                     │ Iconos│Imprim  │
+│              │                                     │ Imprim│Export  │
+│              │                                     │ Biblioteca:    │
+│              │                                     │ Iconos│Faccion │
 └──────────────┴─────────────────────────────────────┴────────────────┘
 ```
 
@@ -431,29 +494,64 @@ De ahí salen cuatro decisiones, todas para no gastar alto:
   barra cosas del mazo con cosas de la sesión de edición; agrupar por qué es
   cada cosa resultó más claro que agrupar por qué tan seguido se toca. La
   barra de arriba se quedó con lo que no es ni de una carta ni del mazo como
-  archivo: deshacer/rehacer, el idioma, y exportar la carta abierta.
+  archivo: deshacer/rehacer, el idioma, el (i) de «Acerca de», y exportar la
+  carta abierta.
+
+  **Los dos «exportar» se distinguen por el alcance, no por el formato.** Arriba
+  «Exportar carta» y en el pie «Exportar mazo…»; el formato —PNG suelto contra
+  un zip de PNGs— va en el `title`. Antes decían «Exportar PNG» y «Exportar
+  PNGs…», que se diferencian en una letra, iban los dos en dorado y compartían
+  la misma etiqueta de ocupado («Exportando…»): mientras corría no se sabía cuál
+  era.
 - **El panel va en pestañas** (`src/ui/Tabs.tsx`). Eran trece secciones
   apiladas en una sola columna. Cada pestaña agrupa una decisión distinta sobre
-  la carta, y van en el orden en que se arma una: **Imagen** (`ArtPanel`),
-  **Encabezado** (`CardPanel`) y **Reglas** (`RulesPanel`). La imagen es lo
-  primero porque es lo que hace que la carta sea algo — por eso es también la
-  pestaña con la que abre la app. Como todo el panel es de la carta abierta, se
-  bloquea entero con `inert` al marcarla terminada.
+  la carta, y van en el orden en que se arma una: **Identidad** —`ArtPanel` y
+  `CardPanel` juntos— y **Reglas** (`RulesPanel`). Identidad es la primera y con
+  la que abre la app, porque la imagen es lo que hace que la carta sea algo. Como
+  todo el panel es de la carta abierta, se bloquea entero con `inert` al marcarla
+  terminada.
 
-  Los nombres son las **zonas de la carta**, no categorías abstractas:
-  "Encabezado" es lo que se dibuja arriba —placa del nombre, banda de facción y
-  rombo del costo— y "Reglas" son las cajas de abajo. La del medio se llamó
-  "Carta" al principio y era un mal nombre: en un editor de cartas **todo** es
-  la carta, así que no distinguía nada, y encima adentro tenía una sección
-  llamada igual.
+  "Identidad" es **qué es la carta** —imagen, nombre, facción, iconos de agente
+  y costo— contra "Reglas", que es qué hace. Antes eran tres pestañas, con la
+  imagen aparte del encabezado; se juntaron porque las dos contestan la misma
+  pregunta y separarlas costaba un viaje de ida y vuelta para armar la mitad de
+  arriba de la carta. La del medio se llamó "Carta" en la primera versión y era
+  un mal nombre: en un editor de cartas **todo** es la carta, así que no
+  distinguía nada, y encima adentro tenía una sección llamada igual.
 - **La galería va a la derecha, en columna.** El preview es una carta parada:
   el alto es justo lo que necesita y una tira de miniaturas abajo se lo
   quitaba. Al costado ocupa ancho, que es lo que sobra.
+
+  La columna lleva **dos títulos y ninguno se repite**: arriba «Cartas», que es
+  lo que la grilla lista, y en el pie «Mazo», que es el nombre y las acciones de
+  archivo. Los dos decían «Mazo» y a media columna de distancia no distinguían
+  nada — la columna entera es el mazo, así que titular las dos partes igual no
+  agregaba información.
 - **Lo que se usa cada tanto va en diálogo** (`src/ui/Dialog.tsx`, el `<dialog>`
   nativo). Iconos propios e impresión son del mazo entero, así que se abren
   desde el pie de la columna del mazo — que es donde se los busca — y no
   ocupan lugar fijo mientras no se usan. Ese pie es `children` de
   `CardGallery`, para que la galería siga siendo sólo cartas.
+
+  El cuarto diálogo, **Acerca de** (`src/ui/AboutPanel.tsx`), es la excepción a
+  esa regla de dónde se abre: se abre con el (i) de la barra de arriba, pegado
+  al nombre y a la versión, porque no es del mazo ni de la carta abierta sino
+  de la app entera. Adentro va el descargo —proyecto de fans, sin fines de
+  lucro, las marcas y el arte son de Dire Wolf Digital y de los dueños de
+  Dune—, el mismo que está en el README, y como cualquier texto de la UI vive
+  en `strings.ts` en los tres idiomas.
+
+**Las dos grillas de iconos del panel se abren distinto, y las dos tienen que
+quedar a la vista.** La de las cajas de contenido (`ContentPalette`) está
+`sticky bottom-0` y se topa a `max-h-[42vh]`, así que aparece siempre pegada al
+pie sin tapar las cajas que se están llenando. La del beneficio de compra
+(`CardPanel`) es inline y **cae abajo de todo**: el beneficio es el último campo
+de la última sección, así que la grilla se abría entera fuera del alto visible
+—medido: cero píxeles a la vista, tanto en 1440 × 800 como en 1024 × 640— y el
+clic parecía no hacer nada. Se arregla con un `scrollIntoView({ block:
+'nearest' })` al abrirla, el mismo recurso que usa la galería para la carta
+elegida. Un control que se despliega abajo del fold necesita eso o estar
+anclado; no hay una tercera opción.
 
 Donde el navegador no tiene la File System Access API, el aviso de que
 «Guardar» baja una copia va al lado de `DeckFileControls`, en el pie de la
@@ -494,11 +592,21 @@ heredan el color del botón —incluido el atenuado de `disabled`— sin tener q
 mantener una variante por estado. La regla de dónde van:
 
 - **Sí** en botones que hacen algo con un archivo (abrir, guardar, exportar,
-  imprimir, subir), en los que abren un diálogo y en las tres pestañas. Son los
+  imprimir, subir), en los que abren un diálogo y en las dos pestañas. Son los
   que se buscan de un vistazo, y ahí el símbolo llega antes que la palabra.
+- **Sí, y sin texto al lado**, en los botones que sólo son un símbolo: cerrar un
+  diálogo, quitar una fila, quitar la imagen, duplicar una carta, el tilde de
+  terminada. Estos usaban los caracteres `×`, `⧉` y `✓` de la fuente del
+  sistema, que no alinean ni escalan con los SVG de al lado; ahora son
+  `CloseIcon`, `CopyIcon` y `CheckIcon`. El nombre va en `title` y `aria-label`,
+  que es lo único que los identifica.
 - **No** en títulos de sección, etiquetas de campo ni en los grupos de
   `Choice`/`MultiChoice`. Ahí el texto ya alcanza y el icono sólo agrega ruido —
   las facciones, además, ya se distinguen por color.
+
+Lo único que sigue siendo un carácter suelto es el `…` del botón «otro valor» de
+`NumberField`: ahí el punto suspensivo es texto, la misma convención que
+«Guardar como…», y no un símbolo que haya que dibujar.
 
 El de iconos propios es el **rombo del juego** y no un "shapes" genérico: la
 forma de los iconos de Dune es esa, y así el botón dice de qué iconos habla.
@@ -540,22 +648,32 @@ grilla siguen ocupando la celda entera.
   - [x] Guardar / Guardar como con diálogo nativo, recordando el archivo
   - [x] hoja de impresión 3×3
   - [x] export en lote
+  - [x] reordenar las cartas arrastrándolas, ejemplares por carta y sacar
+        afuera sólo las terminadas
 - [ ] Fase 6 — empaquetado de escritorio
 
 ### Lo próximo
 
-En orden de valor, y ninguno depende de exportar nada más del PSD:
+Lo que queda está trabado esperando arte del PSD — ver "Falta exportar" —, más
+el empaquetado de escritorio de la Fase 6.
 
-1. **Conectar `unload.png`** — la banderola roja de Rise of Ix. En las cartas
-   reales lleva texto y un icono adentro, así que se resuelve con el mismo
-   `ContentPart` que ya existe.
-
-Y lo que sigue trabado esperando arte del PSD está en "Falta exportar".
+Lo más grande que se puede hacer sin arte nueva es el **reverso de carta**,
+para imprimir a doble faz: necesita una segunda cara en el modelo y páginas
+alternadas en el PDF, con la vuelta espejada para que al dar vuelta la hoja
+cada reverso caiga sobre su carta.
 
 ## Las hojas de impresión
 
 `src/export/printSheet.ts` arma la grilla de cartas que entra en el papel
 elegido y la baja como **un PDF con todas las páginas**, no como PNG sueltos.
+
+Las copias se multiplican y son dos cosas distintas: `card.copies` son los
+**ejemplares que el mazo tiene de esa carta** —parte del mazo, se guardan en el
+archivo y se editan con la carta abierta—, y el número del diálogo de imprimir
+es **cuántas veces se imprime el mazo entero**, que es de esta impresión y no
+viaja. `sheetCards()` las junta, dejando las copias de una carta seguidas para
+poder cortarlas de una. El zip del export en lote ignora las dos: saca un PNG
+por carta, porque el mismo archivo repetido no agrega nada.
 
 Lo que aporta el PDF es el **tamaño físico**: la hoja viaja declarada en puntos,
 así que se imprime 1:1 y no hay forma de que un "ajustar a la página" deje las
@@ -709,7 +827,22 @@ como que "Guardar" ignoró el mazo abierto, que fue justamente el bug.
 
 El estado "sin guardar" se marca en `mutate()` (`src/App.tsx`), que es el único
 lugar por donde pasan los cambios del mazo — comparar el mazo serializado
-contra el último guardado sería carísimo con las imágenes embebidas.
+contra el último guardado sería carísimo con las imágenes embebidas. Con ese
+estado prendido, cerrar la pestaña pasa por el cartel del navegador
+(`beforeunload`).
+
+**El autoguardado puede fallar y hay que decirlo.** Va a `localStorage`, que
+son unos 5 MB, y las imágenes viajan adentro como data URL: un mazo con varias
+fotos no entra. `saveAutosave` devuelve si pudo, y la app avisa una sola vez
+por sesión — creerse respaldado y no estarlo es peor que saber que hay que
+guardar a archivo. Antes el error se tragaba en silencio.
+
+Los atajos son **Ctrl+S** (guardar), **Ctrl+O** (abrir), **Ctrl+Z / Ctrl+Mayús+Z**
+y **Alt+←/→** para moverse entre cartas. Todos salen del mismo listener, que se
+engancha una vez y lee las funciones vigentes por ref. Cambiar de carta va con
+Alt y no con las flechas solas porque las flechas solas son del campo de texto,
+del slider de zoom y de la lista que esté enfocada. Adentro de un diálogo los
+atajos son del diálogo.
 
 El diálogo nativo no se puede automatizar con Playwright, así que las pruebas
 end-to-end cubren el camino de respaldo (borrando `window.showSaveFilePicker`)
@@ -728,13 +861,23 @@ no es un campo de `Card` ni de `Deck`, y por eso `exportPrintSheets` recibe el
 idioma como parámetro (`SheetOptions.language`) en vez de leerlo del mazo.
 
 **Diccionario propio, sin librería.** `src/i18n/strings.ts` tiene un objeto
-`Strings` por idioma (`es` y `en`), no un mapa `clave -> {es, en}`: así
-TypeScript obliga a que los dos idiomas tengan exactamente los mismos campos,
-con el mismo tipo — si a una función traducida (una que arma texto con un
+`Strings` por idioma (`es`, `en` y `pt`), no un mapa `clave -> {es, en, pt}`:
+así TypeScript obliga a que los tres idiomas tengan exactamente los mismos
+campos, con el mismo tipo — si a una función traducida (una que arma texto con un
 número o un nombre adentro) le falta un parámetro en un solo idioma, no
 compila. Es consistente con el resto del proyecto, que evita dependencias
 pesadas para poco (el PDF de las hojas de impresión también se escribe a
 mano).
+
+**Lo que el tipo no puede ver es el idioma del valor.** Un `string` en español
+dentro del bloque `en` compila igual, y así se colaron 22 textos sin traducir —
+los dos bloques de biblioteca de `iconPanel` y `factionPanel`, agregados en
+español a los tres idiomas y traducidos sólo en uno—: la app en inglés mostraba
+«EN ESTE MAZO» y «MI BIBLIOTECA». Peor de agarrar todavía es cuando el idioma va
+como **parámetro**: `usedIn: (cards) => \`In ${pluralCards(cards, 'es')}\`` es
+válido para el compilador y devuelve texto en español. Al agregar una clave hay
+que escribir los tres valores en el momento, y al revisar conviene abrir los
+diálogos en cada idioma y leerlos — es lo único que lo encuentra.
 
 Las palabras del **juego** —facciones, iconos, estilos de agente, variantes de
 influencia, tamaños de papel— no viven en `strings.ts`: se traducen donde ya
@@ -773,14 +916,25 @@ constante.
 
 ## La galería
 
-El archivo guardado pasó a tener un **mazo** (`version: 8`, con `name`,
+El archivo guardado pasó a tener un **mazo** (`version: 9`, con `name`,
 `cards[]`, `icons[]` y `factions[]`). `migrate()` en `src/model/storage.ts`
 sube los archivos viejos al abrirlos: la versión 1 tenía una sola carta en
 `card`, la 2 guardaba el contenido de las cajas como listas de iconos sueltos
 (`playIcons` / `revealIcons`) en vez de piezas mezcladas con texto, la 3 no
-tenía iconos propios, la 4 no tenía nombre propio y la 7 no tenía facciones
-propias — un mazo así muestra en el pie de la galería el nombre del archivo,
-hasta que se edita.
+tenía iconos propios, la 4 no tenía nombre propio, la 7 no tenía facciones
+propias —un mazo así muestra en el pie de la galería el nombre del archivo,
+hasta que se edita— y la 8 no tenía ejemplares por carta.
+
+**El orden de la galería es el orden del mazo**: el de la hoja de impresión y
+el de los PNG del zip. Por eso las cartas se arrastran para reordenarlas —
+antes, cambiar el orden salía sólo borrando y rehaciendo—, y por eso duplicar
+mete la copia **al lado** de la original y no al final: se duplica una carta
+para compararla con la que salió.
+
+El destino del arrastre es un hueco *entre* cartas, de 0 a `cards.length`, y no
+la carta de al lado: así el borde de la primera y el de la última también son
+destinos. `moveCard` descuenta uno cuando el hueco está más adelante, porque
+sacar la carta corre todo un lugar hacia atrás.
 
 La 6 sumó `library?: CustomIcon[]` y la 8 sumó `factionLibrary?:
 CustomFaction[]`, las bibliotecas enteras del que guardó. **Hoy sólo se leen.**
@@ -815,6 +969,11 @@ trabajo: viaja en el archivo del mazo pero **el render no la mira**, así que no
 sale en el PNG — el sello de la galería y el tilde de la casilla son HTML
 aparte del `Stage` de Konva, no capas de la carta.
 
+Lo que sí la mira es **sacar el mazo afuera**: el toggle «Sólo las terminadas»
+del pie de la galería deja la carta a medio hacer fuera del PDF y del zip. Va
+con los dos botones y no adentro del diálogo de uno, porque el PDF y el zip son
+las dos formas de lo mismo, y se apaga solo mientras no haya ninguna terminada.
+
 La marca vive en tres lugares, y los tres son siempre visibles (nada depende
 de pasar el mouse — la primera versión sí, y el resultado fue que la función
 no se veía):
@@ -822,8 +981,8 @@ no se veía):
   recorriendo la galería.
 - Una casilla en el pie, junto al nombre, que es el control para tildar y
   destildar.
-- Una etiqueta "✓ Terminada" arriba a la izquierda del preview grande, para
-  cuando se está mirando esa carta en particular y no la galería.
+- Una etiqueta "Terminada", con tilde, arriba a la izquierda del preview grande,
+  para cuando se está mirando esa carta en particular y no la galería.
 
 Los tres son HTML puesto encima, no parte del `Stage` de Konva — por eso no
 aparecen en el PNG exportado, igual que el resto de la marca.
@@ -838,6 +997,16 @@ con el botón **Desbloquear**, que es lo mismo que destildarla desde la
 galería. Guardar y exportar siguen andando con la carta bloqueada — el
 bloqueo es sólo para no tocar el contenido por error, no para impedir sacarle
 el PNG.
+
+**Cuidado con los controles que están encima del preview**: viven en `<main>`,
+así que el `inert` del panel no los alcanza y hay que apagarlos uno por uno. Ahí
+se escapó la chapa del encuadre — el candado seguía tocándose sobre una carta
+terminada, marcando el mazo como sin guardar y abriendo un paso de deshacer, con
+el mismo botón que dentro del panel estaba inerte. Ahora la chapa no se dibuja
+con `card.done`, y `toggleArtLock` chequea `card.done` igual que `setTransform`:
+las dos cosas, porque no alcanza con esconder el botón si el handler sigue
+aceptando el cambio. La otra chapa, la de «Terminada», **sí** queda viva a
+propósito: es el control para destildar.
 
 Ojo con `inert`: React 19 trata `''` como `false` en atributos booleanos, así
 que tiene que pasarse el booleano (`inert={card.done}`), no un string vacío.

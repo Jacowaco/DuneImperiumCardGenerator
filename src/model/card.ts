@@ -12,13 +12,29 @@ import type { Language } from './language'
 export type AnyIconId = IconId | CustomIconId
 
 /**
+ * Giro de la imagen, en pasos de 90° y en sentido horario. Sólo esos cuatro:
+ * lo que hace falta es enderezar una foto que vino acostada, no inclinarla.
+ */
+export type ArtRotation = 0 | 90 | 180 | 270
+
+/**
  * Encuadre de la imagen del jugador dentro del Card Art Container.
- * x / y son coordenadas del lienzo de la carta (750 x 1039), no del recorte.
+ * x / y son coordenadas del lienzo de la carta (750 x 1039), no del recorte,
+ * y apuntan al borde de arriba a la izquierda de la imagen **ya girada**.
  */
 export type ArtTransform = {
   x: number
   y: number
   scale: number
+  /**
+   * Los dos van opcionales para que un archivo viejo —y el caso común, que es
+   * una imagen sin tocar— no cargue dos campos más por carta. Ausente es cero
+   * y `false`; quien haga cuentas usa `orientedSize` / `artPlacement`
+   * (`model/art.ts`) y no los lee sueltos.
+   */
+  rotation?: ArtRotation
+  /** Espejado horizontal, aplicado **después** del giro: espeja lo que se ve. */
+  flip?: boolean
 }
 
 export type CardArt = {
@@ -165,13 +181,37 @@ export type Card = {
   /** Iconos dentro de cada caja, en el orden en que se dibujan. */
   playContent: ContentPart[]
   revealContent: ContentPart[]
+  /**
+   * Unload (Rise of Ix): la banda de revelación lleva la banderola roja con el
+   * icono de descarte y el de destrucción. Marca dos formas más de cobrar la
+   * revelación —al descartar y al destruir la carta— y no cambia lo que la
+   * banda dice, así que es una marca de la banda y no una caja aparte.
+   */
+  unload: boolean
   art: CardArt | null
   /**
    * Marca de "ya está terminada", para saber cuáles del mazo no hay que tocar
    * más. Es una anotación de trabajo: no se dibuja ni sale en el PNG.
    */
   done: boolean
+  /**
+   * Cuántos ejemplares de esta carta tiene el mazo. Es del mazo y no de la
+   * impresión —viaja en el archivo, como el resto de la carta—: que un mazo
+   * lleve tres Espadachines es un hecho del mazo, y quien lo abra en otra
+   * máquina tiene que imprimir los tres.
+   *
+   * Sólo la mira la hoja de impresión. El zip del export en lote saca **un**
+   * PNG por carta: repetir el mismo archivo tres veces no agrega nada.
+   */
+  copies: number
 }
+
+/** Ninguna carta lleva menos de una, y el tope es para que no se cuelgue el PDF. */
+export const MIN_COPIES = 1
+export const MAX_COPIES = 99
+
+export const clampCopies = (copies: number) =>
+  Math.min(MAX_COPIES, Math.max(MIN_COPIES, Math.round(copies) || MIN_COPIES))
 
 /** Los iconos que la carta nombra, sin repetir: contenido y beneficio de compra. */
 export function cardIconIds(card: Card): Set<string> {
@@ -199,6 +239,8 @@ export const emptyCard = (): Card => ({
   agentSilhouette: true,
   playContent: [],
   revealContent: [],
+  unload: false,
   art: null,
   done: false,
+  copies: 1,
 })

@@ -7,6 +7,7 @@ import {
 } from '../assets/icons/agents'
 import { useT } from '../i18n/strings'
 import {
+  clampCopies,
   FACTION_COLORS,
   FACTION_IDS,
   FACTIONS,
@@ -37,6 +38,8 @@ type Props = {
 // quede afuera se escribe a mano en el campo de al lado.
 const COST_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 const BENEFIT_AMOUNT_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/** Arranca en 1: una carta que el mazo no lleva se borra, no se pone en cero. */
+const COPIES_QUICK_PICKS = [1, 2, 3, 4, 5, 6]
 
 /**
  * Quién es la carta: nombre, facción, a qué espacios puede mandar el agente y
@@ -330,6 +333,27 @@ export function CardPanel({ card, onChange }: Props) {
             )}
           </>
         )}
+      </Section>
+
+      {/*
+        Cuántos ejemplares de esta carta lleva el mazo. Es una propiedad de la
+        carta —viaja en el archivo y se edita con la carta abierta, como todo
+        lo de este panel— y no una opción de impresión: que un mazo lleve tres
+        Espadachines es un hecho del mazo, no de cómo se lo imprime hoy.
+
+        Lo único que la mira es la hoja de impresión. El zip del export en lote
+        saca un PNG por carta: el mismo archivo repetido tres veces no agrega
+        nada.
+      */}
+      <Section title={t.cardPanel.copies} hint={t.cardPanel.copiesHint}>
+        <NumberField
+          value={card.copies}
+          options={COPIES_QUICK_PICKS}
+          otherLabel={t.cardPanel.otherValue}
+          decreaseLabel={t.contentEditor.decrease(t.cardPanel.copies)}
+          increaseLabel={t.contentEditor.increase(t.cardPanel.copies)}
+          onChange={(copies) => onChange({ copies: clampCopies(copies) })}
+        />
       </Section>
     </>
   )

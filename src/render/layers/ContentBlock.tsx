@@ -27,7 +27,12 @@ export function ContentBlock({ card, placeholder }: { card: Card; placeholder?: 
       />
       <Block
         library={library}
-        placements={layoutContent(card.revealContent, revealBox(rows), library, placeholder)}
+        placements={layoutContent(
+          card.revealContent,
+          revealBox(rows, card.unload),
+          library,
+          placeholder,
+        )}
         textColor={CONTENT.text.revealColor}
       />
     </>

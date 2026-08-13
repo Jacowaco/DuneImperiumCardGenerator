@@ -9,7 +9,12 @@ import { DownloadIcon } from './icons'
 const COPIES_QUICK_PICKS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 type Props = {
+  /** Cartas distintas que se van a imprimir, ya filtradas por «sólo terminadas». */
   cards: number
+  /** Esas mismas cartas contando los ejemplares de cada una (`card.copies`). */
+  units: number
+  /** Si el mazo tiene cartas que quedaron afuera por no estar terminadas. */
+  onlyDone: boolean
   paper: PaperId
   bleed: boolean
   copies: number
@@ -26,6 +31,8 @@ type Props = {
  */
 export function PrintPanel({
   cards,
+  units,
+  onlyDone,
   paper,
   bleed,
   copies,
@@ -38,7 +45,9 @@ export function PrintPanel({
   const t = useT()
   const { language } = useLanguage()
   const imposition = impose(paper, bleed)
-  const total = cards * copies
+  // Las copias se multiplican: cada carta lleva las suyas (`card.copies`) y
+  // arriba de eso está cuántas veces se pide el mazo entero.
+  const total = units * copies
   const pages = sheetCount(total, imposition)
   const { widthMm, heightMm } = PAPERS[paper]
 
@@ -51,7 +60,10 @@ export function PrintPanel({
         onChange={(next) => next && onPaper(next)}
       />
 
-      <Field label={t.printPanel.copies}>
+      {/* Esto es cuántas veces se imprime el mazo entero. Las copias de cada
+          carta se eligen en la carta (`card.copies`), porque son parte del mazo
+          y viajan en el archivo; esto es de esta impresión nada más. */}
+      <Field label={t.printPanel.deckCopies}>
         <NumberField
           value={copies}
           options={COPIES_QUICK_PICKS}
@@ -66,8 +78,13 @@ export function PrintPanel({
         {widthMm} × {heightMm} mm — {imposition.columns} × {imposition.rows} ={' '}
         {imposition.perSheet} {cardWord(imposition.perSheet, language)} {t.printPanel.perSheetSuffix}{' '}
         {pages === 1 ? t.printPanel.fitsOnOne : t.printPanel.spansPages(pages)}
-        {copies > 1 && ` ${t.printPanel.copiesHint(total)}`}
+        {total !== cards && ` ${t.printPanel.copiesHint(total)}`}
       </Hint>
+
+      {/* El filtro se prende afuera, al pie de la galería, porque vale también
+          para el zip. Acá se dice qué se está por imprimir: sin esto, un PDF
+          más corto de lo esperado se lee como un error. */}
+      {onlyDone && <Hint>{t.printPanel.onlyDoneHint(cards)}</Hint>}
 
       <Toggle label={t.printPanel.bleedToggle} checked={bleed} onChange={onBleed} />
 

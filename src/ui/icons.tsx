@@ -232,6 +232,26 @@ export const CheckIcon = () => (
   </Icon>
 )
 
+/**
+ * Girar la imagen un cuarto de vuelta: la flecha da la vuelta por arriba, en
+ * el mismo sentido en que gira la foto.
+ */
+export const RotateIcon = () => (
+  <Icon>
+    <path d="M12.75 8a4.75 4.75 0 1 1-1.4-3.35" />
+    <path d="M12.9 2.4v2.6h-2.6" />
+  </Icon>
+)
+
+/** Espejar: la misma silueta a los dos lados de un eje, una dada vuelta. */
+export const FlipIcon = () => (
+  <Icon>
+    <path d="M8 2.25v11.5" strokeDasharray="2 1.6" />
+    <path d="M6.25 4.75 3.25 8l3 3.25z" />
+    <path d="M9.75 4.75 12.75 8l-3 3.25z" />
+  </Icon>
+)
+
 /** Agarradera para arrastrar y reordenar una fila de lista. */
 export const GripIcon = () => (
   <Icon>

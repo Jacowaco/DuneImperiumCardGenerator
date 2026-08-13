@@ -115,10 +115,23 @@ function drawCropMarks(context: CanvasRenderingContext2D, layout: PageLayout) {
 export type SheetOptions = {
   paper: PaperId
   bleed: boolean
+  /** Cuántas veces se imprime el mazo entero, además de las copias de cada carta. */
   copies: number
   language: Language
   onProgress?: (done: number, total: number) => void
 }
+
+/**
+ * Las cartas que van a la hoja, ya repetidas: cada una tantas veces como
+ * ejemplares tenga en el mazo (`card.copies`) por las veces que se pidió el
+ * mazo entero.
+ *
+ * Las copias de una carta salen juntas, una al lado de la otra, y no
+ * desparramadas por la hoja: así se cortan de una y no hay que ir a buscarlas
+ * entre el resto del mazo.
+ */
+export const sheetCards = <T extends { copies: number }>(cards: T[], copies: number): T[] =>
+  cards.flatMap((card) => Array<T>(card.copies * copies).fill(card))
 
 export async function exportPrintSheets(
   deck: Deck,
@@ -127,9 +140,7 @@ export async function exportPrintSheets(
   await prepare(deck)
 
   const imposition = impose(paper, bleed)
-  // Cada carta repetida `copies` veces, una al lado de la otra: así salen
-  // juntas en la hoja y no hay que ir a buscarlas entre el resto del mazo.
-  const cards = deck.cards.flatMap((card) => Array(copies).fill(card))
+  const cards = sheetCards(deck.cards, copies)
   const pages = sheetCount(cards.length, imposition)
 
   const pdf = createPdf(PAPERS[paper].widthMm, PAPERS[paper].heightMm)

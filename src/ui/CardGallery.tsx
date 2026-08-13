@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { pluralCards, pluralDone, useT } from '../i18n/strings'
 import type { Card } from '../model/card'
@@ -16,6 +16,8 @@ type Props = {
   onDuplicate: (index: number) => void
   onRemove: (index: number) => void
   onToggleDone: (index: number) => void
+  /** Mover una carta a otro lugar del mazo: `to` es el hueco donde cae. */
+  onMove: (from: number, to: number) => void
   /** Pie de la columna: lo que es del mazo entero y no de una carta. */
   children?: ReactNode
 }
@@ -34,6 +36,10 @@ const SCALE = THUMBNAIL_WIDTH / CARD_WIDTH
  *
  * En el pie va lo que es del mazo entero (`children`): esta columna es el
  * mazo, así que es acá donde se lo busca, y no entre las pestañas de la carta.
+ *
+ * El orden de esta lista **es** el del mazo: el de la hoja de impresión y el
+ * de los PNG del zip. Por eso las cartas se arrastran para reordenarlas — sin
+ * eso, cambiar el orden salía sólo borrando y rehaciendo.
  */
 export function CardGallery({
   cards,
@@ -43,12 +49,24 @@ export function CardGallery({
   onDuplicate,
   onRemove,
   onToggleDone,
+  onMove,
   children,
 }: Props) {
   const t = useT()
   const { language } = useLanguage()
   const done = cards.filter((card) => card.done).length
   const selectedRef = useRef<HTMLDivElement | null>(null)
+
+  // Qué carta se está arrastrando y en qué hueco caería. El hueco es un índice
+  // *entre* cartas —de 0 a cards.length—, no la carta de al lado: así el borde
+  // derecho de la última y el izquierdo de la primera son destinos posibles.
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+
+  const endDrag = () => {
+    setDragIndex(null)
+    setDropIndex(null)
+  }
 
   // Con el mazo largo, la carta abierta puede quedar fuera de la vista al
   // agregar una nueva o al abrir un archivo.
@@ -82,12 +100,51 @@ export function CardGallery({
           <div
             key={index}
             ref={index === selected ? selectedRef : undefined}
-            className="group relative"
+            draggable
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = 'move'
+              // El navegador necesita algo en el `dataTransfer` para arrancar
+              // el arrastre en Firefox; el índice de verdad va por estado, que
+              // es lo único que un drop de afuera no puede falsificar.
+              event.dataTransfer.setData('text/plain', String(index))
+              setDragIndex(index)
+            }}
+            onDragEnd={endDrag}
+            onDragOver={(event) => {
+              // Sólo lo nuestro: un icono de la paleta o un archivo soltado acá
+              // no tienen por qué reordenar el mazo.
+              if (dragIndex === null) return
+              event.preventDefault()
+              const rect = event.currentTarget.getBoundingClientRect()
+              setDropIndex(event.clientX < rect.left + rect.width / 2 ? index : index + 1)
+            }}
+            onDrop={(event) => {
+              if (dragIndex === null) return
+              event.preventDefault()
+              const rect = event.currentTarget.getBoundingClientRect()
+              const to = event.clientX < rect.left + rect.width / 2 ? index : index + 1
+              onMove(dragIndex, to)
+              endDrag()
+            }}
+            className={`group relative transition-opacity ${
+              dragIndex === index ? 'opacity-40' : ''
+            }`}
           >
+            {/* La línea del hueco donde va a caer. Va pegada al costado de la
+                miniatura y no entre las filas de la grilla, porque el orden se
+                lee de izquierda a derecha y renglón por renglón. */}
+            {dragIndex !== null && (dropIndex === index || dropIndex === index + 1) && (
+              <div
+                className={`absolute -top-1 bottom-0 w-0.5 rounded-full bg-sand-300 ${
+                  dropIndex === index ? '-left-1.5' : '-right-1.5'
+                }`}
+              />
+            )}
+
             <button
               onClick={() => onSelect(index)}
               title={card.title.trim() || t.gallery.unnamed}
-              className={`block overflow-hidden rounded transition ${
+              className={`relative block overflow-hidden rounded transition ${
                 index === selected ? 'ring-2 ring-sand-500' : 'opacity-60 hover:opacity-100'
               }`}
             >
@@ -95,6 +152,18 @@ export function CardGallery({
               <div className="pointer-events-none">
                 <CardStage card={card} scale={SCALE} />
               </div>
+
+              {/* Cuántos ejemplares lleva el mazo. Sólo cuando es más de uno:
+                  «×1» en todas las cartas sería ruido en la única vista donde
+                  se recorre el mazo entero de un vistazo. */}
+              {card.copies > 1 && (
+                <span
+                  title={t.gallery.copiesStamp(card.copies)}
+                  className="absolute right-1 bottom-1 rounded bg-zinc-950/85 px-1.5 py-0.5 text-[10px] font-semibold text-sand-100 tabular-nums"
+                >
+                  ×{card.copies}
+                </span>
+              )}
             </button>
 
             {/* Sello sobre la miniatura: se ve de un vistazo recorriendo la

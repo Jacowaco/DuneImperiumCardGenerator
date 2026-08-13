@@ -135,19 +135,28 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 export function Toggle({
   label,
   checked,
+  disabled,
   onChange,
 }: {
   label: string
   checked: boolean
+  /** Para cuando la opción no tiene sentido todavía, no para bloquear la carta
+   *  —eso lo hace el `inert` del panel entero. */
+  disabled?: boolean
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm text-zinc-300">
+    <label
+      className={`flex items-center gap-2.5 text-sm text-zinc-300 ${
+        disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
+      }`}
+    >
       <input
         type="checkbox"
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
-        className="size-4 accent-sand-500"
+        className="size-4 accent-sand-500 disabled:cursor-not-allowed"
       />
       {label}
     </label>

@@ -112,7 +112,18 @@ export const CONTENT = {
      */
     surface: '#8e867a',
   },
-  reveal: { top: 810, bottom: 1007 },
+  reveal: {
+    top: 810,
+    bottom: 1007,
+    /**
+     * Borde izquierdo del contenido cuando la banda lleva la banderola de
+     * Unload: la placa roja ocupa el arranque de la banda. 213 es la punta del
+     * chevrón, que es lo más ancho que llega (medido sobre `unload.png`, píxel
+     * rojo más a la derecha en el alto donde cae la fila de iconos; el cuerpo
+     * de la placa termina antes, en 189).
+     */
+    unloadLeft: 213,
+  },
   /** Alto de referencia de los iconos de las hojas del PSD. */
   nominalIconHeight: 99,
   /**

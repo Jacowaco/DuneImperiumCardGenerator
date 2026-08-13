@@ -3,7 +3,7 @@ import { PLAY_ROWS, PLAY_ROWS_LABELS, type Card, type PlayRows } from '../model/
 import { useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
 import { autoPlayRows } from '../render/contentLayout'
-import { Choice, Section, Toggle } from './controls'
+import { Choice, Hint, Section, Toggle } from './controls'
 import { ContentEditor } from './ContentEditor'
 import { ContentPalette } from './ContentPalette'
 
@@ -61,8 +61,22 @@ export function RulesPanel({ card, onChange }: Props) {
         <ContentEditor box="play" />
       </Section>
 
-      <Section title={t.rulesPanel.reveal} hint={t.rulesPanel.contentHint}>
+      {/* Unload es una marca de la banda de revelación —dos formas más de
+          cobrarla, al descartar y al destruir la carta— y no una caja aparte,
+          así que va de acción del título y no como una sección propia. */}
+      <Section
+        title={t.rulesPanel.reveal}
+        hint={t.rulesPanel.contentHint}
+        action={
+          <Toggle
+            label={t.rulesPanel.unload}
+            checked={card.unload}
+            onChange={(unload) => onChange({ unload })}
+          />
+        }
+      >
         <ContentEditor box="reveal" />
+        {card.unload && <Hint>{t.rulesPanel.unloadHint}</Hint>}
       </Section>
 
       <ContentPalette />

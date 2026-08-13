@@ -127,6 +127,8 @@ type Strings = {
     emptyText: string
     /** Tocar la pieza sobre la carta para escribirla ahí mismo. */
     editOnCard: string
+    /** Tocar el número de un icono sobre la carta para cambiar la cantidad. */
+    amountOnCard: string
     lineBreak: string
     deletedIcon: string
     addTo: string
@@ -380,6 +382,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Texto…',
       emptyText: 'Texto',
       editOnCard: 'Escribir el texto',
+      amountOnCard: 'Cambiar la cantidad',
       lineBreak: '— corte de renglón —',
       deletedIcon: 'Icono borrado',
       addTo: 'Agregar a',
@@ -658,6 +661,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Text…',
       emptyText: 'Text',
       editOnCard: 'Type the text',
+      amountOnCard: 'Change the amount',
       lineBreak: '— line break —',
       deletedIcon: 'Deleted icon',
       addTo: 'Add to',
@@ -937,6 +941,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Texto…',
       emptyText: 'Texto',
       editOnCard: 'Escrever o texto',
+      amountOnCard: 'Alterar a quantidade',
       lineBreak: '— quebra de linha —',
       deletedIcon: 'Ícone excluído',
       addTo: 'Adicionar a',
@@ -1216,6 +1221,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Texte…',
       emptyText: 'Texte',
       editOnCard: 'Écrire le texte',
+      amountOnCard: 'Changer la quantité',
       lineBreak: '— saut de ligne —',
       deletedIcon: 'Icône supprimée',
       addTo: 'Ajouter à',
@@ -1497,6 +1503,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Text…',
       emptyText: 'Text',
       editOnCard: 'Den Text schreiben',
+      amountOnCard: 'Die Menge ändern',
       lineBreak: '— Zeilenumbruch —',
       deletedIcon: 'Gelöschtes Symbol',
       addTo: 'Hinzufügen zu',
@@ -1777,6 +1784,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Testo…',
       emptyText: 'Testo',
       editOnCard: 'Scrivere il testo',
+      amountOnCard: 'Cambiare la quantità',
       lineBreak: '— a capo —',
       deletedIcon: 'Icona eliminata',
       addTo: 'Aggiungi a',
@@ -2057,6 +2065,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Tekst…',
       emptyText: 'Tekst',
       editOnCard: 'Wpisz tekst',
+      amountOnCard: 'Zmień liczbę',
       lineBreak: '— złamanie wiersza —',
       deletedIcon: 'Usunięta ikona',
       addTo: 'Dodaj do',
@@ -2336,6 +2345,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Text…',
       emptyText: 'Text',
       editOnCard: 'Napsat text',
+      amountOnCard: 'Změnit počet',
       lineBreak: '— zalomení řádku —',
       deletedIcon: 'Smazaný symbol',
       addTo: 'Přidat do',
@@ -2614,6 +2624,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Szöveg…',
       emptyText: 'Szöveg',
       editOnCard: 'A szöveg beírása',
+      amountOnCard: 'A mennyiség módosítása',
       lineBreak: '— sortörés —',
       deletedIcon: 'Törölt ikon',
       addTo: 'Hozzáadás ehhez',
@@ -2893,6 +2904,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Текст…',
       emptyText: 'Текст',
       editOnCard: 'Написать текст',
+      amountOnCard: 'Изменить количество',
       lineBreak: '— перенос строки —',
       deletedIcon: 'Удалённый символ',
       addTo: 'Добавить в',
@@ -3172,6 +3184,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Текст…',
       emptyText: 'Текст',
       editOnCard: 'Написати текст',
+      amountOnCard: 'Змінити кількість',
       lineBreak: '— перенесення рядка —',
       deletedIcon: 'Видалений символ',
       addTo: 'Додати до',
@@ -3451,6 +3464,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Текст…',
       emptyText: 'Текст',
       editOnCard: 'Написване на текста',
+      amountOnCard: 'Промяна на количеството',
       lineBreak: '— нов ред —',
       deletedIcon: 'Изтрит символ',
       addTo: 'Добавяне към',

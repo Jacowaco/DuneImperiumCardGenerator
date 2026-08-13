@@ -582,20 +582,32 @@ cursor caería en cualquier lado menos donde se está escribiendo. Al salir se v
 el título de verdad. Por eso también el fondo del campo es opaco: el título
 sigue abajo, actualizándose letra por letra.
 
-**El costo va al revés que el nombre: el campo no tapa nada.** Un número no
+**Los números van al revés que el nombre: el campo no tapa nada.** Un número no
 lleva versalitas ni se achica solo, así que el `<input>` puede usar la misma
-fuente y el mismo tamaño que `CostBadge` y caer justo encima del dígito. Por eso
-va con el texto transparente y sólo se ve el cursor: el número que se lee sigue
-siendo el que dibuja la carta, redibujado tecla por tecla, y no hay dos números
-pintados uno sobre el otro. La selección va traslúcida por lo mismo.
+fuente y el mismo tamaño con que la carta lo dibuja y caer justo encima. Por eso
+`CardNumberField` va con el texto transparente y sólo se ve el cursor: el número
+que se lee sigue siendo el que dibuja la carta, redibujado tecla por tecla, y no
+hay dos números pintados uno sobre el otro. La selección va traslúcida por lo
+mismo.
 
-La zona para tocarlo es `COST.hit`, el rectángulo más grande que entra **dentro**
-del rombo (72 × 80 centrado en el rombo, medido sobre el alpha de
-`card-cost.png`): más ancho asomaría sobre la esquina del arte y le robaría el
-arrastre a la imagen. El `<input>` sí es más ancho —dos cifras no entran en ese
-rectángulo y un campo que scrollea deja el cursor lejos del número—, así que la
-marca de que se está escribiendo es un recuadro aparte del tamaño de la zona.
-Prender y apagar el rombo sigue siendo del panel: sin número no hay qué tocar.
+Ese campo lo comparten **los tres números de la carta**: el costo del rombo, la
+cantidad del beneficio de compra (los dos en `CardCostField`) y la cantidad de
+los iconos que la llevan encima —especia, solari, persuasión— dentro de las
+cajas de contenido (en `CardDropZones`, con el mismo clic que abre las piezas de
+texto). Cuál icono lleva número lo dice `numberColor` del catálogo, que es lo
+mismo que mira `ContentBlock` para dibujarlo: el que no lo lleva no tiene qué
+cambiar, así que sigue siendo sólo un tirador para arrastrar.
+
+`CardNumberField` recibe por separado **qué se recuadra** y **qué ancho tiene el
+campo**, y no son lo mismo: con dos cifras el texto no entra en lo recuadrado, y
+un input que scrollea deja el cursor lejos del número. Por eso la marca de que
+se está escribiendo es un recuadro aparte, del tamaño de lo que se toca.
+
+La zona del costo es `COST.hit`, el rectángulo más grande que entra **dentro**
+del rombo (72 × 80 centrado en él, medido sobre el alpha de `card-cost.png`):
+más ancho asomaría sobre la esquina del arte y le robaría el arrastre a la
+imagen. Prender y apagar el rombo sigue siendo del panel: sin número no hay qué
+tocar.
 
 Las piezas de texto de las cajas se escriben igual, con el mismo campo puesto
 encima: los tiradores de `CardDropZones` se arrastran para mover la pieza y **un

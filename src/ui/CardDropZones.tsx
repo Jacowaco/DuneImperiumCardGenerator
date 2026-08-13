@@ -12,7 +12,8 @@ import {
   type Box,
   type Placement,
 } from '../render/contentLayout'
-import { CARD_FONT } from '../render/text'
+import { CARD_FONT, fontSizeForCapHeight } from '../render/text'
+import { CardNumberField } from './CardNumberField'
 import { useContentDrag, type ContentBox } from './contentDrag'
 
 /**
@@ -34,14 +35,20 @@ import { useContentDrag, type ContentBox } from './contentDrag'
  * puesto encima, igual que `CardNameField` con el nombre. Es el mismo camino de
  * siempre —tocar la cosa donde se la ve—, y es el que hace falta cuando lo que
  * se está mirando es la carta y no la lista del panel.
+ *
+ * Los iconos que llevan la cantidad encima —la especia, el solari, la
+ * persuasión— se clickean igual, y ahí el campo es el número de
+ * `CardNumberField`: el mismo del rombo de costo, que deja ver lo dibujado.
+ * Los que no llevan número no tienen qué cambiar, así que sólo se arrastran.
  */
 export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
   const t = useT()
   const library = useIconLibrary()
   const { dragSource, setDragSource, drop, parts, update } = useContentDrag()
   const [caret, setCaret] = useState<Caret | null>(null)
-  // Qué pieza de texto se está escribiendo, y con qué texto se entró — para que
-  // Escape lo devuelva, igual que en el campo del nombre.
+  // Qué pieza se está tocando: el texto de una, o la cantidad de un icono. El
+  // texto guarda además con qué se entró, para que Escape lo devuelva —igual
+  // que el campo del nombre—; la cantidad se lo guarda sola.
   const [editing, setEditing] = useState<Editing | null>(null)
 
   // Acomodar el contenido cuesta medir texto contra un canvas, y acá se
@@ -80,14 +87,27 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
   const partAt = (box: ContentBox, index: number): ContentPart | undefined => parts(box)[index]
 
   const editingPart = editing && partAt(editing.box, editing.index)
+  const placementsOf = (box: ContentBox) =>
+    boxes.find((item) => item.box === box)?.placements ?? []
+
+  // El icono cuya cantidad se está escribiendo, tal como quedó ubicado: el
+  // campo va justo encima del número que dibuja `ContentBlock`.
+  const editingIcon =
+    editing?.kind === 'amount'
+      ? placementsOf(editing.box).find(
+          (placement): placement is Extract<Placement, { kind: 'icon' }> =>
+            placement.kind === 'icon' && placement.from === editing.index,
+        )
+      : undefined
+
   // Todo lo que la pieza dibuja, tal como quedó en el último acomodo: el campo
   // se pone encima y por eso sigue al texto mientras se escribe — el bloque va
   // centrado y cada letra lo corre. Son varios pedazos cuando el texto corta de
   // renglón, y hay que taparlos a todos: dejar uno afuera lo deja asomando
   // debajo del campo, leyéndose como texto repetido.
   const editingPlacements =
-    editing && editingPart?.type === 'text'
-      ? (boxes.find((item) => item.box === editing.box)?.placements ?? []).filter(
+    editing?.kind === 'text' && editingPart?.type === 'text'
+      ? placementsOf(editing.box).filter(
           (placement): placement is Extract<Placement, { kind: 'text' }> =>
             placement.kind === 'text' &&
             placement.from <= editing.index &&
@@ -105,11 +125,22 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
     )
   }
 
+  const setEditingAmount = (amount: number) => {
+    if (!editing) return
+    update(
+      editing.box,
+      parts(editing.box).map(
+        (part, index): ContentPart =>
+          index === editing.index && part.type === 'icon' ? { ...part, amount } : part,
+      ),
+    )
+  }
+
   const closeEditing = () => {
     // El texto se dibuja trimmeado igual; esto es para que no queden espacios
     // guardados en el mazo. Si no sobra nada, no se toca la carta: un patch de
     // más abriría un paso de deshacer que no cambia nada.
-    if (editingPart?.type === 'text' && editingPart.text.trim() !== editingPart.text) {
+    if (editing?.kind === 'text' && editingPart?.type === 'text' && editingPart.text.trim() !== editingPart.text) {
       setEditingText(editingPart.text.trim())
     }
     setEditing(null)
@@ -129,13 +160,23 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
             // una sola corrida; ahí no hay una pieza que agarrar, así que sólo
             // se puede tirar de las que se dibujaron solas.
             .filter((placement) => placement.kind === 'icon' || placement.from === placement.to)
-            .map((placement) => (
+            .map((placement) => {
+              // El icono con la cantidad encima se toca como una pieza de
+              // texto: el clic abre el número. El que no la lleva no tiene qué
+              // cambiar, así que sigue siendo sólo un tirador.
+              const numbered =
+                placement.kind === 'icon' && Boolean(library[placement.icon]?.numberColor)
+              const writable = placement.kind === 'text' || numbered
+
+              return (
               <div
                 key={`${box}-${placement.from}-${placement.x}`}
                 draggable
                 title={
                   placement.kind === 'icon'
-                    ? library[placement.icon]?.label
+                    ? numbered
+                      ? `${library[placement.icon]?.label} · ${t.contentEditor.amountOnCard}`
+                      : library[placement.icon]?.label
                     : t.contentEditor.editOnCard
                 }
                 // Un clic escribe la pieza acá mismo; arrastrarla la mueve. No
@@ -146,9 +187,11 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                     ? () => {
                         const part = partAt(box, placement.from)
                         if (part?.type !== 'text') return
-                        setEditing({ box, index: placement.from, before: part.text })
+                        setEditing({ kind: 'text', box, index: placement.from, before: part.text })
                       }
-                    : undefined
+                    : numbered
+                      ? () => setEditing({ kind: 'amount', box, index: placement.from })
+                      : undefined
                 }
                 onDragStart={(event) => {
                   event.dataTransfer.effectAllowed = 'move'
@@ -174,10 +217,11 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                     (placement.kind === 'icon' ? placement.height : placement.lineHeight) * scale,
                 }}
                 className={`pointer-events-auto absolute rounded transition-shadow hover:ring-2 hover:ring-sand-300 active:cursor-grabbing ${
-                  placement.kind === 'text' ? 'cursor-text' : 'cursor-grab'
+                  writable ? 'cursor-text' : 'cursor-grab'
                 }`}
               />
-            )),
+              )
+            }),
         )}
 
       {boxes.map(({ box, label, area, placements }) => (
@@ -230,7 +274,33 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
         />
       )}
 
-      {!card.done && editing && editingPart?.type === 'text' && editingPlacements.length > 0 && (
+      {!card.done && editing?.kind === 'amount' && editingPart?.type === 'icon' && editingIcon && (
+        <CardNumberField
+          mark={{
+            left: editingIcon.x * scale,
+            top: editingIcon.y * scale,
+            width: editingIcon.width * scale,
+            height: editingIcon.height * scale,
+          }}
+          // El icono suele ser más ancho que su número, pero no siempre: los
+          // hay más altos que anchos, y ahí dos cifras no entrarían.
+          width={Math.max(editingIcon.width, editingIcon.height) * scale}
+          fontSize={
+            fontSizeForCapHeight(
+              editingIcon.height * CONTENT.numberHeightRatio,
+              CONTENT.numberWeight,
+            ) * scale
+          }
+          weight={CONTENT.numberWeight}
+          color={library[editingIcon.icon]?.numberColor ?? CONTENT.text.playColor}
+          label={t.cardPanel.amount}
+          value={editingPart.amount}
+          onChange={setEditingAmount}
+          onClose={() => setEditing(null)}
+        />
+      )}
+
+      {!card.done && editing?.kind === 'text' && editingPart?.type === 'text' && editingPlacements.length > 0 && (
         <input
           autoFocus
           value={editingPart.text}
@@ -259,8 +329,13 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
 
 type Caret = { index: number; x: number; top: number; height: number }
 
-/** La pieza de texto que se está escribiendo, y con qué texto se entró. */
-type Editing = { box: ContentBox; index: number; before: string }
+/**
+ * Qué pieza se está tocando sobre la carta: el texto de una —con el que tenía
+ * al entrar, para que Escape lo devuelva— o la cantidad de un icono.
+ */
+type Editing =
+  | { kind: 'text'; box: ContentBox; index: number; before: string }
+  | { kind: 'amount'; box: ContentBox; index: number }
 
 /**
  * El campo va sobre la caja que ocupa todo lo que la pieza dibuja: un renglón

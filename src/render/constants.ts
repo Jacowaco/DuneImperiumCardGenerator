@@ -166,6 +166,13 @@ export const COST = {
   weight: 500,
   color: '#e3eaef',
   /**
+   * Zona para tocar el número sobre la carta (`CardCostField`): el rectángulo
+   * más grande que entra **dentro** del rombo. A 40 px del centro el alpha de
+   * `card-cost.png` va de x=638 a 717, así que 72 x 80 centrado en (676, 93)
+   * no asoma sobre el arte ni le roba el arrastre a la esquina de la imagen.
+   */
+  hit: { width: 72, height: 80 },
+  /**
    * Hueco del icono de beneficio en la cinta. `digitHeight` es el alto del
    * número que la app dibuja centrado encima de los iconos que salen vacíos
    * del PSD (solari, especia, persuasión).

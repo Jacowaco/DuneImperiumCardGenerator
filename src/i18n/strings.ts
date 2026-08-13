@@ -107,6 +107,8 @@ type Strings = {
     cost: string
     hasCost: string
     persuasion: string
+    /** El tirador del número del rombo sobre la carta, como el del nombre. */
+    costOnCard: string
     purchaseBenefit: string
     none: string
     custom: (label: string) => string
@@ -360,6 +362,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Costo de compra',
       hasCost: 'Tiene costo',
       persuasion: 'Persuasión',
+      costOnCard: 'Cambiar el costo',
       purchaseBenefit: 'Beneficio de compra',
       none: 'Ninguno',
       custom: (label) => `Propio · ${label}`,
@@ -637,6 +640,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Acquire Cost',
       hasCost: 'Has a cost',
       persuasion: 'Persuasion',
+      costOnCard: 'Change the cost',
       purchaseBenefit: 'Acquire Bonus',
       none: 'None',
       custom: (label) => `Custom · ${label}`,
@@ -915,6 +919,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Custo de aquisição',
       hasCost: 'Tem custo',
       persuasion: 'Persuasão',
+      costOnCard: 'Alterar o custo',
       purchaseBenefit: 'Bônus de aquisição',
       none: 'Nenhum',
       custom: (label) => `Próprio · ${label}`,
@@ -1193,6 +1198,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: "Coût d'acquisition",
       hasCost: 'A un coût',
       persuasion: 'Persuasion',
+      costOnCard: 'Changer le coût',
       purchaseBenefit: "Bonus d'acquisition",
       none: 'Aucun',
       custom: (label) => `Perso · ${label}`,
@@ -1473,6 +1479,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Kaufkosten',
       hasCost: 'Hat Kosten',
       persuasion: 'Überzeugung',
+      costOnCard: 'Die Kosten ändern',
       purchaseBenefit: 'Kaufbonus',
       none: 'Keiner',
       custom: (label) => `Eigen · ${label}`,
@@ -1752,6 +1759,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Costo di acquisto',
       hasCost: 'Ha un costo',
       persuasion: 'Persuasione',
+      costOnCard: 'Cambiare il costo',
       purchaseBenefit: 'Bonus di acquisto',
       none: 'Nessuno',
       custom: (label) => `Personalizzata · ${label}`,
@@ -2031,6 +2039,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Koszt zakupu',
       hasCost: 'Ma koszt',
       persuasion: 'Perswazja',
+      costOnCard: 'Zmień koszt',
       purchaseBenefit: 'Premia za zakup',
       none: 'Brak',
       custom: (label) => `Własna · ${label}`,
@@ -2309,6 +2318,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Cena za pořízení',
       hasCost: 'Má cenu',
       persuasion: 'Přesvědčování',
+      costOnCard: 'Změnit cenu',
       purchaseBenefit: 'Bonus za pořízení',
       none: 'Žádný',
       custom: (label) => `Vlastní · ${label}`,
@@ -2586,6 +2596,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Vételár',
       hasCost: 'Van ára',
       persuasion: 'Meggyőzés',
+      costOnCard: 'A vételár módosítása',
       purchaseBenefit: 'Vételi bónusz',
       none: 'Nincs',
       custom: (label) => `Saját · ${label}`,
@@ -2864,6 +2875,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Стоимость покупки',
       hasCost: 'Есть стоимость',
       persuasion: 'Убеждение',
+      costOnCard: 'Изменить стоимость',
       purchaseBenefit: 'Бонус за покупку',
       none: 'Нет',
       custom: (label) => `Свой · ${label}`,
@@ -3142,6 +3154,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Вартість придбання',
       hasCost: 'Має вартість',
       persuasion: 'Переконання',
+      costOnCard: 'Змінити вартість',
       purchaseBenefit: 'Бонус за придбання',
       none: 'Немає',
       custom: (label) => `Власний · ${label}`,
@@ -3420,6 +3433,7 @@ const STRINGS: Record<Language, Strings> = {
       cost: 'Цена за придобиване',
       hasCost: 'Има цена',
       persuasion: 'Убеждаване',
+      costOnCard: 'Промяна на цената',
       purchaseBenefit: 'Бонус при придобиване',
       none: 'Няма',
       custom: (label) => `Собствен · ${label}`,

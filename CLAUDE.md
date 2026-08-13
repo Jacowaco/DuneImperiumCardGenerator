@@ -563,9 +563,10 @@ que tiene sentido usarla.
 ### Editar sobre la carta
 
 Las cosas de la carta se pueden tocar **donde se las ve**, además de en el
-panel: el contenido de las cajas se arrastra con `CardDropZones` y el nombre se
-escribe con `CardNameField`. Los dos son HTML posicionado encima del `Stage`
-—como el sello de terminada—, así que nada de esto sale en el PNG.
+panel: el contenido de las cajas se arrastra con `CardDropZones`, el nombre se
+escribe con `CardNameField` y el costo de compra con `CardCostField`. Los tres
+son HTML posicionado encima del `Stage` —como el sello de terminada—, así que
+nada de esto sale en el PNG.
 
 El campo del nombre toma la placa entera (de `TITLE.x` al límite derecho, que
 se corre cuando hay rombo de costo) y no el ancho del texto: una carta sin
@@ -580,6 +581,21 @@ palabra es más grande y el texto se achica solo cuando no entra—, así que el
 cursor caería en cualquier lado menos donde se está escribiendo. Al salir se ve
 el título de verdad. Por eso también el fondo del campo es opaco: el título
 sigue abajo, actualizándose letra por letra.
+
+**El costo va al revés que el nombre: el campo no tapa nada.** Un número no
+lleva versalitas ni se achica solo, así que el `<input>` puede usar la misma
+fuente y el mismo tamaño que `CostBadge` y caer justo encima del dígito. Por eso
+va con el texto transparente y sólo se ve el cursor: el número que se lee sigue
+siendo el que dibuja la carta, redibujado tecla por tecla, y no hay dos números
+pintados uno sobre el otro. La selección va traslúcida por lo mismo.
+
+La zona para tocarlo es `COST.hit`, el rectángulo más grande que entra **dentro**
+del rombo (72 × 80 centrado en el rombo, medido sobre el alpha de
+`card-cost.png`): más ancho asomaría sobre la esquina del arte y le robaría el
+arrastre a la imagen. El `<input>` sí es más ancho —dos cifras no entran en ese
+rectángulo y un campo que scrollea deja el cursor lejos del número—, así que la
+marca de que se está escribiendo es un recuadro aparte del tamaño de la zona.
+Prender y apagar el rombo sigue siendo del panel: sin número no hay qué tocar.
 
 Las piezas de texto de las cajas se escriben igual, con el mismo campo puesto
 encima: los tiradores de `CardDropZones` se arrastran para mover la pieza y **un

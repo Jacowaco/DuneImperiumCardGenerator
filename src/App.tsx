@@ -40,6 +40,7 @@ import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { AboutPanel } from './ui/AboutPanel'
 import { ArtPanel } from './ui/ArtPanel'
+import { CardCostField } from './ui/CardCostField'
 import { CardDropZones } from './ui/CardDropZones'
 import { CardNameField } from './ui/CardNameField'
 import { CardGallery } from './ui/CardGallery'
@@ -780,7 +781,20 @@ export function App() {
               {/* El nombre se escribe también acá, sobre la placa: es lo mismo
                   que el campo de la pestaña Identidad, tocado donde se ve. */}
               {!card.done && (
-                <CardNameField card={card} scale={previewScale} onChange={patchCard} />
+                <>
+                  <CardNameField card={card} scale={previewScale} onChange={patchCard} />
+
+                  {/* Y el costo tocando el número del rombo, por lo mismo. Va
+                      con `key` como las zonas de contenido: lo tecleado es de
+                      esta carta, y Alt+←/→ cambia de carta con el foco puesto
+                      en el campo. */}
+                  <CardCostField
+                    key={index}
+                    card={card}
+                    scale={previewScale}
+                    onChange={patchCard}
+                  />
+                </>
               )}
 
               {/* Los tiradores del contenido: se arrastran para moverlo y los

@@ -114,7 +114,6 @@ type Strings = {
     frame: string
     frameFree: string
     frameLocked: string
-    lockedHint: string
   }
   iconPanel: {
     deckTitle: string
@@ -315,7 +314,6 @@ const STRINGS: Record<Language, Strings> = {
       frame: 'Encuadre',
       frameFree: 'Encuadre libre',
       frameLocked: 'Encuadre bloqueado',
-      lockedHint: 'Encuadre bloqueado: desbloqueálo para mover o hacer zoom.',
     },
     iconPanel: {
       deckTitle: 'En este mazo',
@@ -542,7 +540,6 @@ const STRINGS: Record<Language, Strings> = {
       frame: 'Frame',
       frameFree: 'Free frame',
       frameLocked: 'Frame locked',
-      lockedHint: 'Frame locked: unlock it to move or zoom.',
     },
     iconPanel: {
       deckTitle: 'En este mazo',
@@ -770,7 +767,6 @@ const STRINGS: Record<Language, Strings> = {
       frame: 'Moldura',
       frameFree: 'Moldura livre',
       frameLocked: 'Moldura bloqueada',
-      lockedHint: 'Moldura bloqueada: desbloqueie-a para mover ou ampliar.',
     },
     iconPanel: {
       deckTitle: 'En este mazo',

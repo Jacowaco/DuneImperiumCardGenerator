@@ -8,7 +8,7 @@ import {
   maxArtScale,
 } from '../model/art'
 import type { ArtTransform, CardArt } from '../model/card'
-import { Button, Hint, Section } from './controls'
+import { Button, Section } from './controls'
 import { ImageIcon, LockIcon, LockOpenIcon } from './icons'
 
 type Props = {
@@ -91,30 +91,36 @@ export function ArtPanel({ art, onPick, onTransform, onClear, onToggleLock }: Pr
         </span>
       </label>
 
-      <div className="flex flex-col gap-2">
-        <div className="grid grid-cols-2 gap-2">
-          <Button disabled={!art || art?.locked} onClick={() => art && onTransform(fitCover(art.width, art.height))}>
-            {t.artPanel.fit}
-          </Button>
-          <Button
-            disabled={!art || art?.locked}
-            onClick={() => art && onTransform(centerAt(art.width, art.height, art.transform.scale))}
-          >
-            {t.artPanel.center}
-          </Button>
-        </div>
+      {/* El candado va en la misma fila que Ajustar y Centrar: es el otro
+          control del encuadre, y el icono ya dice si está trabado — un cartel
+          explicándolo repite lo que se ve. */}
+      <div className="flex gap-2">
+        <Button
+          className="flex-1"
+          disabled={!art || art?.locked}
+          onClick={() => art && onTransform(fitCover(art.width, art.height))}
+        >
+          {t.artPanel.fit}
+        </Button>
+        <Button
+          className="flex-1"
+          disabled={!art || art?.locked}
+          onClick={() => art && onTransform(centerAt(art.width, art.height, art.transform.scale))}
+        >
+          {t.artPanel.center}
+        </Button>
         {art && onToggleLock && (
           <Button
+            variant={art.locked ? 'primary' : 'ghost'}
             onClick={() => onToggleLock(!(art?.locked ?? false))}
             title={art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
             aria-label={art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
-            className={art.locked ? 'bg-zinc-800 hover:bg-zinc-700' : ''}
+            aria-pressed={art.locked}
           >
             {art.locked ? <LockIcon /> : <LockOpenIcon />}
           </Button>
         )}
       </div>
-      {art?.locked && <Hint>{t.artPanel.lockedHint}</Hint>}
     </Section>
   )
 }

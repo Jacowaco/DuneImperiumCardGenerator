@@ -669,7 +669,7 @@ export function App() {
                 aria-pressed={card.art.locked}
                 className={`absolute top-4 right-4 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow transition-colors ${
                   card.art.locked
-                    ? 'bg-zinc-600 text-zinc-50 hover:bg-zinc-500'
+                    ? 'bg-sand-500 text-zinc-950 hover:bg-sand-300'
                     : 'bg-zinc-950/70 text-zinc-400 hover:text-zinc-50'
                 }`}
               >

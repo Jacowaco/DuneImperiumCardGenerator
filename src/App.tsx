@@ -679,9 +679,15 @@ export function App() {
             onRemove={removeCard}
             onToggleDone={toggleDone}
           >
-            {/* Lo del mazo entero, al pie de la columna del mazo. */}
+            {/* Lo del mazo entero, al pie de la columna del mazo.
+
+                Arriba de la línea, **el mazo como archivo**: el nombre, las
+                cuatro de abrir y guardar, y las dos de sacarlo afuera —el
+                mismo mazo en PDF o en PNGs, que es guardarlo en otro formato—.
+                Abajo, lo que el mazo tiene adentro, que se edita en diálogo. */}
             <div className="flex flex-col gap-3">
-              <div className="border-b border-zinc-800 pb-3">
+              <div className="flex flex-col gap-2 border-b border-zinc-800 pb-3">
+                <GroupTitle>{t.deckFooter.deckGroup}</GroupTitle>
                 <DeckFileControls
                   name={deck.name}
                   fileName={file?.name ?? null}
@@ -693,10 +699,25 @@ export function App() {
                   onOpen={handleOpen}
                   onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
                 />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button onClick={() => setDialog('print')} className="px-2 text-xs">
+                    <PrinterIcon />
+                    {t.deckFooter.print}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => void handleExportAllPng()}
+                    disabled={cardsExporting}
+                    className="px-2 text-xs"
+                  >
+                    <DownloadIcon />
+                    {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
+                  </Button>
+                </div>
               </div>
-              {/* Dos filas y no una de tres más el export suelto: arriba lo
-                  que el mazo tiene adentro, abajo las dos formas de sacarlo
-                  afuera. Imprimir es del segundo grupo, no del primero. */}
+
+              <GroupTitle>{t.deckFooter.libraryGroup}</GroupTitle>
               <div className="grid grid-cols-2 gap-2">
                 <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
                   <DiamondIcon />
@@ -705,21 +726,6 @@ export function App() {
                 <Button onClick={() => setDialog('factions')} className="px-2 text-xs">
                   <BannerIcon />
                   {t.deckFooter.factions}
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => setDialog('print')} className="px-2 text-xs">
-                  <PrinterIcon />
-                  {t.deckFooter.print}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => void handleExportAllPng()}
-                  disabled={cardsExporting}
-                  className="px-2 text-xs"
-                >
-                  <DownloadIcon />
-                  {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
                 </Button>
               </div>
             </div>
@@ -813,5 +819,14 @@ export function App() {
     </IconLibraryProvider>
     </FactionLibraryProvider>
     </LanguageProvider>
+  )
+}
+
+/** Título de grupo del pie del mazo, con el mismo aire que los de `Section`. */
+function GroupTitle({ children }: { children: string }) {
+  return (
+    <h2 className="text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+      {children}
+    </h2>
   )
 }

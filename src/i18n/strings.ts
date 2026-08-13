@@ -28,6 +28,8 @@ type Strings = {
   doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
   dialogs: { icons: string; factions: string; print: string }
   deckFooter: {
+    deckGroup: string
+    libraryGroup: string
     unsavedName: string
     renameTitle: string
     noNativeFsTooltip: string
@@ -223,6 +225,8 @@ const STRINGS: Record<Language, Strings> = {
     },
     dialogs: { icons: 'Iconos propios', factions: 'Facciones propias', print: 'Imprimir el mazo' },
     deckFooter: {
+      deckGroup: 'Mazo',
+      libraryGroup: 'Biblioteca',
       unsavedName: 'Mazo sin guardar',
       renameTitle: 'Cambiarle el nombre al mazo',
       noNativeFsTooltip:
@@ -448,6 +452,8 @@ const STRINGS: Record<Language, Strings> = {
     },
     dialogs: { icons: 'Custom icons', factions: 'Custom factions', print: 'Print the deck' },
     deckFooter: {
+      deckGroup: 'Deck',
+      libraryGroup: 'Library',
       unsavedName: 'Unsaved deck',
       renameTitle: 'Rename the deck',
       noNativeFsTooltip:
@@ -672,6 +678,8 @@ const STRINGS: Record<Language, Strings> = {
     },
     dialogs: { icons: 'Ícones próprios', factions: 'Facções próprias', print: 'Imprimir o baralho' },
     deckFooter: {
+      deckGroup: 'Baralho',
+      libraryGroup: 'Biblioteca',
       unsavedName: 'Baralho não salvo',
       renameTitle: 'Renomear o baralho',
       noNativeFsTooltip:

@@ -129,6 +129,7 @@ type Strings = {
     nameLabel: (label: string) => string
     colorTitle: string
     colorLabel: (label: string) => string
+    hexLabel: (label: string) => string
     upload: string
     hint: string
     confirmRemove: (label: string, used: number) => string
@@ -296,6 +297,7 @@ const STRINGS: Record<Language, Strings> = {
       nameLabel: (label) => `Nombre de ${label}`,
       colorTitle: 'Color de la banda',
       colorLabel: (label) => `Color de la banda de ${label}`,
+      hexLabel: (label) => `Color de la banda de ${label} en hexadecimal`,
       upload: 'Subir emblema…',
       hint: 'PNG con transparencia, se recorta solo al contenido. Quedan guardadas en este navegador, y el mazo se lleva adentro las que sus cartas usan. Como icono de agente van sobre una placa negra simple, sin el marco de las del reglamento.',
       confirmRemove: (label, used) =>
@@ -475,6 +477,7 @@ const STRINGS: Record<Language, Strings> = {
       nameLabel: (label) => `Name of ${label}`,
       colorTitle: 'Band color',
       colorLabel: (label) => `Band color for ${label}`,
+      hexLabel: (label) => `Band color for ${label} in hex`,
       upload: 'Upload emblem…',
       hint: "Transparent PNG, auto-cropped to content. They're saved in this browser, and the deck carries along the ones its cards use. As an agent icon they sit on a plain black plate, without the frame the rulebook ones have.",
       confirmRemove: (label, used) =>
@@ -655,6 +658,7 @@ const STRINGS: Record<Language, Strings> = {
       nameLabel: (label) => `Nome de ${label}`,
       colorTitle: 'Cor da faixa',
       colorLabel: (label) => `Cor da faixa de ${label}`,
+      hexLabel: (label) => `Cor da faixa de ${label} em hexadecimal`,
       upload: 'Enviar emblema…',
       hint: 'PNG com transparência, recortado automaticamente ao conteúdo. Ficam salvas neste navegador, e o baralho leva junto as que suas cartas usam. Como ícone de agente ficam sobre uma placa preta simples, sem a moldura das do regulamento.',
       confirmRemove: (label, used) =>

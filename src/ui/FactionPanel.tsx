@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { describeError, useT } from '../i18n/strings'
 import { cardIconIds, type AnyFactionId, type Card } from '../model/card'
@@ -7,14 +7,29 @@ import {
   loadCustomFactionEmblem,
   type CustomFaction,
 } from '../model/customFaction'
-import { factionIdFromInfluenceIconId } from '../model/factionArt'
+import { factionIdFromInfluenceIconId, useTintedFactionBand } from '../model/factionArt'
 import { useLanguage } from '../model/language'
-import { CONTENT } from '../render/constants'
+import { CONTENT, FACTION_BAND } from '../render/constants'
+import { useCardImage } from '../render/imageCache'
+import { fontString, layoutSmallCaps } from '../render/text'
+import { useFontsReady } from '../render/useFontsReady'
 import { Action, Hint, Section } from './controls'
 import { UploadIcon } from './icons'
 
-/** Misma escala que `IconPanel`: el icono nominal del juego entra en 40 px. */
-const PREVIEW_HEIGHT = 40
+/** El emblema alcanza para reconocer la facción; el que manda es el color. */
+const PREVIEW_HEIGHT = 32
+
+/**
+ * La banda de la primera posición, que es la más ancha y la que se ve en una
+ * carta de una sola facción. El recorte sale de las medidas del PNG: la banda
+ * ocupa x 25–375, y 90–133 del lienzo de 750 × 1039.
+ */
+const BAND = {
+  left: 25,
+  width: FACTION_BAND.widths[1],
+  top: FACTION_BAND.top,
+  height: FACTION_BAND.height,
+}
 
 type Props = {
   factions: CustomFaction[]
@@ -70,49 +85,20 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
     <Section>
       {factions.length === 0 && <Hint>{t.factionPanel.emptyHint}</Hint>}
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-2">
+      {/*
+        Un poco más anchas que la grilla de `IconPanel`, porque acá lo que se
+        decide es el color y un cuadradito de 20 px no deja verlo — pero no
+        más: el ancho que pide la ficha es el de la banda, que se lee igual
+        chica, así que entran tres por fila en el diálogo.
+      */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-2">
         {factions.map((faction) => (
-          <div
+          <FactionTile
             key={faction.id}
-            className="relative flex flex-col gap-1.5 rounded-md bg-zinc-900/60 p-2"
-          >
-            <div
-              style={{ backgroundColor: CONTENT.play.surface }}
-              className="flex h-20 items-center justify-center rounded px-2"
-            >
-              <img
-                src={faction.emblem}
-                alt=""
-                style={{ height: PREVIEW_HEIGHT }}
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
-
-            <input
-              value={faction.label}
-              aria-label={t.factionPanel.nameLabel(faction.label)}
-              onChange={(event) => update(faction.id, { label: event.target.value })}
-              className="w-full min-w-0 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
-            />
-
-            <label className="flex items-center gap-1.5 text-xs text-zinc-500">
-              {t.factionPanel.colorLabel(faction.label)}
-              <input
-                type="color"
-                value={faction.color}
-                title={t.factionPanel.colorTitle}
-                aria-label={t.factionPanel.colorLabel(faction.label)}
-                onChange={(event) => update(faction.id, { color: event.target.value })}
-                className="ml-auto size-5 shrink-0 cursor-pointer rounded border border-zinc-700 bg-zinc-950 p-0"
-              />
-            </label>
-
-            <div className="absolute top-1 right-1">
-              <Action label={t.factionPanel.removeLabel(faction.label)} onClick={() => remove(faction)}>
-                ×
-              </Action>
-            </div>
-          </div>
+            faction={faction}
+            onUpdate={(patch) => update(faction.id, patch)}
+            onRemove={() => remove(faction)}
+          />
         ))}
 
         <button
@@ -138,6 +124,187 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
         }}
       />
     </Section>
+  )
+}
+
+/**
+ * Una facción propia: cómo se ve y las dos cosas que se editan de ella, el
+ * nombre y el color.
+ *
+ * Va en su propio componente porque el tinte de la banda es un hook
+ * (`useTintedFactionBand`), y también porque cada ficha tiene el borrador del
+ * campo hexadecimal, que es suyo y de nadie más.
+ */
+function FactionTile({
+  faction,
+  onUpdate,
+  onRemove,
+}: {
+  faction: CustomFaction
+  onUpdate: (patch: Partial<CustomFaction>) => void
+  onRemove: () => void
+}) {
+  const t = useT()
+
+  return (
+    <div className="relative flex flex-col gap-1.5 rounded-md bg-zinc-900/60 p-2">
+      {/* El emblema sobre el beige de la caja de turno, que es el fondo
+          contra el que se ve en la carta —adentro de un rombo de influencia—
+          y donde se nota un borde blanco que haya quedado del recorte. */}
+      <div
+        style={{ backgroundColor: CONTENT.play.surface }}
+        className="flex h-12 items-center justify-center rounded px-2"
+      >
+        <img
+          src={faction.emblem}
+          alt=""
+          style={{ height: PREVIEW_HEIGHT }}
+          className="max-h-full max-w-full object-contain"
+        />
+      </div>
+
+      <BandPreview color={faction.color} label={faction.label} />
+
+      <input
+        value={faction.label}
+        aria-label={t.factionPanel.nameLabel(faction.label)}
+        onChange={(event) => onUpdate({ label: event.target.value })}
+        className="w-full min-w-0 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
+      />
+
+      <div className="flex items-center gap-1.5">
+        <input
+          type="color"
+          value={faction.color}
+          title={t.factionPanel.colorTitle}
+          aria-label={t.factionPanel.colorLabel(faction.label)}
+          onChange={(event) => onUpdate({ color: event.target.value })}
+          className="h-8 min-w-0 flex-1 cursor-pointer rounded border border-zinc-700 bg-zinc-950 p-1 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-sm [&::-webkit-color-swatch]:border-0"
+        />
+        <HexField
+          value={faction.color}
+          label={t.factionPanel.hexLabel(faction.label)}
+          onChange={(color) => onUpdate({ color })}
+        />
+      </div>
+
+      <div className="absolute top-1 right-1">
+        <Action label={t.factionPanel.removeLabel(faction.label)} onClick={onRemove}>
+          ×
+        </Action>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * La banda tal como sale impresa: el mismo sprite tintado que dibuja la carta
+ * (`useTintedFactionBand`) y el nombre encima con la misma tipografía y el
+ * mismo acomodo que `FactionBand` — `layoutSmallCaps` con los números de
+ * `FACTION_BAND`. El color no es un valor abstracto: es un degradé sobre la
+ * plantilla con el nombre en versalitas, y una muestra plana no dice cómo va
+ * a quedar.
+ *
+ * Se dibuja en canvas y no con HTML por eso mismo: acá el texto se posiciona
+ * con la misma función que la carta, en las mismas coordenadas, así que la
+ * vista no puede irse quedando atrás del render. El canvas mide lo que mide
+ * la banda de la primera posición —la más ancha, la de una carta de una sola
+ * facción— y CSS lo estira al ancho de la ficha.
+ */
+const PREVIEW_PIXEL_RATIO = 2
+
+function BandPreview({ color, label }: { color: string; label: string }) {
+  const tinted = useTintedFactionBand(color, 1)
+  const band = useCardImage(tinted)
+  const fontsReady = useFontsReady()
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+
+    ctx.setTransform(PREVIEW_PIXEL_RATIO, 0, 0, PREVIEW_PIXEL_RATIO, 0, 0)
+    ctx.clearRect(0, 0, BAND.width, BAND.height)
+
+    // Del lienzo entero de la carta sale el recorte de la banda, que es lo
+    // único que se está mirando acá.
+    if (band) {
+      ctx.drawImage(band, BAND.left, BAND.top, BAND.width, BAND.height, 0, 0, BAND.width, BAND.height)
+    }
+
+    const { glyphs } = layoutSmallCaps(label, {
+      capHeight: FACTION_BAND.text.capHeight,
+      smallCapRatio: 1,
+      letterSpacing: 1,
+      wordSpacing: 10,
+      weight: FACTION_BAND.text.weight,
+      maxWidth: BAND.width - (FACTION_BAND.text.x - BAND.left) - FACTION_BAND.text.rightPadding,
+    })
+
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillStyle = FACTION_BAND.text.color
+    const baseline = BAND.height / 2 + FACTION_BAND.text.capHeight / 2
+    for (const glyph of glyphs) {
+      ctx.font = fontString(glyph.size, FACTION_BAND.text.weight)
+      ctx.fillText(glyph.char, FACTION_BAND.text.x - BAND.left + glyph.x, baseline)
+    }
+    // `fontsReady` no se usa adentro: está para volver a dibujar cuando la
+    // fuente de la carta termina de cargar, porque el canvas ya escribió con
+    // la de reemplazo y no se entera solo.
+  }, [band, label, fontsReady])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden
+      width={BAND.width * PREVIEW_PIXEL_RATIO}
+      height={BAND.height * PREVIEW_PIXEL_RATIO}
+      className="block h-auto w-full rounded"
+    />
+  )
+}
+
+/**
+ * El color en hexadecimal, al lado de la muestra: es lo que deja copiar un
+ * color de otro lado o repetir el mismo en dos facciones, que con el selector
+ * del sistema es a ojo.
+ *
+ * Escribe sobre un borrador propio porque un hexadecimal se tipea de a un
+ * carácter: mandar cada tecla al modelo pintaría la banda de negro
+ * (`hexToRgb` no perdona) hasta terminar de escribirlo.
+ */
+function HexField({
+  value,
+  label,
+  onChange,
+}: {
+  value: string
+  label: string
+  onChange: (color: string) => void
+}) {
+  const [draft, setDraft] = useState(value)
+
+  // El color puede cambiar desde la muestra de al lado, o al deshacer.
+  useEffect(() => setDraft(value), [value])
+
+  const commit = (text: string) => {
+    setDraft(text)
+    const match = /^#?([0-9a-f]{6})$/i.exec(text.trim())
+    if (match) onChange(`#${match[1].toLowerCase()}`)
+  }
+
+  return (
+    <input
+      value={draft}
+      aria-label={label}
+      spellCheck={false}
+      onChange={(event) => commit(event.target.value)}
+      // Lo que quedó a medio escribir vuelve al color vigente: el campo no
+      // puede quedar diciendo algo que la carta no está usando.
+      onBlur={() => setDraft(value)}
+      className="w-[4.75rem] shrink-0 rounded border border-zinc-700 bg-zinc-950 px-1 py-1 text-center font-mono text-[11px] text-zinc-100 uppercase outline-none focus:border-sand-500"
+    />
   )
 }
 

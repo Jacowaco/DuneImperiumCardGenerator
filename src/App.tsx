@@ -659,7 +659,12 @@ export function App() {
         </div>
 
         {dialog === 'icons' && (
-          <Dialog title={t.dialogs.icons} size="wide" onClose={() => setDialog(null)}>
+          <Dialog
+            title={t.dialogs.icons}
+            hint={t.iconPanel.hint}
+            size="wide"
+            onClose={() => setDialog(null)}
+          >
             <IconPanel
               icons={myIcons}
               cards={cards}
@@ -670,7 +675,12 @@ export function App() {
         )}
 
         {dialog === 'factions' && (
-          <Dialog title={t.dialogs.factions} size="wide" onClose={() => setDialog(null)}>
+          <Dialog
+            title={t.dialogs.factions}
+            hint={t.factionPanel.hint}
+            size="wide"
+            onClose={() => setDialog(null)}
+          >
             <FactionPanel
               factions={myFactions}
               cards={cards}

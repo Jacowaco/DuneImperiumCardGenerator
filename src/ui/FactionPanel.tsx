@@ -110,8 +110,8 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
         </button>
       </div>
 
-      <Hint>{t.factionPanel.hint}</Hint>
-
+      {/* Cómo funciona todo esto va en el "(i)" del título del diálogo: es de
+          la sección entera, no de lo que quedó abajo de la grilla. */}
       <input
         ref={inputRef}
         type="file"

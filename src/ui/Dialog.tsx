@@ -1,5 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
+import { HintMark } from './controls'
+
 /**
  * Diálogo modal para lo que se usa cada tanto y no merece ocupar lugar fijo en
  * pantalla. Es el `<dialog>` nativo, así que Esc cierra y el fondo queda
@@ -10,11 +12,18 @@ import { useEffect, useRef, type ReactNode } from 'react'
  */
 export function Dialog({
   title,
+  hint,
   size = 'narrow',
   onClose,
   children,
 }: {
   title: string
+  /**
+   * Cómo funciona lo que hay adentro, en el título y no al pie del panel: es
+   * de todo el diálogo, y abajo de la grilla queda lejos de lo que explica y
+   * ocupa lugar cada vez que se abre.
+   */
+  hint?: string
   /**
    * `narrow` es el ancho de un panel del costado, para lo que sigue siendo una
    * columna de controles. `wide` es para lo que se mira en grilla, donde el
@@ -42,8 +51,9 @@ export function Dialog({
       }`}
     >
       <header className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
-        <h2 className="text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+        <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
           {title}
+          {hint && <HintMark label={hint} />}
         </h2>
         <button
           onClick={() => ref.current?.close()}

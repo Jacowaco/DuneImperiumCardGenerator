@@ -41,7 +41,12 @@ export function Section({
   )
 }
 
-function HintMark({ label }: { label: string }) {
+/**
+ * La marca "(?)" de una aclaración que no hace falta leer siempre. La usan
+ * los títulos de sección y el encabezado de `Dialog`, que es el título de la
+ * sección cuando el panel se abre en diálogo.
+ */
+export function HintMark({ label }: { label: string }) {
   return (
     <span title={label} tabIndex={0} className="shrink-0 text-zinc-500 normal-case">
       <InfoIcon />

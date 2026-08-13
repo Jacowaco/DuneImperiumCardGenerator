@@ -77,6 +77,7 @@ type Strings = {
     textPlaceholder: string
     lineBreak: string
     deletedIcon: string
+    addTo: string
     close: string
     addIcon: string
     addText: string
@@ -242,6 +243,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Texto…',
       lineBreak: '— corte de renglón —',
       deletedIcon: 'Icono borrado',
+      addTo: 'Agregar a',
       close: 'Cerrar',
       addIcon: 'Icono…',
       addText: 'Texto',
@@ -422,6 +424,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Text…',
       lineBreak: '— line break —',
       deletedIcon: 'Deleted icon',
+      addTo: 'Add to',
       close: 'Close',
       addIcon: 'Icon…',
       addText: 'Text',
@@ -603,6 +606,7 @@ const STRINGS: Record<Language, Strings> = {
       textPlaceholder: 'Texto…',
       lineBreak: '— quebra de linha —',
       deletedIcon: 'Ícone excluído',
+      addTo: 'Adicionar a',
       close: 'Fechar',
       addIcon: 'Ícone…',
       addText: 'Texto',

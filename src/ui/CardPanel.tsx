@@ -8,7 +8,7 @@ import { groupIconIds, useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
 import { Field, MultiChoice, NumberField, Section, TextInput, Toggle } from './controls'
 import { ChevronDownIcon } from './icons'
-import { Grid } from './ContentEditor'
+import { Grid } from './ContentPalette'
 
 /** Ninguna banda tiene arte para una posición 5: no hay dónde apilarla. */
 const MAX_FACTIONS = 4

@@ -1,117 +1,57 @@
-import { useState, type ReactNode } from 'react'
 import { useT } from '../i18n/strings'
-import { iconPart, textPart, type AnyIconId, type ContentPart } from '../model/card'
-import { groupIconIds, useIconLibrary, type IconLibrary } from '../model/iconLibrary'
+import { type ContentPart } from '../model/card'
+import { useIconLibrary } from '../model/iconLibrary'
 import { Action, Hint } from './controls'
-import { BreakIcon, DiamondIcon, GripIcon, MinusIcon, PlusIcon, TextIcon } from './icons'
+import { GripIcon, MinusIcon, PlusIcon } from './icons'
+import { PART_STYLES, type ContentBox, type DragSource, type DropTarget } from './ContentPalette'
 
 type Props = {
+  box: ContentBox
   parts: ContentPart[]
   onChange: (parts: ContentPart[]) => void
+  /** La caja a la que van las piezas que se agregan desde la paleta. */
+  active: boolean
+  onActivate: () => void
+  dragSource: DragSource | null
+  dropTarget: DropTarget | null
+  onDropTarget: (target: DropTarget | null) => void
+  /** Soltar acá: `at` es en qué posición de esta caja entra la pieza. */
+  onDrop: (box: ContentBox, at: number) => void
+  onDragSource: (source: DragSource | null) => void
 }
-
-/**
- * De dónde viene lo que se está arrastrando: una fila que ya está en la
- * lista (se reordena) o algo nuevo — un icono de la grilla, o los botones de
- * texto/renglón — que se inserta donde se suelte.
- */
-type DragSource =
-  | { kind: 'reorder'; index: number }
-  | { kind: 'icon'; icon: AnyIconId }
-  | { kind: 'text' }
-  | { kind: 'break' }
-
-function newPartFor(source: DragSource): ContentPart | null {
-  if (source.kind === 'icon') return iconPart(source.icon)
-  if (source.kind === 'text') return textPart()
-  if (source.kind === 'break') return { type: 'break' }
-  return null
-}
-
-/**
- * Un color por tipo de pieza, el mismo en la fila y en el botón que la agrega.
- * En una lista larga y mezclada, el color se lee antes que el contenido.
- */
-const STYLES = {
-  icon: {
-    row: 'border-sand-500 bg-sand-500/10',
-    button: 'bg-sand-500/15 text-sand-100 hover:bg-sand-500/25',
-  },
-  text: {
-    row: 'border-sky-500 bg-sky-500/10',
-    button: 'bg-sky-500/15 text-sky-100 hover:bg-sky-500/25',
-  },
-  break: {
-    row: 'border-zinc-500 bg-zinc-500/10',
-    button: 'bg-zinc-500/15 text-zinc-200 hover:bg-zinc-500/25',
-  },
-} as const
 
 /**
  * Contenido de una caja: iconos y texto en la misma lista, en el orden en que
  * se dibujan. El acomodo en renglones lo hace el layout, no el usuario; acá
  * sólo se elige qué va y en qué orden.
+ *
+ * Es nada más que la lista: qué se puede agregar lo decide `ContentPalette`,
+ * que es una sola para las dos cajas. El estado del arrastre también vive
+ * afuera, por lo mismo — arrastrar una fila del turno a la revelación es un
+ * movimiento entre dos listas, y ninguna de las dos cajas puede resolverlo
+ * sola.
  */
-export function ContentEditor({ parts, onChange }: Props) {
+export function ContentEditor({
+  box,
+  parts,
+  onChange,
+  active,
+  onActivate,
+  dragSource,
+  dropTarget,
+  onDropTarget,
+  onDrop,
+  onDragSource,
+}: Props) {
   const t = useT()
-  const [picking, setPicking] = useState(false)
-  const [dragSource, setDragSource] = useState<DragSource | null>(null)
-  const [dropTarget, setDropTarget] = useState<{ index: number; before: boolean } | null>(null)
   const library = useIconLibrary()
-  const { custom, core, ix, immortality, influence } = groupIconIds(library)
 
   const update = (index: number, part: ContentPart) =>
     onChange(parts.map((item, i) => (i === index ? part : item)))
 
   const remove = (index: number) => onChange(parts.filter((_, i) => i !== index))
 
-  // `to.before` es de qué lado del renglón sobre el que se soltó va a caer la
-  // pieza — así el punto de inserción es siempre el hueco que se está
-  // marcando, y no "arriba" o "abajo" según de qué lado se venía arrastrando.
-  const reorder = (from: number, to: { index: number; before: boolean }) => {
-    if (from === to.index) return
-    const next = [...parts]
-    const [moved] = next.splice(from, 1)
-    let insertAt = to.index
-    if (from < to.index) insertAt--
-    if (!to.before) insertAt++
-    onChange([...next.slice(0, insertAt), moved, ...next.slice(insertAt)])
-  }
-
-  const insertPart = (part: ContentPart, to: { index: number; before: boolean }) => {
-    const at = to.before ? to.index : to.index + 1
-    onChange([...parts.slice(0, at), part, ...parts.slice(at)])
-  }
-
-  // Soltar sobre una fila puede venir de otra fila (reordenar) o de algo
-  // nuevo — icono, texto o renglón — que hay que insertar en ese punto.
-  const dropOnRow = (to: { index: number; before: boolean }) => {
-    if (dragSource === null) return
-    if (dragSource.kind === 'reorder') {
-      reorder(dragSource.index, to)
-    } else {
-      const part = newPartFor(dragSource)
-      if (part) insertPart(part, to)
-    }
-    setDragSource(null)
-    setDropTarget(null)
-  }
-
-  // Al final de la lista no hay una fila sobre la que calcular antes/después,
-  // así que mover o insertar ahí es directo: siempre va al final.
-  const dropAtEnd = () => {
-    if (dragSource === null) return
-    if (dragSource.kind === 'reorder') {
-      const next = [...parts]
-      const [moved] = next.splice(dragSource.index, 1)
-      onChange([...next, moved])
-    } else {
-      const part = newPartFor(dragSource)
-      if (part) onChange([...parts, part])
-    }
-    setDragSource(null)
-    setDropTarget(null)
-  }
+  const here = dropTarget?.box === box ? dropTarget : null
 
   return (
     <div className="flex flex-col gap-2">
@@ -119,21 +59,28 @@ export function ContentEditor({ parts, onChange }: Props) {
           cae sobre ninguna en particular — la caja vacía, o el hueco después
           de la última —, así que siempre hay dónde soltar, no sólo entre dos
           filas. Cada fila frena la propagación para no disparar los dos a
-          la vez. */}
+          la vez.
+
+          El anillo dice cuál de las dos cajas está recibiendo lo que se
+          agregue desde la paleta; tocar la caja la elige, que es lo que uno
+          hace igual antes de agregarle algo. */}
       <div
+        onClick={onActivate}
         onDragOver={(event) => {
           if (dragSource === null) return
           event.preventDefault()
-          setDropTarget({ index: parts.length, before: true })
+          onDropTarget({ box, index: parts.length, before: true })
         }}
         onDrop={(event) => {
           if (dragSource === null) return
           event.preventDefault()
-          dropAtEnd()
+          onDrop(box, parts.length)
         }}
         className={`flex flex-col gap-2 rounded-md transition-colors ${
+          active ? 'ring-1 ring-sand-500/40' : ''
+        } ${
           dragSource !== null ? 'outline-dashed outline-1 outline-offset-2 outline-zinc-600' : ''
-        } ${dropTarget?.index === parts.length ? 'outline-sand-400' : ''} ${
+        } ${here?.index === parts.length ? 'outline-sand-400' : ''} ${
           parts.length === 0 ? 'bg-zinc-900/60 p-3' : ''
         }`}
       >
@@ -151,37 +98,43 @@ export function ContentEditor({ parts, onChange }: Props) {
                 event.preventDefault()
                 return
               }
-              setDragSource({ kind: 'reorder', index })
+              onDragSource({ kind: 'reorder', box, index })
               event.dataTransfer.effectAllowed = 'move'
             }}
             onDragEnd={() => {
-              setDragSource(null)
-              setDropTarget(null)
+              onDragSource(null)
+              onDropTarget(null)
             }}
             onDragOver={(event) => {
               if (dragSource === null) return
-              if (dragSource.kind === 'reorder' && dragSource.index === index) return
+              if (dragSource.kind === 'reorder' && dragSource.box === box && dragSource.index === index)
+                return
               event.preventDefault()
               event.stopPropagation()
               const rect = event.currentTarget.getBoundingClientRect()
-              setDropTarget({ index, before: event.clientY < rect.top + rect.height / 2 })
+              onDropTarget({ box, index, before: event.clientY < rect.top + rect.height / 2 })
             }}
             onDrop={(event) => {
               event.preventDefault()
               event.stopPropagation()
               const rect = event.currentTarget.getBoundingClientRect()
-              dropOnRow({ index, before: event.clientY < rect.top + rect.height / 2 })
+              const before = event.clientY < rect.top + rect.height / 2
+              onDrop(box, before ? index : index + 1)
             }}
             className={`relative flex cursor-grab items-center gap-2 rounded-md border-l-4 p-1.5 transition-opacity active:cursor-grabbing ${
-              STYLES[part.type].row
-            } ${dragSource?.kind === 'reorder' && dragSource.index === index ? 'opacity-40' : ''}`}
+              PART_STYLES[part.type].row
+            } ${
+              dragSource?.kind === 'reorder' && dragSource.box === box && dragSource.index === index
+                ? 'opacity-40'
+                : ''
+            }`}
           >
-            {dropTarget?.index === index &&
+            {here?.index === index &&
               dragSource !== null &&
-              !(dragSource.kind === 'reorder' && dragSource.index === index) && (
+              !(dragSource.kind === 'reorder' && dragSource.box === box && dragSource.index === index) && (
                 <div
                   className={`absolute inset-x-0 h-0.5 rounded-full bg-sand-300 ${
-                    dropTarget.before ? '-top-1' : '-bottom-1'
+                    here.before ? '-top-1' : '-bottom-1'
                   }`}
                 />
               )}
@@ -271,184 +224,6 @@ export function ContentEditor({ parts, onChange }: Props) {
           </div>
         ))}
       </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <Add type="icon" icon={<DiamondIcon />} onClick={() => setPicking(!picking)}>
-          {picking ? t.contentEditor.close : t.contentEditor.addIcon}
-        </Add>
-        <Add
-          type="text"
-          icon={<TextIcon />}
-          onClick={() => onChange([...parts, textPart()])}
-          onDragStart={() => setDragSource({ kind: 'text' })}
-          onDragEnd={() => setDragSource(null)}
-        >
-          {t.contentEditor.addText}
-        </Add>
-        <Add
-          type="break"
-          icon={<BreakIcon />}
-          onClick={() => onChange([...parts, { type: 'break' }])}
-          onDragStart={() => setDragSource({ kind: 'break' })}
-          onDragEnd={() => setDragSource(null)}
-        >
-          {t.contentEditor.addLineBreak}
-        </Add>
-      </div>
-
-      {picking && (
-        <div className="flex flex-col gap-2 rounded-md bg-zinc-900 p-2">
-          {/* Los propios van primero: son los que se agregaron a propósito
-              para este mazo, así que pesan más que revisar todo el catálogo
-              del juego para encontrarlos. */}
-          {custom.length > 0 && (
-            <>
-              <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                {t.contentEditor.custom}
-              </p>
-              <Grid
-                ids={custom}
-                library={library}
-                onPick={(icon) => onChange([...parts, iconPart(icon)])}
-                onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-                onDragEnd={() => setDragSource(null)}
-              />
-            </>
-          )}
-
-          <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-            {t.contentEditor.core}
-          </p>
-          <Grid
-            ids={core}
-            library={library}
-            onPick={(icon) => onChange([...parts, iconPart(icon)])}
-            onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-            onDragEnd={() => setDragSource(null)}
-          />
-
-          {/* Las expansiones van aparte para no tener que revisar tooltip por
-              tooltip cuando el mazo no las usa. */}
-          {ix.length > 0 && (
-            <>
-              <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">Rise of Ix</p>
-              <Grid
-                ids={ix}
-                library={library}
-                onPick={(icon) => onChange([...parts, iconPart(icon)])}
-                onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-                onDragEnd={() => setDragSource(null)}
-              />
-            </>
-          )}
-
-          {immortality.length > 0 && (
-            <>
-              <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">Immortality</p>
-              <Grid
-                ids={immortality}
-                library={library}
-                onPick={(icon) => onChange([...parts, iconPart(icon)])}
-                onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-                onDragEnd={() => setDragSource(null)}
-              />
-            </>
-          )}
-
-          {influence.length > 0 && (
-            <>
-              <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                {t.contentEditor.influence}
-              </p>
-              <Grid
-                ids={influence}
-                library={library}
-                onPick={(icon) => onChange([...parts, iconPart(icon)])}
-                onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-                onDragEnd={() => setDragSource(null)}
-              />
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }
-
-/**
- * Grilla de iconos para elegir uno: se reusa tal cual en `CardPanel` para el
- * beneficio de compra, que no necesita arrastrar — ahí `onDragStart`/
- * `onDragEnd` quedan sin pasar.
- */
-export function Grid({
-  ids,
-  library,
-  onPick,
-  onDragStart,
-  onDragEnd,
-}: {
-  ids: AnyIconId[]
-  library: IconLibrary
-  onPick: (icon: AnyIconId) => void
-  onDragStart?: (icon: AnyIconId) => void
-  onDragEnd?: () => void
-}) {
-  return (
-    <div className="grid grid-cols-6 gap-1">
-      {ids.map((icon) => (
-        <button
-          key={icon}
-          title={library[icon].label}
-          onClick={() => onPick(icon)}
-          draggable={onDragStart !== undefined}
-          onDragStart={(event) => {
-            event.dataTransfer.effectAllowed = 'copy'
-            onDragStart?.(icon)
-          }}
-          onDragEnd={onDragEnd}
-          className={`flex aspect-square items-center justify-center rounded p-1 transition-colors hover:bg-zinc-700 ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
-        >
-          <img
-            src={library[icon].url}
-            alt={library[icon].label}
-            draggable={false}
-            className="max-h-full max-w-full object-contain"
-          />
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function Add({
-  type,
-  icon,
-  onClick,
-  onDragStart,
-  onDragEnd,
-  children,
-}: {
-  type: keyof typeof STYLES
-  icon: ReactNode
-  onClick: () => void
-  onDragStart?: () => void
-  onDragEnd?: () => void
-  children: string
-}) {
-  return (
-    <button
-      onClick={onClick}
-      draggable={onDragStart !== undefined}
-      onDragStart={(event) => {
-        event.dataTransfer.effectAllowed = 'copy'
-        onDragStart?.()
-      }}
-      onDragEnd={onDragEnd}
-      className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-medium transition-colors ${STYLES[type].button} ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
-    >
-      {icon}
-      {children}
-    </button>
-  )
-}
-

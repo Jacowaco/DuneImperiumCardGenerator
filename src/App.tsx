@@ -694,7 +694,10 @@ export function App() {
                   onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              {/* Dos filas y no una de tres más el export suelto: arriba lo
+                  que el mazo tiene adentro, abajo las dos formas de sacarlo
+                  afuera. Imprimir es del segundo grupo, no del primero. */}
+              <div className="grid grid-cols-2 gap-2">
                 <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
                   <DiamondIcon />
                   {t.deckFooter.icons}
@@ -703,20 +706,22 @@ export function App() {
                   <BannerIcon />
                   {t.deckFooter.factions}
                 </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 <Button onClick={() => setDialog('print')} className="px-2 text-xs">
                   <PrinterIcon />
                   {t.deckFooter.print}
                 </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => void handleExportAllPng()}
+                  disabled={cardsExporting}
+                  className="px-2 text-xs"
+                >
+                  <DownloadIcon />
+                  {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
+                </Button>
               </div>
-              <Button
-                variant="primary"
-                onClick={() => void handleExportAllPng()}
-                disabled={cardsExporting}
-                className="text-xs"
-              >
-                <DownloadIcon />
-                {cardsExporting ? t.deckFooter.exportingAll : t.deckFooter.exportAll}
-              </Button>
             </div>
           </CardGallery>
         </div>

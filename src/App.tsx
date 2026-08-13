@@ -30,7 +30,9 @@ import { emptyDeck, loadAutosave, packFactions, packIcons, saveAutosave, type De
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
+import { CardDropZones } from './ui/CardDropZones'
 import { CardGallery } from './ui/CardGallery'
+import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
 import { Button, Toggle } from './ui/controls'
@@ -481,7 +483,16 @@ export function App() {
     }
   }
 
+  /**
+   * Soltar sobre el preview es para la imagen del jugador, y lo único que
+   * trae una imagen es un archivo. El otro arrastre que pasa por acá es el de
+   * contenido, que va a las zonas de `CardDropZones` — se distingue por
+   * `types`, que en un archivo del sistema siempre incluye `Files`.
+   */
+  const isFileDrag = (event: DragEvent) => event.dataTransfer.types.includes('Files')
+
   const handleDrop = (event: DragEvent) => {
+    if (!isFileDrag(event)) return
     event.preventDefault()
     setDragging(false)
     // Carta terminada: no se reemplaza el arte por soltar un archivo encima.
@@ -493,6 +504,10 @@ export function App() {
     <LanguageProvider value={{ language, setLanguage }}>
     <FactionLibraryProvider value={factionLibrary}>
     <IconLibraryProvider value={library}>
+    {/* El arrastre de contenido cruza la pantalla: sale de la paleta del panel
+        de la izquierda y puede terminar sobre la carta, así que el estado
+        tiene que estar arriba de las dos. */}
+    <ContentDragProvider card={card} onChange={patchCard}>
       <div className="flex h-full flex-col">
         <TopBar
           exporting={exporting}
@@ -547,6 +562,7 @@ export function App() {
           <main
             ref={previewRef}
             onDragOver={(event) => {
+              if (!isFileDrag(event)) return
               event.preventDefault()
               setDragging(true)
             }}
@@ -556,7 +572,7 @@ export function App() {
               dragging ? 'bg-zinc-800' : ''
             }`}
           >
-            <div className="transparency-grid shadow-2xl shadow-black/60">
+            <div className="transparency-grid relative shadow-2xl shadow-black/60">
               <CardStage
                 card={card}
                 scale={previewScale}
@@ -564,6 +580,10 @@ export function App() {
                 onArtChange={card.done ? undefined : setTransform}
                 onArtPick={card.done ? undefined : () => fileInputRef.current?.click()}
               />
+
+              {/* Sólo aparecen mientras se arrastra contenido, y encima de la
+                  carta: es la otra forma de decir en qué caja va la pieza. */}
+              <CardDropZones card={card} scale={previewScale} />
             </div>
 
             {/* Mismo sello que la galería, para que se note sin tener que
@@ -717,6 +737,7 @@ export function App() {
           }}
         />
       </div>
+    </ContentDragProvider>
     </IconLibraryProvider>
     </FactionLibraryProvider>
     </LanguageProvider>

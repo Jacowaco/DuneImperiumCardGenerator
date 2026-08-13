@@ -1,24 +1,10 @@
 import { useT } from '../i18n/strings'
 import { type ContentPart } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
+import { useContentDrag, type ContentBox } from './contentDrag'
 import { Action, Hint } from './controls'
 import { GripIcon, MinusIcon, PlusIcon } from './icons'
-import { PART_STYLES, type ContentBox, type DragSource, type DropTarget } from './ContentPalette'
-
-type Props = {
-  box: ContentBox
-  parts: ContentPart[]
-  onChange: (parts: ContentPart[]) => void
-  /** La caja a la que van las piezas que se agregan desde la paleta. */
-  active: boolean
-  onActivate: () => void
-  dragSource: DragSource | null
-  dropTarget: DropTarget | null
-  onDropTarget: (target: DropTarget | null) => void
-  /** Soltar acá: `at` es en qué posición de esta caja entra la pieza. */
-  onDrop: (box: ContentBox, at: number) => void
-  onDragSource: (source: DragSource | null) => void
-}
+import { PART_STYLES } from './ContentPalette'
 
 /**
  * Contenido de una caja: iconos y texto en la misma lista, en el orden en que
@@ -31,20 +17,24 @@ type Props = {
  * movimiento entre dos listas, y ninguna de las dos cajas puede resolverlo
  * sola.
  */
-export function ContentEditor({
-  box,
-  parts,
-  onChange,
-  active,
-  onActivate,
-  dragSource,
-  dropTarget,
-  onDropTarget,
-  onDrop,
-  onDragSource,
-}: Props) {
+export function ContentEditor({ box }: { box: ContentBox }) {
   const t = useT()
   const library = useIconLibrary()
+  const {
+    target,
+    setTarget,
+    dragSource,
+    setDragSource,
+    dropTarget,
+    setDropTarget,
+    parts: partsOf,
+    update: updateBox,
+    drop,
+  } = useContentDrag()
+
+  const parts = partsOf(box)
+  const active = target === box
+  const onChange = (next: ContentPart[]) => updateBox(box, next)
 
   const update = (index: number, part: ContentPart) =>
     onChange(parts.map((item, i) => (i === index ? part : item)))
@@ -65,16 +55,16 @@ export function ContentEditor({
           agregue desde la paleta; tocar la caja la elige, que es lo que uno
           hace igual antes de agregarle algo. */}
       <div
-        onClick={onActivate}
+        onClick={() => setTarget(box)}
         onDragOver={(event) => {
           if (dragSource === null) return
           event.preventDefault()
-          onDropTarget({ box, index: parts.length, before: true })
+          setDropTarget({ box, index: parts.length, before: true })
         }}
         onDrop={(event) => {
           if (dragSource === null) return
           event.preventDefault()
-          onDrop(box, parts.length)
+          drop(box, parts.length)
         }}
         className={`flex flex-col gap-2 rounded-md transition-colors ${
           active ? 'ring-1 ring-sand-500/40' : ''
@@ -98,12 +88,12 @@ export function ContentEditor({
                 event.preventDefault()
                 return
               }
-              onDragSource({ kind: 'reorder', box, index })
+              setDragSource({ kind: 'reorder', box, index })
               event.dataTransfer.effectAllowed = 'move'
             }}
             onDragEnd={() => {
-              onDragSource(null)
-              onDropTarget(null)
+              setDragSource(null)
+              setDropTarget(null)
             }}
             onDragOver={(event) => {
               if (dragSource === null) return
@@ -112,14 +102,14 @@ export function ContentEditor({
               event.preventDefault()
               event.stopPropagation()
               const rect = event.currentTarget.getBoundingClientRect()
-              onDropTarget({ box, index, before: event.clientY < rect.top + rect.height / 2 })
+              setDropTarget({ box, index, before: event.clientY < rect.top + rect.height / 2 })
             }}
             onDrop={(event) => {
               event.preventDefault()
               event.stopPropagation()
               const rect = event.currentTarget.getBoundingClientRect()
               const before = event.clientY < rect.top + rect.height / 2
-              onDrop(box, before ? index : index + 1)
+              drop(box, before ? index : index + 1)
             }}
             className={`relative flex cursor-grab items-center gap-2 rounded-md border-l-4 p-1.5 transition-opacity active:cursor-grabbing ${
               PART_STYLES[part.type].row

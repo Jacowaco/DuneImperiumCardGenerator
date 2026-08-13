@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import {
   AGENT_ICON_IDS,
   AGENT_ICON_STYLES,
@@ -7,14 +5,7 @@ import {
   AGENT_BADGE_URLS,
 } from '../assets/icons/agents'
 import { useT } from '../i18n/strings'
-import {
-  PLAY_ROWS,
-  PLAY_ROWS_LABELS,
-  type AnyAgentIcon,
-  type Card,
-  type ContentPart,
-  type PlayRows,
-} from '../model/card'
+import { PLAY_ROWS, PLAY_ROWS_LABELS, type AnyAgentIcon, type Card, type PlayRows } from '../model/card'
 import { isCustomFactionId } from '../model/customFaction'
 import { useFactionLibrary } from '../model/factionLibrary'
 import { useIconLibrary } from '../model/iconLibrary'
@@ -22,28 +13,12 @@ import { pick, useLanguage } from '../model/language'
 import { autoPlayRows } from '../render/contentLayout'
 import { Choice, MultiChoice, Section, Toggle } from './controls'
 import { ContentEditor } from './ContentEditor'
-import {
-  ContentPalette,
-  newPartFor,
-  type ContentBox,
-  type DragSource,
-  type DropTarget,
-} from './ContentPalette'
+import { ContentPalette } from './ContentPalette'
 
 type Props = {
   card: Card
   onChange: (patch: Partial<Card>) => void
 }
-
-/** Qué campo de la carta es cada caja. */
-const patchBox = (box: ContentBox, parts: ContentPart[]): Partial<Card> =>
-  box === 'play' ? { playContent: parts } : { revealContent: parts }
-
-const insert = (parts: ContentPart[], at: number, part: ContentPart) => [
-  ...parts.slice(0, at),
-  part,
-  ...parts.slice(at),
-]
 
 /** La columna tiene exactamente esta cantidad de ranuras — ver `AgentIcons.tsx`. */
 const MAX_AGENT_ICONS = AGENT_ICON_IDS.length
@@ -59,60 +34,6 @@ export function RulesPanel({ card, onChange }: Props) {
   const library = useIconLibrary()
   const factionLibrary = useFactionLibrary()
   const customFactionIds = Object.keys(factionLibrary).filter(isCustomFactionId)
-
-  // El arrastre y el destino de la paleta son de las dos cajas a la vez, así
-  // que viven acá: una pieza puede salir de una y terminar en la otra, y
-  // ninguna de las dos puede resolver eso sola.
-  const [target, setTarget] = useState<ContentBox>('play')
-  const [dragSource, setDragSource] = useState<DragSource | null>(null)
-  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
-
-  const content = { play: card.playContent, reveal: card.revealContent }
-
-  const add = (part: ContentPart) => onChange(patchBox(target, [...content[target], part]))
-
-  /**
-   * Soltar en `box`, en la posición `at`. Los tres casos son distintos:
-   * reordenar adentro de una caja, mover una pieza de una caja a la otra, y
-   * insertar algo nuevo que viene de la paleta.
-   */
-  const drop = (box: ContentBox, at: number) => {
-    if (dragSource === null) return
-
-    if (dragSource.kind === 'reorder' && dragSource.box === box) {
-      const rest = content[box].filter((_, i) => i !== dragSource.index)
-      // Sacar la pieza corre un lugar todo lo que venía después.
-      onChange(patchBox(box, insert(rest, dragSource.index < at ? at - 1 : at, content[box][dragSource.index])))
-    } else if (dragSource.kind === 'reorder') {
-      const moved = content[dragSource.box][dragSource.index]
-      onChange({
-        ...patchBox(dragSource.box, content[dragSource.box].filter((_, i) => i !== dragSource.index)),
-        ...patchBox(box, insert(content[box], at, moved)),
-      })
-    } else {
-      const part = newPartFor(dragSource)
-      if (part) onChange(patchBox(box, insert(content[box], at, part)))
-    }
-
-    // Lo que se soltó en una caja deja a esa caja como destino: es la que se
-    // está llenando.
-    setTarget(box)
-    setDragSource(null)
-    setDropTarget(null)
-  }
-
-  const editorProps = (box: ContentBox) => ({
-    box,
-    parts: content[box],
-    onChange: (parts: ContentPart[]) => onChange(patchBox(box, parts)),
-    active: target === box,
-    onActivate: () => setTarget(box),
-    dragSource,
-    dropTarget,
-    onDropTarget: setDropTarget,
-    onDrop: drop,
-    onDragSource: setDragSource,
-  })
 
   return (
     <>
@@ -189,19 +110,14 @@ export function RulesPanel({ card, onChange }: Props) {
           />
         </div>
 
-        <ContentEditor {...editorProps('play')} />
+        <ContentEditor box="play" />
       </Section>
 
       <Section title={t.rulesPanel.reveal} hint={t.rulesPanel.contentHint}>
-        <ContentEditor {...editorProps('reveal')} />
+        <ContentEditor box="reveal" />
       </Section>
 
-      <ContentPalette
-        target={target}
-        onTarget={setTarget}
-        onAdd={add}
-        onDragSource={setDragSource}
-      />
+      <ContentPalette />
     </>
   )
 }

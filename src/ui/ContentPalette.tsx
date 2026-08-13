@@ -1,34 +1,11 @@
 import { useState, type ReactNode } from 'react'
 
 import { useT } from '../i18n/strings'
-import { iconPart, textPart, type AnyIconId, type ContentPart } from '../model/card'
+import { iconPart, textPart, type AnyIconId } from '../model/card'
 import { groupIconIds, useIconLibrary, type IconLibrary } from '../model/iconLibrary'
+import { useContentDrag, type ContentBox } from './contentDrag'
 import { Choice } from './controls'
 import { BreakIcon, DiamondIcon, TextIcon } from './icons'
-
-/** Las dos cajas de contenido de la carta. */
-export type ContentBox = 'play' | 'reveal'
-
-/**
- * De dónde viene lo que se está arrastrando: una fila que ya está en una de
- * las cajas (se mueve, y puede terminar en la otra) o algo nuevo — un icono de
- * la grilla, o los botones de texto/renglón — que se inserta donde se suelte.
- */
-export type DragSource =
-  | { kind: 'reorder'; box: ContentBox; index: number }
-  | { kind: 'icon'; icon: AnyIconId }
-  | { kind: 'text' }
-  | { kind: 'break' }
-
-/** Dónde va a caer lo que se está arrastrando, mientras se arrastra. */
-export type DropTarget = { box: ContentBox; index: number; before: boolean }
-
-export function newPartFor(source: DragSource): ContentPart | null {
-  if (source.kind === 'icon') return iconPart(source.icon)
-  if (source.kind === 'text') return textPart()
-  if (source.kind === 'break') return { type: 'break' }
-  return null
-}
 
 /**
  * Un color por tipo de pieza, el mismo en la fila y en el botón que la agrega.
@@ -65,18 +42,9 @@ export const PART_STYLES = {
  * lista del turno larga, una paleta al final de la columna quedaría a un
  * scroll de distancia justo cuando más se la usa.
  */
-export function ContentPalette({
-  target,
-  onTarget,
-  onAdd,
-  onDragSource,
-}: {
-  target: ContentBox
-  onTarget: (box: ContentBox) => void
-  onAdd: (part: ContentPart) => void
-  onDragSource: (source: DragSource | null) => void
-}) {
+export function ContentPalette() {
   const t = useT()
+  const { target, setTarget, add, setDragSource } = useContentDrag()
   const [picking, setPicking] = useState(false)
   const library = useIconLibrary()
   const { custom, core, ix, immortality, influence } = groupIconIds(library)
@@ -99,7 +67,7 @@ export function ContentPalette({
           <Choice<ContentBox>
             value={target}
             columns={2}
-            onChange={(box) => box && onTarget(box)}
+            onChange={(box) => box && setTarget(box)}
             options={[
               { value: 'play', label: t.rulesPanel.playTurn },
               { value: 'reveal', label: t.rulesPanel.reveal },
@@ -115,18 +83,18 @@ export function ContentPalette({
         <Add
           type="text"
           icon={<TextIcon />}
-          onClick={() => onAdd(textPart())}
-          onDragStart={() => onDragSource({ kind: 'text' })}
-          onDragEnd={() => onDragSource(null)}
+          onClick={() => add(textPart())}
+          onDragStart={() => setDragSource({ kind: 'text' })}
+          onDragEnd={() => setDragSource(null)}
         >
           {t.contentEditor.addText}
         </Add>
         <Add
           type="break"
           icon={<BreakIcon />}
-          onClick={() => onAdd({ type: 'break' })}
-          onDragStart={() => onDragSource({ kind: 'break' })}
-          onDragEnd={() => onDragSource(null)}
+          onClick={() => add({ type: 'break' })}
+          onDragStart={() => setDragSource({ kind: 'break' })}
+          onDragEnd={() => setDragSource(null)}
         >
           {t.contentEditor.addLineBreak}
         </Add>
@@ -150,9 +118,9 @@ export function ContentPalette({
                 <Grid
                   ids={group.ids}
                   library={library}
-                  onPick={(icon) => onAdd(iconPart(icon))}
-                  onDragStart={(icon) => onDragSource({ kind: 'icon', icon })}
-                  onDragEnd={() => onDragSource(null)}
+                  onPick={(icon) => add(iconPart(icon))}
+                  onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
+                  onDragEnd={() => setDragSource(null)}
                 />
               </div>
             ))}

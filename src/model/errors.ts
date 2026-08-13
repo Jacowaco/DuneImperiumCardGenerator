@@ -10,6 +10,8 @@
 export type ErrorCode =
   | 'not-a-card'
   | 'no-cards'
+  | 'not-a-library'
+  | 'empty-library'
   | 'empty-image'
   | 'read-failed'
   | 'invalid-image'

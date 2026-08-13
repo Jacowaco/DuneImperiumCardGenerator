@@ -1,7 +1,9 @@
 import type { CustomFaction } from './customFaction'
 import type { CustomIcon } from './customIcon'
+import { LIBRARY_EXTENSION } from './libraryFile'
 import {
   downloadDeck,
+  downloadText,
   FILE_EXTENSION,
   fileSafe,
   parseDeck,
@@ -60,6 +62,52 @@ const FILE_TYPES = [
     accept: { 'application/json': [FILE_EXTENSION, '.json'] },
   },
 ]
+
+const LIBRARY_TYPES = [
+  {
+    description: 'Biblioteca de Dune: Imperium',
+    accept: { 'application/json': [LIBRARY_EXTENSION, '.json'] },
+  },
+]
+
+/**
+ * Guardar texto en un archivo nuevo, sin quedarse con el handle: es para lo
+ * que se exporta de a una vez —la biblioteca— y no para lo que se sobrescribe
+ * seguido, que es el mazo y por eso tiene su propio camino con handle.
+ */
+export async function saveTextAs(
+  text: string,
+  suggestedName: string,
+  types = LIBRARY_TYPES,
+): Promise<void> {
+  const show = picker().showSaveFilePicker
+  if (!show || writesBlocked) return downloadText(text, suggestedName)
+
+  const handle = await show({ suggestedName, types })
+
+  try {
+    const writable = await handle.createWritable()
+    await writable.write(text)
+    await writable.close()
+  } catch (cause) {
+    if (!isUnwritable(cause)) throw cause
+    writesBlocked = true
+    downloadText(text, suggestedName)
+  }
+}
+
+/**
+ * Leer un archivo de texto con el diálogo nativo. `null` cuando el navegador
+ * no tiene la API: ahí el llamador cae en un `<input type=file>`, igual que
+ * para abrir un mazo.
+ */
+export async function openText(types = LIBRARY_TYPES): Promise<string | null> {
+  const show = picker().showOpenFilePicker
+  if (!show) return null
+
+  const [handle] = await show({ types })
+  return (await handle.getFile()).text()
+}
 
 /** El usuario cerró el diálogo. No es un error que valga la pena mostrar. */
 export const isCancelled = (error: unknown) =>

@@ -148,12 +148,24 @@ export function downloadDeck(deck: Deck, library?: CustomIcon[], factionLibrary?
   // Un mazo de una sola carta se guarda con el nombre de esa carta; varios,
   // con un nombre genérico, porque no hay uno mejor que elegir.
   const name = deck.cards.length === 1 ? deck.cards[0].title.trim() || 'carta' : 'mazo'
-  const blob = new Blob([serializeDeck(deck, { library, factionLibrary })], { type: 'application/json' })
+  downloadText(
+    serializeDeck(deck, { library, factionLibrary }),
+    `${fileSafe(name)}${FILE_EXTENSION}`,
+  )
+}
+
+/**
+ * Bajar un archivo, que es lo que queda cuando el navegador no deja escribir
+ * donde el usuario elija (Firefox, Safari, la vista previa embebida del
+ * editor). Lo usan el mazo y la biblioteca.
+ */
+export function downloadText(text: string, fileName: string) {
+  const blob = new Blob([text], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
   link.href = url
-  link.download = `${fileSafe(name)}${FILE_EXTENSION}`
+  link.download = fileName
   link.click()
   URL.revokeObjectURL(url)
 }

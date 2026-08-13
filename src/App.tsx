@@ -22,11 +22,14 @@ import {
   isCancelled,
   openDeck,
   openDeckFromFile,
+  openText,
   saveDeck,
   saveDeckAs,
+  saveTextAs,
   suggestedName,
   type OpenedDeck,
 } from './model/files'
+import { parseLibrary, serializeLibrary, suggestedLibraryName } from './model/libraryFile'
 import { buildIconLibrary, IconLibraryProvider } from './model/iconLibrary'
 import { adoptIcons, listLibraryIcons, saveLibraryIcon, syncLibrary } from './model/iconStore'
 import { LanguageProvider, useLanguageState } from './model/language'
@@ -105,6 +108,9 @@ export function App() {
   const [copies, setCopies] = useState(1)
   const [dragging, setDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Lo que salió bien también hay que decirlo: importar una biblioteca no
+  // cambia nada de lo que se ve, así que sin aviso parece que no hizo nada.
+  const [notice, setNotice] = useState<string | null>(null)
 
   // Archivo abierto: el handle es lo que permite sobrescribirlo sin volver a
   // preguntar dónde. Sin handle, "Guardar" se comporta como "Guardar como".
@@ -226,6 +232,31 @@ export function App() {
     setDeckFactions([...deck.factions, faction])
   }
 
+  /**
+   * La biblioteca entera en un archivo. Va junta —iconos y facciones— porque
+   * las dos son lo mismo para el usuario: lo suyo, que vive sólo en este
+   * navegador y que hasta ahora no había forma de mudar ni de respaldar.
+   */
+  const exportLibrary = () =>
+    run(() => saveTextAs(serializeLibrary(myIcons, myFactions), suggestedLibraryName()))
+
+  const importLibraryText = async (json: string) => {
+    const { icons, factions } = parseLibrary(json)
+    // Adoptar y no pisar: lo que ya tenías con ese id es el que vale, igual
+    // que al abrir un mazo con biblioteca adentro.
+    if (icons.length) setMyIcons(await adoptIcons(icons))
+    if (factions.length) setMyFactions(await adoptFactions(factions))
+    setNotice(t.libraryFile.imported(icons.length, factions.length))
+  }
+
+  const importLibrary = () =>
+    run(async () => {
+      const json = await openText()
+      // Sin diálogo nativo (Firefox, Safari) queda el `<input type=file>`.
+      if (json === null) libraryInputRef.current?.click()
+      else await importLibraryText(json)
+    })
+
   // El índice puede quedar fuera de rango al abrir un mazo más corto.
   const index = Math.min(selected, cards.length - 1)
   const card = cards[index]
@@ -248,6 +279,7 @@ export function App() {
 
   const stageRef = useRef<Konva.Stage | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const libraryInputRef = useRef<HTMLInputElement | null>(null)
   const previewRef = useRef<HTMLDivElement | null>(null)
   const previewScale = useFitScale(previewRef)
 
@@ -637,6 +669,18 @@ export function App() {
                 {error}
               </button>
             )}
+
+            {/* En el mismo lugar que el error y con la misma forma: es el
+                mismo canal —lo que la app tiene para decir— y sólo cambia si
+                salió bien o mal. */}
+            {notice && (
+              <button
+                onClick={() => setNotice(null)}
+                className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-md bg-emerald-900/90 px-4 py-2.5 text-sm text-emerald-50 shadow-lg"
+              >
+                {notice}
+              </button>
+            )}
           </main>
 
           <CardGallery
@@ -708,6 +752,8 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <IconPanel
+              onExportLibrary={exportLibrary}
+              onImportLibrary={importLibrary}
               icons={deck.icons}
               library={myIcons}
               cards={cards}
@@ -728,6 +774,8 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <FactionPanel
+              onExportLibrary={exportLibrary}
+              onImportLibrary={importLibrary}
               factions={deck.factions}
               library={myFactions}
               cards={cards}
@@ -763,6 +811,18 @@ export function App() {
           hidden
           onChange={(event) => {
             void setArtFromFile(event.target.files?.[0])
+            event.target.value = ''
+          }}
+        />
+
+        <input
+          ref={libraryInputRef}
+          type="file"
+          accept=".json"
+          hidden
+          onChange={(event) => {
+            const picked = event.target.files?.[0]
+            if (picked) void run(async () => importLibraryText(await picked.text()))
             event.target.value = ''
           }}
         />

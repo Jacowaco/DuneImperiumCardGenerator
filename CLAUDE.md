@@ -222,6 +222,34 @@ módulo que abriera la 1 después de la migración a la 2 fallaría con
 La biblioteca es de este navegador y no viaja — por eso mismo el mazo tiene que
 seguir llevando el PNG adentro.
 
+#### La biblioteca en un archivo
+
+Que viva en IndexedDB significa que se pierde al cambiar de máquina, al borrar
+los datos del sitio o al abrir la app en otro navegador. Un mazo se lleva lo
+que usa, pero eso no alcanza para mudarla: lo que todavía no usaste no está en
+ningún mazo. Para eso está **Exportar / Importar** al pie de la sección
+«Mi biblioteca», en los dos diálogos —la misma acción desde cualquiera de los
+dos, porque el archivo es uno solo—.
+
+`src/model/libraryFile.ts` define el formato: `.dunelib.json`, con
+`format: 'dune-imperium-library'`, versión 1, `icons[]` y `factions[]`. Es un
+formato **aparte del mazo** y no una variante suya, porque no es un mazo: no
+tiene cartas y no se abre como tal. Las dos listas van juntas porque las dos
+son «lo mío» y separarlas serían dos archivos para el mismo viaje.
+
+Importar **adopta, no pisa**: lo que ya tenías con ese id es el que vale, la
+misma regla que al abrir un mazo con biblioteca adentro. Y avisa cuántos
+entraron, porque no cambia nada de lo que se ve en pantalla — sin el aviso
+parece que el botón no hizo nada. Ese aviso verde es el mismo lugar y la misma
+forma que el error rojo del preview: es el mismo canal, y lo único que cambia
+es si salió bien o mal.
+
+En `files.ts`, exportar e importar no usan el camino del mazo: `saveTextAs` y
+`openText` guardan y leen sin quedarse con el *handle*, porque la biblioteca se
+exporta de a una vez y no se sobrescribe seguido como el mazo. Donde no está la
+File System Access API caen en bajar el archivo y en un `<input type=file>`,
+igual que el mazo.
+
 ### Texto en las cajas de contenido
 
 El contenido de cada caja es una lista de `ContentPart` (`src/model/card.ts`):
@@ -433,6 +461,27 @@ galería; la versión larga está en su `title`.
 
 Entra sin scroll horizontal en 1024 × 640, que es la ventana más chica en la
 que tiene sentido usarla.
+
+### Editar sobre la carta
+
+Las cosas de la carta se pueden tocar **donde se las ve**, además de en el
+panel: el contenido de las cajas se arrastra con `CardDropZones` y el nombre se
+escribe con `CardNameField`. Los dos son HTML posicionado encima del `Stage`
+—como el sello de terminada—, así que nada de esto sale en el PNG.
+
+El campo del nombre toma la placa entera (de `TITLE.x` al límite derecho, que
+se corre cuando hay rombo de costo) y no el ancho del texto: una carta sin
+nombre no tiene texto que agarrar, que es justo cuando más se lo quiere
+escribir. Por lo mismo, la placa vacía dibuja «Nombre» atenuado, con el mismo
+mecanismo que la pieza de texto vacía —`placeholders` en `CardStage`—, así que
+el relleno no llega ni a la galería ni al PNG.
+
+Mientras se escribe, el `<input>` **tapa** el título dibujado en vez de dejarlo
+ver: las versalitas no se pueden imitar con un input —la inicial de cada
+palabra es más grande y el texto se achica solo cuando no entra—, así que el
+cursor caería en cualquier lado menos donde se está escribiendo. Al salir se ve
+el título de verdad. Por eso también el fondo del campo es opaco: el título
+sigue abajo, actualizándose letra por letra.
 
 ### Iconos de la interfaz
 

@@ -164,6 +164,13 @@ type Strings = {
     confirmRemove: (label: string, used: number) => string
     removeLabel: (label: string) => string
   }
+  libraryFile: {
+    export: string
+    exportTitle: string
+    import: string
+    importTitle: string
+    imported: (icons: number, factions: number) => string
+  }
   printPanel: {
     perSheetSuffix: string
     fitsOnOne: string
@@ -368,6 +375,16 @@ const STRINGS: Record<Language, Strings> = {
         `«${label}» está en ${pluralCards(used, 'es')} de este mazo. Si la borrás, esas cartas pierden la banda, el icono de agente o el rombo que la nombra.`,
       removeLabel: (label) => `Borrar ${label}`,
     },
+    libraryFile: {
+      export: 'Exportar…',
+      exportTitle:
+        'Guarda tu biblioteca entera —iconos y facciones— en un archivo, para llevarla a otra computadora o tener una copia. La biblioteca vive en este navegador nada más.',
+      import: 'Importar…',
+      importTitle:
+        'Trae a tu biblioteca lo que tenga un archivo de biblioteca. Lo que ya tenías con el mismo id se conserva como está.',
+      imported: (icons, factions) =>
+        `Se sumaron ${pluralIcons(icons, 'es')} y ${pluralFactions(factions, 'es')} a tu biblioteca.`,
+    },
     printPanel: {
       perSheetSuffix: 'por hoja.',
       fitsOnOne: 'El mazo entra en una.',
@@ -399,6 +416,8 @@ const STRINGS: Record<Language, Strings> = {
       permissionDenied: (fileName) =>
         `Chrome pide permiso para escribir sobre ${fileName}. Apretá Guardar de nuevo y elegí «Editar archivo», o usá Guardar como… para elegir otro.`,
       'not-a-card': () => 'El archivo no es una carta de Dune: Imperium.',
+      'not-a-library': () => 'Ese archivo no es una biblioteca de Dune: Imperium.',
+      'empty-library': () => 'Esa biblioteca no tiene iconos ni facciones adentro.',
       'no-cards': () => 'El archivo no tiene ninguna carta.',
       'empty-image': ({ name }) => `La imagen está vacía: ${name}`,
       'read-failed': ({ name }) => `No se pudo leer el archivo: ${name}`,
@@ -583,6 +602,16 @@ const STRINGS: Record<Language, Strings> = {
         `"${label}" is used in ${pluralCards(used, 'en')} of this deck. Deleting it removes the band, agent icon, or diamond that names it from those cards.`,
       removeLabel: (label) => `Delete ${label}`,
     },
+    libraryFile: {
+      export: 'Export…',
+      exportTitle:
+        'Saves your whole library —icons and factions— to a file, to carry it to another computer or keep a backup. The library lives in this browser only.',
+      import: 'Import…',
+      importTitle:
+        'Brings whatever a library file carries into your library. Anything you already had under the same id is kept as it is.',
+      imported: (icons, factions) =>
+        `Added ${pluralIcons(icons, 'en')} and ${pluralFactions(factions, 'en')} to your library.`,
+    },
     printPanel: {
       perSheetSuffix: 'per sheet.',
       fitsOnOne: 'The deck fits on one.',
@@ -614,6 +643,8 @@ const STRINGS: Record<Language, Strings> = {
       permissionDenied: (fileName) =>
         `Chrome needs permission to write to ${fileName}. Press Save again and choose "Edit file", or use Save as… to pick another.`,
       'not-a-card': () => "The file isn't a Dune: Imperium card.",
+      'not-a-library': () => "That file isn't a Dune: Imperium library.",
+      'empty-library': () => 'That library has no icons or factions inside.',
       'no-cards': () => 'The file has no cards.',
       'empty-image': ({ name }) => `The image is empty: ${name}`,
       'read-failed': ({ name }) => `Couldn't read the file: ${name}`,
@@ -799,6 +830,16 @@ const STRINGS: Record<Language, Strings> = {
         `«${label}» está em ${pluralCards(used, 'pt')} deste baralho. Se você excluir, essas cartas perdem a faixa, o ícone de agente ou o losango que a nomeia.`,
       removeLabel: (label) => `Excluir ${label}`,
     },
+    libraryFile: {
+      export: 'Exportar…',
+      exportTitle:
+        'Salva sua biblioteca inteira —ícones e facções— em um arquivo, para levá-la a outro computador ou ter uma cópia. A biblioteca vive só neste navegador.',
+      import: 'Importar…',
+      importTitle:
+        'Traz para a sua biblioteca o que um arquivo de biblioteca tiver. O que você já tinha com o mesmo id fica como está.',
+      imported: (icons, factions) =>
+        `Foram somados ${pluralIcons(icons, 'pt')} e ${pluralFactions(factions, 'pt')} à sua biblioteca.`,
+    },
     printPanel: {
       perSheetSuffix: 'por folha.',
       fitsOnOne: 'O baralho cabe em uma.',
@@ -830,6 +871,8 @@ const STRINGS: Record<Language, Strings> = {
       permissionDenied: (fileName) =>
         `O Chrome pede permissão para gravar em ${fileName}. Aperte Salvar de novo e escolha «Editar arquivo», ou use Salvar como… para escolher outro.`,
       'not-a-card': () => 'O arquivo não é uma carta de Dune: Imperium.',
+      'not-a-library': () => 'Esse arquivo não é uma biblioteca de Dune: Imperium.',
+      'empty-library': () => 'Essa biblioteca não tem ícones nem facções dentro.',
       'no-cards': () => 'O arquivo não tem nenhuma carta.',
       'empty-image': ({ name }) => `A imagem está vazia: ${name}`,
       'read-failed': ({ name }) => `Não foi possível ler o arquivo: ${name}`,
@@ -844,6 +887,23 @@ const STRINGS: Record<Language, Strings> = {
 }
 
 /** El texto de una cantidad de cartas, con el número adelante. */
+/**
+ * Los dos números del aviso de "biblioteca importada". Van juntos y no en
+ * `Strings` porque son la misma cuenta en los tres idiomas: singular o plural
+ * de dos palabras.
+ */
+export function pluralIcons(n: number, language: Language): string {
+  if (language === 'en') return n === 1 ? '1 icon' : `${n} icons`
+  if (language === 'pt') return n === 1 ? '1 ícone' : `${n} ícones`
+  return n === 1 ? '1 icono' : `${n} iconos`
+}
+
+export function pluralFactions(n: number, language: Language): string {
+  if (language === 'en') return n === 1 ? '1 faction' : `${n} factions`
+  if (language === 'pt') return n === 1 ? '1 facção' : `${n} facções`
+  return n === 1 ? '1 facción' : `${n} facciones`
+}
+
 export function pluralCards(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 card' : `${n} cards`
   return n === 1 ? '1 carta' : `${n} cartas`

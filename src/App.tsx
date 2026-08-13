@@ -46,7 +46,7 @@ import { CardGallery } from './ui/CardGallery'
 import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
-import { Button } from './ui/controls'
+import { Button, HintMark } from './ui/controls'
 import { Dialog } from './ui/Dialog'
 import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
@@ -926,7 +926,9 @@ export function App() {
                 />
               </div>
 
-              <GroupTitle>{t.deckFooter.libraryGroup}</GroupTitle>
+              <GroupTitle hint={t.deckFooter.libraryGroupHint}>
+                {t.deckFooter.libraryGroup}
+              </GroupTitle>
               <div className="grid grid-cols-2 gap-2">
                 <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
                   <DiamondIcon />
@@ -1097,11 +1099,16 @@ function OnlyDoneFilter({
   )
 }
 
-/** Título de grupo del pie del mazo, con el mismo aire que los de `Section`. */
-function GroupTitle({ children }: { children: string }) {
+/**
+ * Título de grupo del pie del mazo, con el mismo aire que los de `Section` —
+ * incluida la marca "(?)" de la aclaración, para que la explicación se busque
+ * en el mismo lugar en las dos columnas.
+ */
+function GroupTitle({ children, hint }: { children: string; hint?: string }) {
   return (
-    <h2 className="text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+    <h2 className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
       {children}
+      {hint && <HintMark label={hint} />}
     </h2>
   )
 }

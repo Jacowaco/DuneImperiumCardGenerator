@@ -88,6 +88,7 @@ export function CardPanel({ card, onChange }: Props) {
         action={
           <Toggle
             label={t.cardPanel.startingCard}
+            hint={t.cardPanel.startingCardHint}
             checked={card.starting}
             onChange={(starting) => onChange({ starting })}
           />
@@ -147,6 +148,7 @@ export function CardPanel({ card, onChange }: Props) {
         action={
           <Toggle
             label={pick(AGENT_ICON_STYLES.infiltrate, language)}
+            hint={t.cardPanel.infiltrateHint}
             checked={card.agentIconStyle === 'infiltrate'}
             onChange={(checked) => onChange({ agentIconStyle: checked ? 'infiltrate' : 'locations' })}
           />

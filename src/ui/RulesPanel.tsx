@@ -29,6 +29,7 @@ export function RulesPanel({ card, onChange }: Props) {
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Toggle
             label={t.rulesPanel.autoAdjust}
+            hint={t.rulesPanel.autoAdjustHint}
             checked={card.playRowsAuto}
             onChange={(playRowsAuto) =>
               onChange(
@@ -53,6 +54,7 @@ export function RulesPanel({ card, onChange }: Props) {
 
           <Toggle
             label={t.rulesPanel.agentSilhouette}
+            hint={t.rulesPanel.agentSilhouetteHint}
             checked={card.agentSilhouette}
             onChange={(agentSilhouette) => onChange({ agentSilhouette })}
           />

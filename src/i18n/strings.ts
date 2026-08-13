@@ -49,6 +49,7 @@ type Strings = {
   deckFooter: {
     deckGroup: string
     libraryGroup: string
+    libraryGroupHint: string
     unsavedName: string
     renameTitle: string
     noNativeFsTooltip: string
@@ -100,6 +101,7 @@ type Strings = {
     /** El tirador del nombre sobre la carta, además del campo del panel. */
     editOnCard: string
     startingCard: string
+    startingCardHint: string
     faction: string
     factionHint: string
     cost: string
@@ -111,6 +113,8 @@ type Strings = {
     amount: string
     otherValue: string
     agentIcons: string
+    /** Qué es el estilo Infiltración, que va de acción del título de arriba. */
+    infiltrateHint: string
     copies: string
     copiesHint: string
   }
@@ -138,7 +142,9 @@ type Strings = {
   rulesPanel: {
     playTurn: string
     autoAdjust: string
+    autoAdjustHint: string
     agentSilhouette: string
+    agentSilhouetteHint: string
     reveal: string
     contentHint: string
     unload: string
@@ -304,6 +310,8 @@ const STRINGS: Record<Language, Strings> = {
     deckFooter: {
       deckGroup: 'Mazo',
       libraryGroup: 'Biblioteca',
+      libraryGroupHint:
+        'Tus iconos y facciones, guardados en este navegador para reusarlos entre mazos. No viajan con el archivo: traer uno lo copia al mazo, y el mazo se lleva el PNG adentro.',
       unsavedName: 'Mazo sin guardar',
       renameTitle: 'Cambiarle el nombre al mazo',
       noNativeFsTooltip:
@@ -344,6 +352,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       editOnCard: 'Escribir el nombre',
       startingCard: 'Inicial',
+      startingCardHint:
+        'Las cartas del mazo inicial llevan un rombo antes del nombre, y el título arranca más a la derecha para dejarle lugar.',
       faction: 'Facción',
       factionHint:
         'Se apilan hacia abajo en este mismo orden, sin importar en qué orden las elijas. Hasta 4 por carta.',
@@ -356,6 +366,8 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Cantidad',
       otherValue: 'Otro valor',
       agentIcons: 'Iconos de agente',
+      infiltrateHint:
+        'Rise of Ix: el agente puede ir a un espacio que ya ocupa un rival. Son los mismos siete iconos, con otro marco.',
       copies: 'Ejemplares',
       copiesHint:
         'Cuántas veces está esta carta en el mazo. Se guarda en el archivo y lo usa la hoja de impresión; el zip de PNGs saca uno solo por carta.',
@@ -382,7 +394,11 @@ const STRINGS: Record<Language, Strings> = {
     rulesPanel: {
       playTurn: 'Turno de agente',
       autoAdjust: 'Alto automático',
+      autoAdjustHint:
+        'La caja tiene tres altos —1, 2 o 3 filas— y con esto queda el más chico donde entre el contenido. Apagalo para fijarlo a mano.',
       agentSilhouette: 'Silueta del agente',
+      agentSilhouetteHint:
+        'La figura que va detrás del contenido de la caja. En la carta terminada los iconos la tapan casi entera: sola se ve más marcada de lo que se va a ver después.',
       reveal: 'Revelación',
       contentHint: 'Arrastrá iconos, texto y renglones para agregarlos o para reordenarlos.',
       unload: 'Unload',
@@ -572,6 +588,8 @@ const STRINGS: Record<Language, Strings> = {
     deckFooter: {
       deckGroup: 'Deck',
       libraryGroup: 'Library',
+      libraryGroupHint:
+        "Your own icons and factions, kept in this browser so you can reuse them across decks. They don't travel with the file: bringing one in copies it into the deck, and the deck carries the PNG inside.",
       unsavedName: 'Unsaved deck',
       renameTitle: 'Rename the deck',
       noNativeFsTooltip:
@@ -611,6 +629,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       editOnCard: 'Type the name',
       startingCard: 'Starting',
+      startingCardHint:
+        'Starting deck cards carry a diamond before the name, and the title starts further right to leave room for it.',
       faction: 'Faction',
       factionHint:
         'They stack downward in this same order, no matter what order you pick them in. Up to 4 per card.',
@@ -623,6 +643,8 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Amount',
       otherValue: 'Custom value',
       agentIcons: 'Agent Icons',
+      infiltrateHint:
+        'Rise of Ix: the agent can go to a space a rival already occupies. Same seven icons, with a different frame.',
       copies: 'Copies',
       copiesHint:
         'How many times this card is in the deck. It is saved in the file and used by the print sheet; the PNG zip exports one file per card.',
@@ -649,7 +671,11 @@ const STRINGS: Record<Language, Strings> = {
     rulesPanel: {
       playTurn: 'Agent Turn',
       autoAdjust: 'Auto height',
+      autoAdjustHint:
+        'The box comes in three heights — 1, 2 or 3 rows — and this leaves it at the smallest one the content fits in. Turn it off to set it by hand.',
       agentSilhouette: 'Agent Silhouette',
+      agentSilhouetteHint:
+        'The figure behind the content of the box. On a finished card the icons cover almost all of it: on its own it looks stronger than it will end up looking.',
       reveal: 'Reveal',
       contentHint: 'Drag icons, text and line breaks to add them or to reorder them.',
       unload: 'Unload',
@@ -839,6 +865,8 @@ const STRINGS: Record<Language, Strings> = {
     deckFooter: {
       deckGroup: 'Baralho',
       libraryGroup: 'Biblioteca',
+      libraryGroupHint:
+        'Seus ícones e facções, guardados neste navegador para reusá-los entre baralhos. Não viajam com o arquivo: trazer um copia para o baralho, e o baralho leva o PNG dentro.',
       unsavedName: 'Baralho não salvo',
       renameTitle: 'Renomear o baralho',
       noNativeFsTooltip:
@@ -879,6 +907,8 @@ const STRINGS: Record<Language, Strings> = {
       namePlaceholder: 'Duncan Idaho',
       editOnCard: 'Escrever o nome',
       startingCard: 'Inicial',
+      startingCardHint:
+        'As cartas do baralho inicial levam um losango antes do nome, e o título começa mais à direita para dar lugar a ele.',
       faction: 'Facção',
       factionHint:
         'Empilham para baixo nessa mesma ordem, não importa em que ordem você as escolha. Até 4 por carta.',
@@ -891,6 +921,8 @@ const STRINGS: Record<Language, Strings> = {
       amount: 'Quantidade',
       otherValue: 'Outro valor',
       agentIcons: 'Ícones de agente',
+      infiltrateHint:
+        'Rise of Ix: o agente pode ir a um espaço que um rival já ocupa. São os mesmos sete ícones, com outra moldura.',
       copies: 'Exemplares',
       copiesHint:
         'Quantas vezes esta carta está no baralho. Fica salvo no arquivo e é usado pela folha de impressão; o zip de PNGs sai com um por carta.',
@@ -917,7 +949,11 @@ const STRINGS: Record<Language, Strings> = {
     rulesPanel: {
       playTurn: 'Turno de agente',
       autoAdjust: 'Altura automática',
+      autoAdjustHint:
+        'A caixa tem três alturas —1, 2 ou 3 linhas— e com isto fica a menor em que o conteúdo cabe. Desligue para fixá-la à mão.',
       agentSilhouette: 'Silhueta do agente',
+      agentSilhouetteHint:
+        'A figura que fica atrás do conteúdo da caixa. Na carta pronta os ícones a cobrem quase toda: sozinha parece mais marcada do que vai ficar depois.',
       reveal: 'Revelação',
       contentHint: 'Arraste ícones, texto e quebras de linha para adicioná-los ou reordená-los.',
       unload: 'Unload',

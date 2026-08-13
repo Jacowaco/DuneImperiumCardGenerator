@@ -67,7 +67,12 @@ export function DeckFileControls({
           una pantalla baja es justo lo que escasea.
 
           El punto ámbar dice que hay cambios sin guardar; el archivo completo,
-          con extensión, va en el tooltip. */}
+          con extensión, va en el tooltip.
+
+          El nombre lleva fondo y borde propios aunque no se esté editando: es
+          un campo, y sin nada atrás no se lee como algo que se pueda tocar. La
+          caja es la misma que la del input —mismo padding, mismo borde—, así
+          que al entrar a editar no se mueve nada. */}
       <div className="flex min-w-0 items-center gap-2">
         <h2 className="shrink-0 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
           {title}
@@ -92,7 +97,7 @@ export function DeckFileControls({
           type="button"
           onClick={startEdit}
           title={fileName ?? t.deckFooter.renameTitle}
-          className={`group flex min-w-0 flex-1 items-center gap-1.5 rounded px-1 py-1 text-sm hover:bg-zinc-900 ${
+          className={`group flex min-w-0 flex-1 items-center gap-1.5 rounded border border-zinc-800 bg-zinc-900 px-1.5 py-1 text-sm transition-colors hover:border-zinc-700 hover:bg-zinc-800 ${
             displayName ? 'text-zinc-100' : 'text-zinc-500 italic'
           }`}
         >

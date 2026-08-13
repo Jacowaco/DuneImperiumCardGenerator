@@ -5,25 +5,69 @@ import { fontSizeForCapHeight, textWidth } from './text'
 
 export type Box = { top: number; bottom: number }
 
-export type Placement =
-  | { kind: 'icon'; icon: string; amount: number; x: number; y: number; width: number; height: number }
-  | { kind: 'text'; text: string; x: number; baseline: number; size: number }
+/**
+ * De qué pieza de la lista salió lo que se dibujó, y en qué renglón cayó.
+ *
+ * El render no lo usa: es para poder manipular el contenido **desde la
+ * carta** — agarrar un icono donde se lo ve, y saber entre qué dos piezas
+ * cae el puntero al soltar. Un texto se dibuja de a corridas de palabras que
+ * pueden venir de varias piezas seguidas, así que lleva un rango
+ * (`from`–`to`) y no un índice solo.
+ */
+type Origin = {
+  from: number
+  to: number
+  /** Borde de arriba y alto del renglón, ya en escala de carta. */
+  lineTop: number
+  lineHeight: number
+}
+
+export type Placement = Origin &
+  (
+    | { kind: 'icon'; icon: string; amount: number; x: number; y: number; width: number; height: number }
+    | {
+        kind: 'text'
+        text: string
+        x: number
+        baseline: number
+        size: number
+        width: number
+        /** Relleno de una pieza vacía: se dibuja atenuado y no sale en el PNG. */
+        placeholder?: boolean
+      }
+  )
 
 /**
  * Una pieza medida, todavía sin ubicar, en la escala nominal (icono = 99 px).
  * El texto se parte en palabras porque el corte de renglón es por palabra.
+ *
+ * `part` es de qué pieza de la lista salió: una palabra no se puede devolver
+ * sola al modelo, pero sí decir junto a cuál de las piezas cayó.
  */
 type Item =
-  | { kind: 'icon'; icon: string; amount: number; width: number; height: number }
-  | { kind: 'word'; text: string; width: number }
-  | { kind: 'break' }
+  | { kind: 'icon'; icon: string; amount: number; width: number; height: number; part: number }
+  | { kind: 'word'; text: string; width: number; part: number; placeholder?: boolean }
+  | { kind: 'break'; part: number }
 
 const NOMINAL_FONT = fontSizeForCapHeight(CONTENT.text.capHeight, CONTENT.text.weight)
 const SPACE = textWidth(' ', NOMINAL_FONT, CONTENT.text.weight)
 
-function measure(parts: ContentPart[], library: IconLibrary): Item[] {
-  return parts.flatMap((part): Item[] => {
-    if (part.type === 'break') return [{ kind: 'break' }]
+const word = (text: string, part: number): Item => ({
+  kind: 'word',
+  text,
+  width: textWidth(text, NOMINAL_FONT, CONTENT.text.weight),
+  part,
+})
+
+/**
+ * `placeholder` es la palabra con la que se dibuja una pieza de texto todavía
+ * vacía. Sin ella la pieza no ocupa nada, que es lo que corresponde al
+ * exportar; con ella se la ve en la carta y se la puede agarrar apenas se la
+ * suelta, que es lo que hace falta mientras se edita.
+ */
+function measure(parts: ContentPart[], library: IconLibrary, placeholder?: string): Item[] {
+  return parts.flatMap((part, index): Item[] => {
+    if (part.type === 'break') return [{ kind: 'break', part: index }]
 
     if (part.type === 'icon') {
       // Un icono propio que ya no está en el mazo no reserva lugar: dejar el
@@ -31,18 +75,13 @@ function measure(parts: ContentPart[], library: IconLibrary): Item[] {
       const entry = library[part.icon]
       if (!entry) return []
       const { width, height } = entry
-      return [{ kind: 'icon', icon: part.icon, amount: part.amount, width, height }]
+      return [{ kind: 'icon', icon: part.icon, amount: part.amount, width, height, part: index }]
     }
 
-    return part.text
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((word) => ({
-        kind: 'word',
-        text: word,
-        width: textWidth(word, NOMINAL_FONT, CONTENT.text.weight),
-      }))
+    const text = part.text.trim()
+    if (!text) return placeholder ? [{ ...word(placeholder, index), placeholder: true }] : []
+
+    return text.split(/\s+/).map((item) => word(item, index))
   })
 }
 
@@ -129,6 +168,8 @@ export function layoutContent(
     // espaciado natural entre ellas al posicionarlas una por una.
     let run: string[] = []
     let runStart = x
+    let runFrom = 0
+    let runTo = 0
 
     const flush = () => {
       if (!run.length) return
@@ -138,6 +179,11 @@ export function layoutContent(
         x: runStart,
         baseline: middle + (CONTENT.text.capHeight * scale) / 2,
         size: NOMINAL_FONT * scale,
+        width: x - runStart,
+        from: runFrom,
+        to: runTo,
+        lineTop: y,
+        lineHeight,
       })
       run = []
     }
@@ -147,7 +193,11 @@ export function layoutContent(
       x += separation(line.items[position - 1], item) * scale
 
       if (item.kind === 'word') {
-        if (!run.length) runStart = x
+        if (!run.length) {
+          runStart = x
+          runFrom = item.part
+        }
+        runTo = item.part
         run.push(item.text)
         x += item.width * scale
         return
@@ -164,6 +214,10 @@ export function layoutContent(
         y: middle - height / 2,
         width,
         height,
+        from: item.part,
+        to: item.part,
+        lineTop: y,
+        lineHeight,
       })
       x += width
     })

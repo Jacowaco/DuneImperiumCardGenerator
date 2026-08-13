@@ -134,18 +134,22 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
 
 export function Toggle({
   label,
+  hint,
   checked,
   disabled,
   onChange,
 }: {
   label: string
+  /** Qué hace la opción, para cuando el nombre no alcanza. Va como la marca
+   *  "(?)" al lado, igual que en el título de una sección. */
+  hint?: string
   checked: boolean
   /** Para cuando la opción no tiene sentido todavía, no para bloquear la carta
    *  —eso lo hace el `inert` del panel entero. */
   disabled?: boolean
   onChange: (checked: boolean) => void
 }) {
-  return (
+  const control = (
     <label
       className={`flex items-center gap-2.5 text-sm text-zinc-300 ${
         disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
@@ -160,6 +164,17 @@ export function Toggle({
       />
       {label}
     </label>
+  )
+
+  if (!hint) return control
+
+  // La marca va **afuera** del `<label>`: adentro, ir a leer la aclaración
+  // tildaría la casilla que la aclaración explica.
+  return (
+    <span className="flex items-center gap-1.5">
+      {control}
+      <HintMark label={hint} />
+    </span>
   )
 }
 

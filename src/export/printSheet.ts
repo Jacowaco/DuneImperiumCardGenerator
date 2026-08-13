@@ -137,7 +137,7 @@ export async function exportPrintSheets(
   deck: Deck,
   { paper, bleed, copies, language, onProgress }: SheetOptions,
 ): Promise<void> {
-  await prepare(deck)
+  await prepare(deck, language)
 
   const imposition = impose(paper, bleed)
   const cards = sheetCards(deck.cards, copies)

@@ -1657,6 +1657,1952 @@ const STRINGS: Record<Language, Strings> = {
       'card-canvas-failed': () => 'Die Zeichenfläche der Karte konnte nicht vorbereitet werden.',
     },
   },
+  it: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Esportazione della carta…',
+      export: 'Esporta la carta',
+      exportTitle: 'Esporta la carta aperta come PNG',
+      defaultFileName: 'carta',
+      language: 'Lingua',
+      undo: 'Annulla (Ctrl+Z)',
+      redo: 'Ripeti (Ctrl+Maiusc+Z)',
+    },
+    tabs: { front: 'Identità', rules: 'Regole' },
+    doneBanner: {
+      locked: 'Carta finita, bloccata per non modificarla per sbaglio.',
+      unlock: 'Sblocca',
+    },
+    doneBadge: {
+      done: 'Finita',
+      markDone: 'Segna come finita',
+      reopenTitle: 'Finita — clicca per riaprirla',
+      markDoneTitle: 'Segna come finita',
+    },
+    dialogs: {
+      icons: 'Icone personalizzate',
+      factions: 'Fazioni personalizzate',
+      print: 'Stampa il mazzo',
+      about: 'Informazioni',
+      close: 'Chiudi',
+    },
+    about: {
+      fanMade:
+        'Questo è un progetto di fan per i fan, senza scopo di lucro: è gratuito, non ha pubblicità e non si paga nulla per usarlo.',
+      ownership:
+        'Dune: Imperium, le sue espansioni, le sue illustrazioni, le sue icone e il suo design grafico sono proprietà di Dire Wolf Digital, LLC. «Dune» e l’universo del romanzo appartengono a Herbert Properties LLC. Tutti i marchi e i diritti appartengono ai rispettivi proprietari.',
+      notAffiliated:
+        'Questa app non è affiliata a Dire Wolf Digital né ai titolari del marchio Dune, e non è da loro sponsorizzata né approvata.',
+      personalUse:
+        'Le carte che crei qui sono per uso personale: giocare a casa, provare idee e condividerle con il tuo gruppo. Non sono da vendere né da produrre commercialmente. Se il gioco ti piace, compra l’originale e sostieni chi l’ha fatto.',
+      takedown:
+        'Se hai diritti su uno di questi materiali e vuoi che qualcosa venga rimosso, scrivici tramite il repository e lo risolviamo.',
+      source: 'Codice e contatti',
+    },
+    deckFooter: {
+      deckGroup: 'Mazzo',
+      libraryGroup: 'Libreria',
+      libraryGroupHint:
+        'Le tue icone e le tue fazioni, salvate in questo browser per riusarle tra un mazzo e l’altro. Non viaggiano con il file: portarne una dentro la copia nel mazzo, e il mazzo si porta il PNG all’interno.',
+      unsavedName: 'Mazzo non salvato',
+      renameTitle: 'Rinomina il mazzo',
+      noNativeFsTooltip:
+        'Qui i file non si possono sovrascrivere, quindi «Salva» e «Salva come…» scaricano una copia nuova. L’API esiste solo in Chrome ed Edge, e non nell’anteprima incorporata dell’editor: aprendo l’app in una finestra del browser, «Salva» scrive sul file aperto senza chiedere.',
+      noNativeFsBadge: 'Qui «Salva» scarica una copia',
+      new: 'Nuovo',
+      confirmNew: 'Questo mazzo ha modifiche non salvate. Iniziare comunque un mazzo nuovo?',
+      open: 'Apri…',
+      save: 'Salva',
+      saveAs: 'Salva come…',
+      icons: 'Icone…',
+      factions: 'Fazioni…',
+      print: 'Stampa…',
+      exportAll: 'Esporta il mazzo…',
+      exportingAll: 'Esportazione del mazzo…',
+      exportAllTitle: 'Esporta tutte le carte come PNG separati, dentro uno zip',
+      onlyDone: 'Solo quelle finite',
+      onlyDoneTitle: (done, pending) =>
+        `Il PDF e lo zip portano solo le ${done} carte finite; le altre ${pending} restano fuori.`,
+      onlyDoneEmpty: 'Nessuna carta è ancora segnata come finita.',
+    },
+    gallery: {
+      title: 'Carte',
+      newCardTitle: 'Carta nuova',
+      newButton: 'Carta nuova',
+      unnamed: 'Senza nome',
+      duplicate: 'Duplica',
+      remove: 'Elimina',
+      doneStamp: 'Finita',
+      reopenTitle: 'Finita — clicca per riaprirla',
+      markDoneTitle: 'Segna come finita',
+      markPendingAria: 'Segna come da fare',
+      copiesStamp: (copies) => `${copies} copie nel mazzo`,
+    },
+    cardPanel: {
+      name: 'Nome',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Scrivere il nome',
+      startingCard: 'Iniziale',
+      startingCardHint:
+        'Le carte del mazzo iniziale hanno un rombo prima del nome, e il titolo comincia più a destra per lasciargli spazio.',
+      faction: 'Fazione',
+      factionHint:
+        'Si impilano verso il basso in questo stesso ordine, indipendentemente da quello in cui le scegli. Fino a 4 per carta.',
+      cost: 'Costo di acquisto',
+      hasCost: 'Ha un costo',
+      persuasion: 'Persuasione',
+      purchaseBenefit: 'Bonus di acquisto',
+      none: 'Nessuno',
+      custom: (label) => `Personalizzata · ${label}`,
+      amount: 'Quantità',
+      otherValue: 'Altro valore',
+      agentIcons: 'Icone agente',
+      infiltrateHint:
+        'Rise of Ix: l’agente può andare su uno spazio già occupato da un rivale. Sono le stesse sette icone, con una cornice diversa.',
+      copies: 'Copie',
+      copiesHint:
+        'Quante volte questa carta sta nel mazzo. Si salva nel file e la usa il foglio di stampa; lo zip di PNG ne tira fuori uno solo per carta.',
+    },
+    contentEditor: {
+      empty: 'Riquadro vuoto.',
+      textPlaceholder: 'Testo…',
+      emptyText: 'Testo',
+      editOnCard: 'Scrivere il testo',
+      lineBreak: '— a capo —',
+      deletedIcon: 'Icona eliminata',
+      addTo: 'Aggiungi a',
+      close: 'Chiudi',
+      addIcon: 'Icona…',
+      addText: 'Testo',
+      addLineBreak: 'A capo',
+      remove: 'Togli',
+      custom: 'Personalizzate',
+      core: 'Dune Imperium',
+      influence: 'Influenza per fazione',
+      decrease: (label) => `Diminuisci ${label}`,
+      increase: (label) => `Aumenta ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Turno agente',
+      autoAdjust: 'Altezza automatica',
+      autoAdjustHint:
+        'Il riquadro ha tre altezze — 1, 2 o 3 righe — e così resta alla più piccola in cui il contenuto ci sta. Spegnilo per fissarla a mano.',
+      agentSilhouette: 'Sagoma dell’agente',
+      agentSilhouetteHint:
+        'La figura dietro al contenuto del riquadro. Sulla carta finita le icone la coprono quasi tutta: da sola si vede più marcata di come si vedrà poi.',
+      reveal: 'Rivelazione',
+      contentHint: 'Trascina icone, testo e ritorni a capo per aggiungerli o riordinarli.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: la rivelazione si applica anche quando la carta viene scartata o eliminata. Lo stendardo occupa l’inizio della fascia, quindi il contenuto entra più stretto.',
+    },
+    artPanel: {
+      image: 'Immagine',
+      changeImage: 'Cambia immagine…',
+      chooseImage: 'Scegli un’immagine…',
+      remove: 'Togli',
+      zoom: 'Zoom',
+      fit: 'Adatta',
+      center: 'Centra',
+      rotate: 'Ruota di un quarto di giro',
+      flip: 'Specchia',
+      dragZoomHint:
+        'Trascina l’immagine sulla carta per spostarla; la rotellina fa zoom. Puoi anche incollare un’immagine con Ctrl+V.',
+      placeholder: 'Trascina qui un’immagine\no tocca per sceglierla',
+      frame: 'Inquadratura',
+      frameFree: 'Inquadratura libera',
+      frameLocked: 'Inquadratura bloccata',
+    },
+    iconPanel: {
+      deckTitle: 'In questo mazzo',
+      deckHint:
+        'Quelle che questo mazzo ha a disposizione: sono quelle che offre il selettore dei riquadri e quelle che viaggiano dentro il file, così il mazzo si vede uguale su un’altra macchina. La dimensione e il nome sono di qui e non toccano la libreria.',
+      libraryTitle: 'La mia libreria',
+      libraryHint:
+        'Quelle che hai caricato una volta, salvate in questo browser. Non viaggiano con il mazzo e non vengono disegnate: è da qui che si copia, per non ricaricare la stessa cosa in ogni mazzo.',
+      emptyLibraryHint: 'Non hai ancora salvato nessuna icona nella libreria.',
+      usedIn: (cards) => `In ${pluralCards(cards, 'it')}`,
+      unused: 'Non usata',
+      alreadyInDeck: 'Già nel mazzo',
+      toLibraryLabel: (label) => `Salva ${label} nella mia libreria`,
+      toDeckLabel: (label) => `Porta ${label} in questo mazzo`,
+      forgetLabel: (label) => `Togli ${label} dalla mia libreria`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» esce dalla tua libreria e non potrai portarla in altri mazzi. I mazzi che la hanno già dentro non cambiano. Toglierla?`,
+      emptyHint:
+        'Per regole che il gioco non porta. Restano disponibili in tutti i tuoi mazzi e compaiono in fondo al selettore di icone.',
+      nameLabel: (label) => `Nome di ${label}`,
+      heightTitle: 'Altezza sulla carta, in % dell’icona del gioco',
+      heightLabel: (label) => `Altezza di ${label} sulla carta, in % dell’icona del gioco`,
+      decreaseHeightLabel: (label) => `Rimpicciolisci ${label}`,
+      increaseHeightLabel: (label) => `Ingrandisci ${label}`,
+      showNumberText: 'Numero',
+      showNumberLabel: (label) => `Mostra il numero su ${label}`,
+      numberColorTitle: 'Colore del numero',
+      numberColorLabel: (label) => `Colore del numero di ${label}`,
+      upload: 'Carica un’icona…',
+      hint: 'PNG con trasparenza, ritagliati da soli sul contenuto. La % è l’altezza sulla carta rispetto a un’icona del gioco. Restano salvate in questo browser, e il mazzo si porta dentro quelle che le sue carte usano.',
+      confirmRemove: (label, used) =>
+        `«${label}» sta in ${pluralCards(used, 'it')} di questo mazzo. Se la cancelli, quelle carte la perdono.`,
+      removeLabel: (label) => `Cancella ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'In questo mazzo',
+      deckHint:
+        'Quelle che questo mazzo ha a disposizione: sono quelle che offre il selettore di fazione e quelle che viaggiano dentro il file. Il nome e il colore sono di qui e non toccano la libreria.',
+      libraryTitle: 'La mia libreria',
+      libraryHint:
+        'Quelle che hai creato una volta, salvate in questo browser. Non viaggiano con il mazzo: è da qui che si copia, per non ricaricare l’emblema in ogni mazzo.',
+      emptyLibraryHint: 'Non hai ancora salvato nessuna fazione nella libreria.',
+      usedIn: (cards) => `In ${pluralCards(cards, 'it')}`,
+      unused: 'Non usata',
+      alreadyInDeck: 'Già nel mazzo',
+      toLibraryLabel: (label) => `Salva ${label} nella mia libreria`,
+      toDeckLabel: (label) => `Porta ${label} in questo mazzo`,
+      forgetLabel: (label) => `Togli ${label} dalla mia libreria`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» esce dalla tua libreria e non potrai portarla in altri mazzi. I mazzi che la hanno già dentro non cambiano. Toglierla?`,
+      emptyHint:
+        'Per mazzi con fazioni che il gioco non porta. Restano disponibili in tutti i tuoi mazzi, e generano da sole i 4 rombi di «+1/−1 Influenza» di quella fazione, pronti da usare nel contenuto di una carta.',
+      nameLabel: (label) => `Nome di ${label}`,
+      colorTitle: 'Colore della fascia',
+      colorLabel: (label) => `Colore della fascia di ${label}`,
+      hexLabel: (label) => `Colore della fascia di ${label} in esadecimale`,
+      upload: 'Carica un emblema…',
+      hint: 'PNG con trasparenza, ritagliato da solo sul contenuto. Restano salvate in questo browser, e il mazzo si porta dentro quelle che le sue carte usano. Come icona agente stanno su una placca nera semplice, senza la cornice di quelle del regolamento.',
+      confirmRemove: (label, used) =>
+        `«${label}» sta in ${pluralCards(used, 'it')} di questo mazzo. Se la cancelli, quelle carte perdono la fascia, l’icona agente o il rombo che la nomina.`,
+      removeLabel: (label) => `Cancella ${label}`,
+    },
+    libraryFile: {
+      export: 'Esporta…',
+      exportTitle:
+        'Salva tutta la tua libreria — icone e fazioni — in un file, per portarla su un altro computer o averne una copia. La libreria vive solo in questo browser.',
+      import: 'Importa…',
+      importTitle:
+        'Porta nella tua libreria quello che un file di libreria contiene. Quello che avevi già con lo stesso id resta com’è.',
+      imported: (icons, factions) =>
+        `Aggiunte ${pluralIcons(icons, 'it')} e ${pluralFactions(factions, 'it')} alla tua libreria.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'per foglio.',
+      fitsOnOne: 'Il mazzo ci sta in uno.',
+      spansPages: (pages) => `Il mazzo ne occupa ${pages}.`,
+      deckCopies: 'Copie del mazzo intero',
+      onlyDoneHint: (cards) =>
+        `Si stampano solo quelle finite: ${pluralCards(cards, 'it')} del mazzo.`,
+      copiesOtherValue: 'Altra quantità',
+      copiesDecrease: 'Togli una copia',
+      copiesIncrease: 'Aggiungi una copia',
+      copiesHint: (total) => `${pluralCards(total, 'it')} in tutto.`,
+      bleedToggle: 'Abbondanza di 3 mm (tipografia)',
+      bleedOnHint:
+        'Ogni carta si disegna 3 mm più grande di nero per lato e si taglia da sola: se la taglierina si sposta, taglia nel nero e non su un filo bianco. Ne entrano meno per foglio.',
+      bleedOffHint:
+        'Le carte stanno attaccate e condividono il taglio, quindi un taglio serve per due. Ne entrano di più per foglio, ma qualsiasi scarto si vede.',
+      buildingPdf: 'Creazione del PDF…',
+      downloadPdf: 'Scarica il PDF da stampare',
+      pdfSizeHintBefore:
+        'Il PDF porta dentro la dimensione del foglio, quindi si stampa in scala reale. Comunque, nella finestra di stampa scegli ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' o «dimensione reale», mai «adatta alla pagina».',
+      cardSizeHint: (w, h) =>
+        `Ogni carta singola esce a ${w} × ${h} px — 63,5 × 88 mm al doppio di 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Non si è potuto aprire il file.',
+      artFailed: 'Non si è potuta caricare l’immagine.',
+      sheetFailed: 'Non si è potuto comporre il foglio.',
+      cardsFailed: 'Non si sono potute esportare le carte.',
+      iconFailed: 'Non si è potuta caricare l’icona.',
+      autosaveFull:
+        'Il mazzo non ci sta nel salvataggio automatico del browser: se ricarichi la pagina, perdi quello che non hai salvato. Salvalo in un file.',
+      noneFinished:
+        'Non c’è nessuna carta finita da esportare. Togli la spunta a «Solo quelle finite».',
+      permissionDenied: (fileName) =>
+        `Chrome chiede il permesso di scrivere su ${fileName}. Premi di nuovo Salva e scegli «Modifica file», oppure usa Salva come… per sceglierne un altro.`,
+      'not-a-card': () => 'Il file non è una carta di Dune: Imperium.',
+      'not-a-library': () => 'Quel file non è una libreria di Dune: Imperium.',
+      'empty-library': () => 'Quella libreria non ha né icone né fazioni dentro.',
+      'no-cards': () => 'Il file non ha nessuna carta.',
+      'empty-image': ({ name }) => `L’immagine è vuota: ${name}`,
+      'read-failed': ({ name }) => `Non si è potuto leggere il file: ${name}`,
+      'invalid-image': ({ name }) => `Non è un’immagine valida: ${name}`,
+      'canvas-failed': () => 'Il browser non ha potuto preparare l’immagine.',
+      'png-failed': () => 'Il browser non ha potuto generare il PNG.',
+      'sheet-canvas-failed': () => 'Il browser non ha potuto preparare il foglio.',
+      'sheet-read-failed': () => 'Il browser non ha potuto leggere il foglio.',
+      'card-canvas-failed': () => 'Non si è potuta preparare la tela della carta.',
+    },
+  },
+  pl: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Eksportowanie karty…',
+      export: 'Eksportuj kartę',
+      exportTitle: 'Eksportuj otwartą kartę jako PNG',
+      defaultFileName: 'karta',
+      language: 'Język',
+      undo: 'Cofnij (Ctrl+Z)',
+      redo: 'Ponów (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Tożsamość', rules: 'Zasady' },
+    doneBanner: {
+      locked: 'Karta gotowa, zablokowana, żeby jej przez pomyłkę nie zmienić.',
+      unlock: 'Odblokuj',
+    },
+    doneBadge: {
+      done: 'Gotowa',
+      markDone: 'Oznacz jako gotową',
+      reopenTitle: 'Gotowa — kliknij, aby otworzyć ponownie',
+      markDoneTitle: 'Oznacz jako gotową',
+    },
+    dialogs: {
+      icons: 'Własne ikony',
+      factions: 'Własne frakcje',
+      print: 'Wydrukuj talię',
+      about: 'O programie',
+      close: 'Zamknij',
+    },
+    about: {
+      fanMade:
+        'To projekt fanów dla fanów, non-profit: jest darmowy, nie ma reklam i nic nie kosztuje.',
+      ownership:
+        'Dune: Imperium, jego dodatki, grafiki, ikony i projekt graficzny są własnością Dire Wolf Digital, LLC. „Diuna” i uniwersum powieści należą do Herbert Properties LLC. Wszystkie znaki towarowe i prawa należą do ich właścicieli.',
+      notAffiliated:
+        'Ta aplikacja nie jest powiązana z Dire Wolf Digital ani z właścicielami marki Diuna, nie jest przez nich sponsorowana ani zatwierdzona.',
+      personalUse:
+        'Karty, które tu tworzysz, są do użytku własnego: do gry w domu, do testowania pomysłów i dzielenia się nimi ze swoją grupą. Nie są przeznaczone do sprzedaży ani do produkcji komercyjnej. Jeśli gra ci się podoba, kup oryginał i wesprzyj tych, którzy ją zrobili.',
+      takedown:
+        'Jeśli masz prawa do któregoś z tych materiałów i chcesz, żeby coś zostało usunięte, napisz do nas przez repozytorium i to załatwimy.',
+      source: 'Kod i kontakt',
+    },
+    deckFooter: {
+      deckGroup: 'Talia',
+      libraryGroup: 'Biblioteka',
+      libraryGroupHint:
+        'Twoje ikony i frakcje, zapisane w tej przeglądarce, żeby używać ich w różnych taliach. Nie podróżują z plikiem: przeniesienie kopiuje je do talii, a talia niesie PNG w środku.',
+      unsavedName: 'Niezapisana talia',
+      renameTitle: 'Zmień nazwę talii',
+      noNativeFsTooltip:
+        'Tutaj nie da się nadpisywać plików, więc „Zapisz” i „Zapisz jako…” pobierają nową kopię. To API jest tylko w Chrome i Edge, a nie w osadzonym podglądzie edytora: po otwarciu aplikacji w oknie przeglądarki „Zapisz” pisze do otwartego pliku bez pytania.',
+      noNativeFsBadge: 'Tutaj „Zapisz” pobiera kopię',
+      new: 'Nowa',
+      confirmNew: 'Ta talia ma niezapisane zmiany. Zacząć mimo to nową talię?',
+      open: 'Otwórz…',
+      save: 'Zapisz',
+      saveAs: 'Zapisz jako…',
+      icons: 'Ikony…',
+      factions: 'Frakcje…',
+      print: 'Drukuj…',
+      exportAll: 'Eksportuj talię…',
+      exportingAll: 'Eksportowanie talii…',
+      exportAllTitle: 'Eksportuj wszystkie karty jako osobne PNG, w archiwum zip',
+      onlyDone: 'Tylko gotowe',
+      onlyDoneTitle: (done, pending) =>
+        `PDF i zip zawierają tylko ${done} gotowych kart; pozostałe ${pending} zostają poza nimi.`,
+      onlyDoneEmpty: 'Żadna karta nie jest jeszcze oznaczona jako gotowa.',
+    },
+    gallery: {
+      title: 'Karty',
+      newCardTitle: 'Nowa karta',
+      newButton: 'Nowa karta',
+      unnamed: 'Bez nazwy',
+      duplicate: 'Duplikuj',
+      remove: 'Usuń',
+      doneStamp: 'Gotowa',
+      reopenTitle: 'Gotowa — kliknij, aby otworzyć ponownie',
+      markDoneTitle: 'Oznacz jako gotową',
+      markPendingAria: 'Oznacz jako niegotową',
+      copiesStamp: (copies) => `${copies} egzemplarzy w talii`,
+    },
+    cardPanel: {
+      name: 'Nazwa',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Wpisz nazwę',
+      startingCard: 'Startowa',
+      startingCardHint:
+        'Karty talii startowej mają romb przed nazwą, a tytuł zaczyna się bardziej w prawo, żeby zrobić mu miejsce.',
+      faction: 'Frakcja',
+      factionHint:
+        'Układają się w dół dokładnie w tej kolejności, niezależnie od tego, w jakiej je wybierzesz. Do 4 na kartę.',
+      cost: 'Koszt zakupu',
+      hasCost: 'Ma koszt',
+      persuasion: 'Perswazja',
+      purchaseBenefit: 'Premia za zakup',
+      none: 'Brak',
+      custom: (label) => `Własna · ${label}`,
+      amount: 'Liczba',
+      otherValue: 'Inna wartość',
+      agentIcons: 'Ikony agenta',
+      infiltrateHint:
+        'Rise of Ix: agent może wejść na pole zajęte już przez rywala. To te same siedem ikon, w innej ramce.',
+      copies: 'Egzemplarze',
+      copiesHint:
+        'Ile razy ta karta jest w talii. Zapisuje się w pliku i używa jej arkusz do druku; zip z PNG-ami daje jeden plik na kartę.',
+    },
+    contentEditor: {
+      empty: 'Puste pole.',
+      textPlaceholder: 'Tekst…',
+      emptyText: 'Tekst',
+      editOnCard: 'Wpisz tekst',
+      lineBreak: '— złamanie wiersza —',
+      deletedIcon: 'Usunięta ikona',
+      addTo: 'Dodaj do',
+      close: 'Zamknij',
+      addIcon: 'Ikona…',
+      addText: 'Tekst',
+      addLineBreak: 'Nowy wiersz',
+      remove: 'Usuń',
+      custom: 'Własne',
+      core: 'Dune Imperium',
+      influence: 'Wpływ według frakcji',
+      decrease: (label) => `Zmniejsz ${label}`,
+      increase: (label) => `Zwiększ ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Tura agenta',
+      autoAdjust: 'Automatyczna wysokość',
+      autoAdjustHint:
+        'Pole ma trzy wysokości — 1, 2 lub 3 wiersze — a to zostawia najmniejszą, w której mieści się treść. Wyłącz, żeby ustawić ją ręcznie.',
+      agentSilhouette: 'Sylwetka agenta',
+      agentSilhouetteHint:
+        'Postać za treścią pola. Na gotowej karcie ikony zakrywają ją prawie w całości: sama wygląda mocniej, niż będzie wyglądać później.',
+      reveal: 'Ujawnienie',
+      contentHint: 'Przeciągnij ikony, tekst i złamania wiersza, aby je dodać lub zmienić kolejność.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: ujawnienie działa również przy odrzuceniu i zniszczeniu karty. Wstęga zajmuje początek pasa, więc treść mieści się węziej.',
+    },
+    artPanel: {
+      image: 'Obraz',
+      changeImage: 'Zmień obraz…',
+      chooseImage: 'Wybierz obraz…',
+      remove: 'Usuń',
+      zoom: 'Powiększenie',
+      fit: 'Dopasuj',
+      center: 'Wyśrodkuj',
+      rotate: 'Obróć o ćwierć obrotu',
+      flip: 'Odbij',
+      dragZoomHint:
+        'Przeciągnij obraz po karcie, aby go przesunąć; kółko powiększa. Możesz też wkleić obraz przez Ctrl+V.',
+      placeholder: 'Przeciągnij tu obraz\nlub dotknij, aby go wybrać',
+      frame: 'Kadr',
+      frameFree: 'Kadr swobodny',
+      frameLocked: 'Kadr zablokowany',
+    },
+    iconPanel: {
+      deckTitle: 'W tej talii',
+      deckHint:
+        'Te, którymi ta talia dysponuje: to je oferuje selektor pól i to one podróżują w pliku, więc talia wygląda tak samo na innym komputerze. Rozmiar i nazwa są stąd i nie ruszają biblioteki.',
+      libraryTitle: 'Moja biblioteka',
+      libraryHint:
+        'Te, które kiedyś wgrałeś, zapisane w tej przeglądarce. Nie podróżują z talią i nie są rysowane: to stąd się kopiuje, żeby nie wgrywać tego samego w każdej talii.',
+      emptyLibraryHint: 'Nie zapisałeś jeszcze żadnej ikony w bibliotece.',
+      usedIn: (cards) => `W ${pluralCards(cards, 'pl')}`,
+      unused: 'Nieużywana',
+      alreadyInDeck: 'Już w talii',
+      toLibraryLabel: (label) => `Zapisz ${label} w mojej bibliotece`,
+      toDeckLabel: (label) => `Przenieś ${label} do tej talii`,
+      forgetLabel: (label) => `Usuń ${label} z mojej biblioteki`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}” znika z twojej biblioteki i nie przeniesiesz jej już do innych talii. Talie, które mają ją w środku, się nie zmienią. Usunąć?`,
+      emptyHint:
+        'Do zasad, których gra nie ma. Zostają dostępne we wszystkich twoich taliach i pojawiają się na końcu selektora ikon.',
+      nameLabel: (label) => `Nazwa ${label}`,
+      heightTitle: 'Wysokość na karcie, w % ikony z gry',
+      heightLabel: (label) => `Wysokość ${label} na karcie, w % ikony z gry`,
+      decreaseHeightLabel: (label) => `Zmniejsz ${label}`,
+      increaseHeightLabel: (label) => `Powiększ ${label}`,
+      showNumberText: 'Liczba',
+      showNumberLabel: (label) => `Pokaż liczbę na ${label}`,
+      numberColorTitle: 'Kolor liczby',
+      numberColorLabel: (label) => `Kolor liczby ${label}`,
+      upload: 'Wgraj ikonę…',
+      hint: 'PNG z przezroczystością, przycinane same do treści. % to wysokość na karcie w porównaniu z ikoną z gry. Zostają zapisane w tej przeglądarce, a talia niesie w środku te, których używają jej karty.',
+      confirmRemove: (label, used) =>
+        `„${label}” jest w ${pluralCards(used, 'pl')} tej talii. Jeśli ją skasujesz, te karty ją stracą.`,
+      removeLabel: (label) => `Skasuj ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'W tej talii',
+      deckHint:
+        'Te, którymi ta talia dysponuje: to je oferuje selektor frakcji i to one podróżują w pliku. Nazwa i kolor są stąd i nie ruszają biblioteki.',
+      libraryTitle: 'Moja biblioteka',
+      libraryHint:
+        'Te, które kiedyś zrobiłeś, zapisane w tej przeglądarce. Nie podróżują z talią: to stąd się kopiuje, żeby nie wgrywać emblematu w każdej talii.',
+      emptyLibraryHint: 'Nie zapisałeś jeszcze żadnej frakcji w bibliotece.',
+      usedIn: (cards) => `W ${pluralCards(cards, 'pl')}`,
+      unused: 'Nieużywana',
+      alreadyInDeck: 'Już w talii',
+      toLibraryLabel: (label) => `Zapisz ${label} w mojej bibliotece`,
+      toDeckLabel: (label) => `Przenieś ${label} do tej talii`,
+      forgetLabel: (label) => `Usuń ${label} z mojej biblioteki`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}” znika z twojej biblioteki i nie przeniesiesz jej już do innych talii. Talie, które mają ją w środku, się nie zmienią. Usunąć?`,
+      emptyHint:
+        'Do talii z frakcjami, których gra nie ma. Zostają dostępne we wszystkich twoich taliach i same generują 4 romby „+1/−1 wpływu” tej frakcji, gotowe do użycia w treści karty.',
+      nameLabel: (label) => `Nazwa ${label}`,
+      colorTitle: 'Kolor pasa',
+      colorLabel: (label) => `Kolor pasa ${label}`,
+      hexLabel: (label) => `Kolor pasa ${label} szesnastkowo`,
+      upload: 'Wgraj emblemat…',
+      hint: 'PNG z przezroczystością, przycinany sam do treści. Zostają zapisane w tej przeglądarce, a talia niesie w środku te, których używają jej karty. Jako ikona agenta siedzą na prostej czarnej płytce, bez ramki tych z instrukcji.',
+      confirmRemove: (label, used) =>
+        `„${label}” jest w ${pluralCards(used, 'pl')} tej talii. Jeśli ją skasujesz, te karty stracą pas, ikonę agenta lub romb, który ją nazywa.`,
+      removeLabel: (label) => `Skasuj ${label}`,
+    },
+    libraryFile: {
+      export: 'Eksportuj…',
+      exportTitle:
+        'Zapisuje całą twoją bibliotekę — ikony i frakcje — do pliku, żeby przenieść ją na inny komputer albo mieć kopię. Biblioteka żyje tylko w tej przeglądarce.',
+      import: 'Importuj…',
+      importTitle:
+        'Wnosi do twojej biblioteki to, co zawiera plik biblioteki. To, co już miałeś pod tym samym id, zostaje bez zmian.',
+      imported: (icons, factions) =>
+        `Dodano ${pluralIcons(icons, 'pl')} i ${pluralFactions(factions, 'pl')} do twojej biblioteki.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'na arkusz.',
+      fitsOnOne: 'Talia mieści się na jednym.',
+      spansPages: (pages) => `Talia zajmuje ${pages}.`,
+      deckCopies: 'Kopie całej talii',
+      onlyDoneHint: (cards) =>
+        `Drukowane są tylko gotowe: ${pluralCards(cards, 'pl')} z talii.`,
+      copiesOtherValue: 'Inna liczba',
+      copiesDecrease: 'Odejmij jedną kopię',
+      copiesIncrease: 'Dodaj jedną kopię',
+      copiesHint: (total) => `${pluralCards(total, 'pl')} łącznie.`,
+      bleedToggle: 'Spad 3 mm (drukarnia)',
+      bleedOnHint:
+        'Każda karta rysowana jest o 3 mm większa na czarno z każdej strony i cięta osobno: jeśli gilotyna zjedzie, tnie w czerń, a nie w białą krawędź. Mieści się ich mniej na arkusz.',
+      bleedOffHint:
+        'Karty leżą przy sobie i dzielą cięcie, więc jedno cięcie starcza na dwie. Mieści się ich więcej na arkusz, ale każde odchylenie widać.',
+      buildingPdf: 'Składanie PDF…',
+      downloadPdf: 'Pobierz PDF do druku',
+      pdfSizeHintBefore:
+        'PDF niesie w sobie rozmiar arkusza, więc drukuje się w skali rzeczywistej. Mimo to w oknie drukowania wybierz ',
+      pdfSizeHintBold: '100%',
+      pdfSizeHintAfter: ' albo „rozmiar rzeczywisty”, nigdy „dopasuj do strony”.',
+      cardSizeHint: (w, h) =>
+        `Każda pojedyncza karta wychodzi w ${w} × ${h} px — 63,5 × 88 mm przy podwojonym 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Nie udało się otworzyć pliku.',
+      artFailed: 'Nie udało się wczytać obrazu.',
+      sheetFailed: 'Nie udało się złożyć arkusza.',
+      cardsFailed: 'Nie udało się wyeksportować kart.',
+      iconFailed: 'Nie udało się wczytać ikony.',
+      autosaveFull:
+        'Talia nie mieści się w automatycznym zapisie przeglądarki: jeśli przeładujesz stronę, stracisz to, czego nie zapisałeś. Zapisz ją do pliku.',
+      noneFinished: 'Nie ma żadnej gotowej karty do wyeksportowania. Odznacz „Tylko gotowe”.',
+      permissionDenied: (fileName) =>
+        `Chrome prosi o zgodę na zapis do ${fileName}. Naciśnij Zapisz jeszcze raz i wybierz „Edytuj plik”, albo użyj Zapisz jako…, żeby wybrać inny.`,
+      'not-a-card': () => 'Ten plik nie jest kartą Dune: Imperium.',
+      'not-a-library': () => 'Ten plik nie jest biblioteką Dune: Imperium.',
+      'empty-library': () => 'Ta biblioteka nie ma w środku ani ikon, ani frakcji.',
+      'no-cards': () => 'Plik nie ma żadnej karty.',
+      'empty-image': ({ name }) => `Obraz jest pusty: ${name}`,
+      'read-failed': ({ name }) => `Nie udało się odczytać pliku: ${name}`,
+      'invalid-image': ({ name }) => `To nie jest prawidłowy obraz: ${name}`,
+      'canvas-failed': () => 'Przeglądarka nie zdołała przygotować obrazu.',
+      'png-failed': () => 'Przeglądarka nie zdołała wygenerować PNG.',
+      'sheet-canvas-failed': () => 'Przeglądarka nie zdołała przygotować arkusza.',
+      'sheet-read-failed': () => 'Przeglądarka nie zdołała odczytać arkusza.',
+      'card-canvas-failed': () => 'Nie udało się przygotować płótna karty.',
+    },
+  },
+  cs: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Exportuji kartu…',
+      export: 'Exportovat kartu',
+      exportTitle: 'Exportovat otevřenou kartu jako PNG',
+      defaultFileName: 'karta',
+      language: 'Jazyk',
+      undo: 'Zpět (Ctrl+Z)',
+      redo: 'Znovu (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Identita', rules: 'Pravidla' },
+    doneBanner: {
+      locked: 'Karta hotová, zamčená, aby se omylem nezměnila.',
+      unlock: 'Odemknout',
+    },
+    doneBadge: {
+      done: 'Hotová',
+      markDone: 'Označit jako hotovou',
+      reopenTitle: 'Hotová — kliknutím ji znovu otevřeš',
+      markDoneTitle: 'Označit jako hotovou',
+    },
+    dialogs: {
+      icons: 'Vlastní symboly',
+      factions: 'Vlastní frakce',
+      print: 'Vytisknout balíček',
+      about: 'O aplikaci',
+      close: 'Zavřít',
+    },
+    about: {
+      fanMade:
+        'Tohle je projekt fanoušků pro fanoušky, neziskový: je zdarma, nemá reklamy a za používání se nic neplatí.',
+      ownership:
+        'Dune: Imperium, jeho rozšíření, ilustrace, symboly a grafický design jsou majetkem Dire Wolf Digital, LLC. „Duna“ a svět románu patří Herbert Properties LLC. Všechny značky a práva patří jejich vlastníkům.',
+      notAffiliated:
+        'Tato aplikace není spojena s Dire Wolf Digital ani s držiteli značky Duna a nemá jejich podporu ani schválení.',
+      personalUse:
+        'Karty, které si tu vyrobíš, jsou pro osobní použití: hrát doma, zkoušet nápady a sdílet je se svou partou. Nejsou na prodej ani na komerční výrobu. Jestli se ti hra líbí, kup si originál a podpoř ty, kdo ji udělali.',
+      takedown:
+        'Pokud máš práva na některý z těchto materiálů a chceš, aby něco bylo staženo, napiš nám přes repozitář a vyřešíme to.',
+      source: 'Kód a kontakt',
+    },
+    deckFooter: {
+      deckGroup: 'Balíček',
+      libraryGroup: 'Knihovna',
+      libraryGroupHint:
+        'Tvoje symboly a frakce, uložené v tomhle prohlížeči, aby se daly použít napříč balíčky. S souborem necestují: přenesení je zkopíruje do balíčku a balíček si nese PNG uvnitř.',
+      unsavedName: 'Neuložený balíček',
+      renameTitle: 'Přejmenovat balíček',
+      noNativeFsTooltip:
+        'Tady se soubory nedají přepisovat, takže „Uložit“ a „Uložit jako…“ stáhnou novou kopii. To API je jen v Chromu a Edgi, ne ve vestavěném náhledu editoru: když aplikaci otevřeš v okně prohlížeče, „Uložit“ zapíše do otevřeného souboru bez ptaní.',
+      noNativeFsBadge: 'Tady „Uložit“ stáhne kopii',
+      new: 'Nový',
+      confirmNew: 'Tenhle balíček má neuložené změny. Přesto začít nový?',
+      open: 'Otevřít…',
+      save: 'Uložit',
+      saveAs: 'Uložit jako…',
+      icons: 'Symboly…',
+      factions: 'Frakce…',
+      print: 'Tisk…',
+      exportAll: 'Exportovat balíček…',
+      exportingAll: 'Exportuji balíček…',
+      exportAllTitle: 'Exportovat všechny karty jako samostatné PNG, v zipu',
+      onlyDone: 'Jen hotové',
+      onlyDoneTitle: (done, pending) =>
+        `PDF a zip obsahují jen ${done} hotových karet; zbylých ${pending} zůstane mimo.`,
+      onlyDoneEmpty: 'Zatím není žádná karta označená jako hotová.',
+    },
+    gallery: {
+      title: 'Karty',
+      newCardTitle: 'Nová karta',
+      newButton: 'Nová karta',
+      unnamed: 'Bez názvu',
+      duplicate: 'Duplikovat',
+      remove: 'Smazat',
+      doneStamp: 'Hotová',
+      reopenTitle: 'Hotová — kliknutím ji znovu otevřeš',
+      markDoneTitle: 'Označit jako hotovou',
+      markPendingAria: 'Označit jako rozdělanou',
+      copiesStamp: (copies) => `${copies} kusů v balíčku`,
+    },
+    cardPanel: {
+      name: 'Název',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Napsat název',
+      startingCard: 'Startovní',
+      startingCardHint:
+        'Karty startovního balíčku mají před názvem kosočtverec a titulek začíná víc vpravo, aby mu udělal místo.',
+      faction: 'Frakce',
+      factionHint:
+        'Skládají se dolů přesně v tomhle pořadí, ať je vybereš v jakémkoli. Až 4 na kartu.',
+      cost: 'Cena za pořízení',
+      hasCost: 'Má cenu',
+      persuasion: 'Přesvědčování',
+      purchaseBenefit: 'Bonus za pořízení',
+      none: 'Žádný',
+      custom: (label) => `Vlastní · ${label}`,
+      amount: 'Množství',
+      otherValue: 'Jiná hodnota',
+      agentIcons: 'Symboly agenta',
+      infiltrateHint:
+        'Rise of Ix: agent může jít na pole, které už zabral soupeř. Je to stejných sedm symbolů, s jiným rámečkem.',
+      copies: 'Kusy',
+      copiesHint:
+        'Kolikrát je tahle karta v balíčku. Ukládá se do souboru a používá ji tiskový arch; zip s PNG vytáhne jen jeden na kartu.',
+    },
+    contentEditor: {
+      empty: 'Prázdné pole.',
+      textPlaceholder: 'Text…',
+      emptyText: 'Text',
+      editOnCard: 'Napsat text',
+      lineBreak: '— zalomení řádku —',
+      deletedIcon: 'Smazaný symbol',
+      addTo: 'Přidat do',
+      close: 'Zavřít',
+      addIcon: 'Symbol…',
+      addText: 'Text',
+      addLineBreak: 'Zalomení',
+      remove: 'Odebrat',
+      custom: 'Vlastní',
+      core: 'Dune Imperium',
+      influence: 'Vliv podle frakce',
+      decrease: (label) => `Snížit ${label}`,
+      increase: (label) => `Zvýšit ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Tah agenta',
+      autoAdjust: 'Automatická výška',
+      autoAdjustHint:
+        'Pole má tři výšky — 1, 2 nebo 3 řádky — a tohle ho nechá na nejmenší, do které se obsah vejde. Vypni to, když si ji chceš nastavit ručně.',
+      agentSilhouette: 'Silueta agenta',
+      agentSilhouetteHint:
+        'Postava za obsahem pole. Na hotové kartě ji symboly zakryjí skoro celou: sama vypadá výrazněji, než jak bude vypadat potom.',
+      reveal: 'Odhalení',
+      contentHint: 'Přetáhni symboly, text a zalomení, když je chceš přidat nebo přeskládat.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: odhalení platí i při odhození a zničení karty. Stuha zabírá začátek pásu, takže se obsah vejde do menší šířky.',
+    },
+    artPanel: {
+      image: 'Obrázek',
+      changeImage: 'Změnit obrázek…',
+      chooseImage: 'Vybrat obrázek…',
+      remove: 'Odebrat',
+      zoom: 'Přiblížení',
+      fit: 'Přizpůsobit',
+      center: 'Vycentrovat',
+      rotate: 'Otočit o čtvrt otáčky',
+      flip: 'Zrcadlit',
+      dragZoomHint:
+        'Táhni obrázek po kartě, když ho chceš posunout; kolečko přibližuje. Obrázek můžeš taky vložit přes Ctrl+V.',
+      placeholder: 'Přetáhni sem obrázek\nnebo klepni a vyber ho',
+      frame: 'Výřez',
+      frameFree: 'Výřez volný',
+      frameLocked: 'Výřez zamčený',
+    },
+    iconPanel: {
+      deckTitle: 'V tomhle balíčku',
+      deckHint:
+        'Ty, které má tenhle balíček k dispozici: nabízí je výběr do polí a cestují uvnitř souboru, takže balíček vypadá stejně i na jiném počítači. Velikost a název jsou odsud a knihovny se netýkají.',
+      libraryTitle: 'Moje knihovna',
+      libraryHint:
+        'Ty, které jsi někdy nahrál, uložené v tomhle prohlížeči. S balíčkem necestují a nekreslí se: odsud se kopíruje, aby ses nemusel v každém balíčku nahrávat to samé.',
+      emptyLibraryHint: 'Do knihovny sis zatím neuložil žádný symbol.',
+      usedIn: (cards) => `V ${pluralCards(cards, 'cs')}`,
+      unused: 'Nepoužitý',
+      alreadyInDeck: 'Už je v balíčku',
+      toLibraryLabel: (label) => `Uložit ${label} do mé knihovny`,
+      toDeckLabel: (label) => `Přenést ${label} do tohohle balíčku`,
+      forgetLabel: (label) => `Odebrat ${label} z mé knihovny`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}“ zmizí z tvé knihovny a už ho nepřeneseš do jiných balíčků. Balíčky, které ho mají uvnitř, se nezmění. Odebrat?`,
+      emptyHint:
+        'Na pravidla, která hra nemá. Zůstanou dostupné ve všech tvých balíčcích a objeví se na konci výběru symbolů.',
+      nameLabel: (label) => `Název ${label}`,
+      heightTitle: 'Výška na kartě, v % symbolu ze hry',
+      heightLabel: (label) => `Výška ${label} na kartě, v % symbolu ze hry`,
+      decreaseHeightLabel: (label) => `Zmenšit ${label}`,
+      increaseHeightLabel: (label) => `Zvětšit ${label}`,
+      showNumberText: 'Číslo',
+      showNumberLabel: (label) => `Zobrazit číslo na ${label}`,
+      numberColorTitle: 'Barva čísla',
+      numberColorLabel: (label) => `Barva čísla ${label}`,
+      upload: 'Nahrát symbol…',
+      hint: 'PNG s průhledností, ořežou se samy na obsah. % je výška na kartě v porovnání se symbolem ze hry. Zůstanou uložené v tomhle prohlížeči a balíček si nese uvnitř ty, které jeho karty používají.',
+      confirmRemove: (label, used) =>
+        `„${label}“ je v ${pluralCards(used, 'cs')} tohohle balíčku. Když ho smažeš, tyhle karty o něj přijdou.`,
+      removeLabel: (label) => `Smazat ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'V tomhle balíčku',
+      deckHint:
+        'Ty, které má tenhle balíček k dispozici: nabízí je výběr frakce a cestují uvnitř souboru. Název a barva jsou odsud a knihovny se netýkají.',
+      libraryTitle: 'Moje knihovna',
+      libraryHint:
+        'Ty, které jsi někdy vytvořil, uložené v tomhle prohlížeči. S balíčkem necestují: odsud se kopíruje, aby ses nemusel v každém balíčku nahrávat znak.',
+      emptyLibraryHint: 'Do knihovny sis zatím neuložil žádnou frakci.',
+      usedIn: (cards) => `V ${pluralCards(cards, 'cs')}`,
+      unused: 'Nepoužitá',
+      alreadyInDeck: 'Už je v balíčku',
+      toLibraryLabel: (label) => `Uložit ${label} do mé knihovny`,
+      toDeckLabel: (label) => `Přenést ${label} do tohohle balíčku`,
+      forgetLabel: (label) => `Odebrat ${label} z mé knihovny`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}“ zmizí z tvé knihovny a už ji nepřeneseš do jiných balíčků. Balíčky, které ji mají uvnitř, se nezmění. Odebrat?`,
+      emptyHint:
+        'Na balíčky s frakcemi, které hra nemá. Zůstanou dostupné ve všech tvých balíčcích a samy vygenerují 4 kosočtverce „+1/−1 vliv“ té frakce, připravené k použití v obsahu karty.',
+      nameLabel: (label) => `Název ${label}`,
+      colorTitle: 'Barva pásu',
+      colorLabel: (label) => `Barva pásu ${label}`,
+      hexLabel: (label) => `Barva pásu ${label} šestnáctkově`,
+      upload: 'Nahrát znak…',
+      hint: 'PNG s průhledností, ořeže se samo na obsah. Zůstanou uložené v tomhle prohlížeči a balíček si nese uvnitř ty, které jeho karty používají. Jako symbol agenta sedí na obyčejné černé destičce, bez rámečku těch z pravidel.',
+      confirmRemove: (label, used) =>
+        `„${label}“ je v ${pluralCards(used, 'cs')} tohohle balíčku. Když ji smažeš, tyhle karty přijdou o pás, symbol agenta nebo kosočtverec, který ji jmenuje.`,
+      removeLabel: (label) => `Smazat ${label}`,
+    },
+    libraryFile: {
+      export: 'Exportovat…',
+      exportTitle:
+        'Uloží celou tvou knihovnu — symboly a frakce — do souboru, abys ji přenesl na jiný počítač nebo měl kopii. Knihovna žije jen v tomhle prohlížeči.',
+      import: 'Importovat…',
+      importTitle:
+        'Přinese do tvé knihovny to, co je v souboru knihovny. Co jsi už měl pod stejným id, zůstane, jak je.',
+      imported: (icons, factions) =>
+        `Do tvé knihovny přibylo ${pluralIcons(icons, 'cs')} a ${pluralFactions(factions, 'cs')}.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'na arch.',
+      fitsOnOne: 'Balíček se vejde na jeden.',
+      spansPages: (pages) => `Balíček jich zabere ${pages}.`,
+      deckCopies: 'Kopie celého balíčku',
+      onlyDoneHint: (cards) => `Tisknou se jen hotové: ${pluralCards(cards, 'cs')} z balíčku.`,
+      copiesOtherValue: 'Jiné množství',
+      copiesDecrease: 'Ubrat jednu kopii',
+      copiesIncrease: 'Přidat jednu kopii',
+      copiesHint: (total) => `Celkem ${pluralCards(total, 'cs')}.`,
+      bleedToggle: 'Spadávka 3 mm (tiskárna)',
+      bleedOnHint:
+        'Každá karta se kreslí o 3 mm větší v černé na každé straně a řeže se samostatně: když se řezačka posune, řízne do černé a ne do bílé hrany. Vejde se jich na arch míň.',
+      bleedOffHint:
+        'Karty leží na sobě nalepené a sdílejí řez, takže jeden řez slouží dvěma. Vejde se jich na arch víc, ale každá odchylka je vidět.',
+      buildingPdf: 'Skládám PDF…',
+      downloadPdf: 'Stáhnout PDF k tisku',
+      pdfSizeHintBefore:
+        'PDF si nese velikost archu v sobě, takže se tiskne ve skutečném měřítku. Přesto v tiskovém dialogu vyber ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' nebo „skutečná velikost“, nikdy „přizpůsobit stránce“.',
+      cardSizeHint: (w, h) =>
+        `Každá samostatná karta vyjde v ${w} × ${h} px — 63,5 × 88 mm při dvojnásobku 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Soubor se nepodařilo otevřít.',
+      artFailed: 'Obrázek se nepodařilo načíst.',
+      sheetFailed: 'Arch se nepodařilo složit.',
+      cardsFailed: 'Karty se nepodařilo exportovat.',
+      iconFailed: 'Symbol se nepodařilo načíst.',
+      autosaveFull:
+        'Balíček se nevejde do automatického ukládání prohlížeče: když stránku načteš znovu, přijdeš o všechno neuložené. Ulož ho do souboru.',
+      noneFinished: 'Není žádná hotová karta k exportu. Odškrtni „Jen hotové“.',
+      permissionDenied: (fileName) =>
+        `Chrome žádá o svolení zapisovat do ${fileName}. Zmáčkni Uložit znovu a vyber „Upravit soubor“, nebo použij Uložit jako… a vyber jiný.`,
+      'not-a-card': () => 'Ten soubor není karta Dune: Imperium.',
+      'not-a-library': () => 'Ten soubor není knihovna Dune: Imperium.',
+      'empty-library': () => 'Ta knihovna nemá uvnitř ani symboly, ani frakce.',
+      'no-cards': () => 'Soubor nemá žádnou kartu.',
+      'empty-image': ({ name }) => `Obrázek je prázdný: ${name}`,
+      'read-failed': ({ name }) => `Soubor se nepodařilo přečíst: ${name}`,
+      'invalid-image': ({ name }) => `Není to platný obrázek: ${name}`,
+      'canvas-failed': () => 'Prohlížeč nedokázal obrázek připravit.',
+      'png-failed': () => 'Prohlížeč nedokázal PNG vytvořit.',
+      'sheet-canvas-failed': () => 'Prohlížeč nedokázal arch připravit.',
+      'sheet-read-failed': () => 'Prohlížeč nedokázal arch přečíst.',
+      'card-canvas-failed': () => 'Plátno karty se nepodařilo připravit.',
+    },
+  },
+  hu: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Kártya exportálása…',
+      export: 'Kártya exportálása',
+      exportTitle: 'A megnyitott kártya exportálása PNG-ként',
+      defaultFileName: 'kartya',
+      language: 'Nyelv',
+      undo: 'Visszavonás (Ctrl+Z)',
+      redo: 'Újra (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Azonosság', rules: 'Szabályok' },
+    doneBanner: {
+      locked: 'Kész kártya, lezárva, hogy véletlenül se változzon.',
+      unlock: 'Feloldás',
+    },
+    doneBadge: {
+      done: 'Kész',
+      markDone: 'Megjelölés késznek',
+      reopenTitle: 'Kész — kattints az újranyitáshoz',
+      markDoneTitle: 'Megjelölés késznek',
+    },
+    dialogs: {
+      icons: 'Saját ikonok',
+      factions: 'Saját frakciók',
+      print: 'A pakli nyomtatása',
+      about: 'Névjegy',
+      close: 'Bezárás',
+    },
+    about: {
+      fanMade:
+        'Ez rajongói projekt rajongóknak, nonprofit: ingyenes, nincs benne reklám, és a használatáért semmit nem kérünk.',
+      ownership:
+        'A Dune: Imperium, a kiegészítői, az illusztrációi, az ikonjai és a grafikai tervezése a Dire Wolf Digital, LLC tulajdona. A „Dűne” és a regény univerzuma a Herbert Properties LLC-hez tartozik. Minden védjegy és jog a jogtulajdonosoké.',
+      notAffiliated:
+        'Ez az alkalmazás nem áll kapcsolatban a Dire Wolf Digitallal és a Dűne védjegy tulajdonosaival, és nem is támogatják vagy hagyták jóvá.',
+      personalUse:
+        'Az itt készített kártyák személyes használatra valók: otthoni játékra, ötletek kipróbálására és arra, hogy megoszd őket a társaságoddal. Nem eladásra vagy kereskedelmi gyártásra készültek. Ha tetszik a játék, vedd meg az eredetit, és támogasd azokat, akik csinálták.',
+      takedown:
+        'Ha jogaid vannak ezekhez az anyagokhoz, és szeretnéd, hogy valami lekerüljön, írj nekünk a repón keresztül, és megoldjuk.',
+      source: 'Forráskód és kapcsolat',
+    },
+    deckFooter: {
+      deckGroup: 'Pakli',
+      libraryGroup: 'Könyvtár',
+      libraryGroupHint:
+        'A saját ikonjaid és frakcióid, ebben a böngészőben elmentve, hogy paklik között újra tudd használni őket. A fájllal nem utaznak: behozni annyi, mint bemásolni a pakliba, és a pakli a PNG-t magában viszi.',
+      unsavedName: 'Mentetlen pakli',
+      renameTitle: 'A pakli átnevezése',
+      noNativeFsTooltip:
+        'Itt a fájlok nem írhatók felül, ezért a „Mentés” és a „Mentés másként…” új másolatot tölt le. Az API csak a Chrome-ban és az Edge-ben létezik, a szerkesztő beágyazott előnézetében nem: ha böngészőablakban nyitod meg az appot, a „Mentés” kérdés nélkül a megnyitott fájlba ír.',
+      noNativeFsBadge: 'Itt a „Mentés” másolatot tölt le',
+      new: 'Új',
+      confirmNew: 'Ebben a pakliban mentetlen változások vannak. Mégis új paklit kezdesz?',
+      open: 'Megnyitás…',
+      save: 'Mentés',
+      saveAs: 'Mentés másként…',
+      icons: 'Ikonok…',
+      factions: 'Frakciók…',
+      print: 'Nyomtatás…',
+      exportAll: 'Pakli exportálása…',
+      exportingAll: 'Pakli exportálása…',
+      exportAllTitle: 'Minden kártya külön PNG-ként, egy zipben',
+      onlyDone: 'Csak a készek',
+      onlyDoneTitle: (done, pending) =>
+        `A PDF és a zip csak a(z) ${done} kész kártyát viszi; a másik ${pending} kimarad.`,
+      onlyDoneEmpty: 'Még egy kártya sincs késznek jelölve.',
+    },
+    gallery: {
+      title: 'Kártyák',
+      newCardTitle: 'Új kártya',
+      newButton: 'Új kártya',
+      unnamed: 'Névtelen',
+      duplicate: 'Másolat',
+      remove: 'Törlés',
+      doneStamp: 'Kész',
+      reopenTitle: 'Kész — kattints az újranyitáshoz',
+      markDoneTitle: 'Megjelölés késznek',
+      markPendingAria: 'Megjelölés függőben lévőnek',
+      copiesStamp: (copies) => `${copies} példány a pakliban`,
+    },
+    cardPanel: {
+      name: 'Név',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'A név beírása',
+      startingCard: 'Kezdő',
+      startingCardHint:
+        'A kezdőpakli kártyáin rombusz van a név előtt, és a cím jobbra kezdődik, hogy helyet hagyjon neki.',
+      faction: 'Frakció',
+      factionHint:
+        'Pontosan ebben a sorrendben rendeződnek lefelé, akármilyen sorrendben választod ki őket. Kártyánként legfeljebb 4.',
+      cost: 'Vételár',
+      hasCost: 'Van ára',
+      persuasion: 'Meggyőzés',
+      purchaseBenefit: 'Vételi bónusz',
+      none: 'Nincs',
+      custom: (label) => `Saját · ${label}`,
+      amount: 'Mennyiség',
+      otherValue: 'Más érték',
+      agentIcons: 'Ügynökikonok',
+      infiltrateHint:
+        'Rise of Ix: az ügynök olyan mezőre is mehet, amelyet már elfoglalt egy ellenfél. Ugyanaz a hét ikon, más kerettel.',
+      copies: 'Példányok',
+      copiesHint:
+        'Hányszor van benne ez a kártya a pakliban. A fájlba mentődik, és a nyomtatóív használja; a PNG-zip kártyánként csak egyet ad ki.',
+    },
+    contentEditor: {
+      empty: 'Üres mező.',
+      textPlaceholder: 'Szöveg…',
+      emptyText: 'Szöveg',
+      editOnCard: 'A szöveg beírása',
+      lineBreak: '— sortörés —',
+      deletedIcon: 'Törölt ikon',
+      addTo: 'Hozzáadás ehhez',
+      close: 'Bezárás',
+      addIcon: 'Ikon…',
+      addText: 'Szöveg',
+      addLineBreak: 'Sortörés',
+      remove: 'Eltávolítás',
+      custom: 'Sajátok',
+      core: 'Dune Imperium',
+      influence: 'Befolyás frakciónként',
+      decrease: (label) => `${label} csökkentése`,
+      increase: (label) => `${label} növelése`,
+    },
+    rulesPanel: {
+      playTurn: 'Ügynökforduló',
+      autoAdjust: 'Automatikus magasság',
+      autoAdjustHint:
+        'A mezőnek három magassága van — 1, 2 vagy 3 sor —, és ez a legkisebbre állítja, amelybe a tartalom befér. Kapcsold ki, ha kézzel akarod beállítani.',
+      agentSilhouette: 'Az ügynök sziluettje',
+      agentSilhouetteHint:
+        'A mező tartalma mögötti alak. A kész kártyán az ikonok szinte teljesen eltakarják: önmagában erősebbnek látszik, mint amilyen a végén lesz.',
+      reveal: 'Felfedés',
+      contentHint: 'Húzz ide ikonokat, szöveget és sortöréseket a hozzáadáshoz vagy átrendezéshez.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: a felfedés akkor is jár, ha a kártyát eldobod vagy megsemmisíted. A szalag elfoglalja a sáv elejét, ezért a tartalom keskenyebben fér el.',
+    },
+    artPanel: {
+      image: 'Kép',
+      changeImage: 'Kép cseréje…',
+      chooseImage: 'Kép választása…',
+      remove: 'Eltávolítás',
+      zoom: 'Nagyítás',
+      fit: 'Igazítás',
+      center: 'Középre',
+      rotate: 'Forgatás negyed fordulattal',
+      flip: 'Tükrözés',
+      dragZoomHint:
+        'Húzd a képet a kártyán, hogy mozgasd; a görgő nagyít. Ctrl+V-vel képet is beilleszthetsz.',
+      placeholder: 'Húzz ide egy képet\nvagy koppints a választáshoz',
+      frame: 'Képkivágás',
+      frameFree: 'Szabad kivágás',
+      frameLocked: 'Kivágás zárolva',
+    },
+    iconPanel: {
+      deckTitle: 'Ebben a pakliban',
+      deckHint:
+        'Amikkel ez a pakli rendelkezik: ezeket kínálja a mezők választója, és ezek utaznak a fájlban, így a pakli más gépen is ugyanúgy néz ki. A méret és a név ide tartozik, a könyvtárhoz nem nyúl.',
+      libraryTitle: 'A könyvtáram',
+      libraryHint:
+        'Amiket valamikor feltöltöttél, ebben a böngészőben elmentve. A paklival nem utaznak, és nem rajzolódnak ki: innen másolsz, hogy ne kelljen minden pakliba újra feltölteni ugyanazt.',
+      emptyLibraryHint: 'Még egy ikont sem mentettél a könyvtárba.',
+      usedIn: (cards) => `${pluralCards(cards, 'hu')} használja`,
+      unused: 'Nincs használatban',
+      alreadyInDeck: 'Már a pakliban van',
+      toLibraryLabel: (label) => `${label} mentése a könyvtáramba`,
+      toDeckLabel: (label) => `${label} behozása ebbe a pakliba`,
+      forgetLabel: (label) => `${label} eltávolítása a könyvtáramból`,
+      confirmRemoveFromLibrary: (label) =>
+        `A(z) „${label}” kikerül a könyvtáradból, és nem tudod más paklikba behozni. Azok a paklik, amelyekben már benne van, nem változnak. Eltávolítod?`,
+      emptyHint:
+        'Olyan szabályokhoz, amiket a játék nem hoz. Minden paklidban elérhetők maradnak, és az ikonválasztó végén jelennek meg.',
+      nameLabel: (label) => `${label} neve`,
+      heightTitle: 'Magasság a kártyán, a játék ikonjának %-ában',
+      heightLabel: (label) => `${label} magassága a kártyán, a játék ikonjának %-ában`,
+      decreaseHeightLabel: (label) => `${label} kicsinyítése`,
+      increaseHeightLabel: (label) => `${label} nagyítása`,
+      showNumberText: 'Szám',
+      showNumberLabel: (label) => `Szám megjelenítése ezen: ${label}`,
+      numberColorTitle: 'A szám színe',
+      numberColorLabel: (label) => `${label} számának színe`,
+      upload: 'Ikon feltöltése…',
+      hint: 'Átlátszó PNG-k, maguktól a tartalomra vágva. A % a kártyán mért magasság a játék ikonjához képest. Ebben a böngészőben maradnak elmentve, és a pakli magával viszi azokat, amiket a kártyái használnak.',
+      confirmRemove: (label, used) =>
+        `A(z) „${label}” ennyi kártyán van rajta ebben a pakliban: ${pluralCards(used, 'hu')}. Ha törlöd, ezek a kártyák elvesztik.`,
+      removeLabel: (label) => `${label} törlése`,
+    },
+    factionPanel: {
+      deckTitle: 'Ebben a pakliban',
+      deckHint:
+        'Amikkel ez a pakli rendelkezik: ezeket kínálja a frakcióválasztó, és ezek utaznak a fájlban. A név és a szín ide tartozik, a könyvtárhoz nem nyúl.',
+      libraryTitle: 'A könyvtáram',
+      libraryHint:
+        'Amiket valamikor összeraktál, ebben a böngészőben elmentve. A paklival nem utaznak: innen másolsz, hogy ne kelljen minden pakliba újra feltölteni a jelvényt.',
+      emptyLibraryHint: 'Még egy frakciót sem mentettél a könyvtárba.',
+      usedIn: (cards) => `${pluralCards(cards, 'hu')} használja`,
+      unused: 'Nincs használatban',
+      alreadyInDeck: 'Már a pakliban van',
+      toLibraryLabel: (label) => `${label} mentése a könyvtáramba`,
+      toDeckLabel: (label) => `${label} behozása ebbe a pakliba`,
+      forgetLabel: (label) => `${label} eltávolítása a könyvtáramból`,
+      confirmRemoveFromLibrary: (label) =>
+        `A(z) „${label}” kikerül a könyvtáradból, és nem tudod más paklikba behozni. Azok a paklik, amelyekben már benne van, nem változnak. Eltávolítod?`,
+      emptyHint:
+        'Olyan paklikhoz, amelyekben a játék által nem hozott frakciók vannak. Minden paklidban elérhetők maradnak, és maguktól legyártják az adott frakció 4 „+1/−1 befolyás” rombuszát, készen arra, hogy kártyatartalomként használd.',
+      nameLabel: (label) => `${label} neve`,
+      colorTitle: 'A sáv színe',
+      colorLabel: (label) => `${label} sávjának színe`,
+      hexLabel: (label) => `${label} sávjának színe hexadecimálisan`,
+      upload: 'Jelvény feltöltése…',
+      hint: 'Átlátszó PNG, magától a tartalomra vágva. Ebben a böngészőben maradnak elmentve, és a pakli magával viszi azokat, amiket a kártyái használnak. Ügynökikonként egyszerű fekete lapon ülnek, a szabálykönyvbeliek kerete nélkül.',
+      confirmRemove: (label, used) =>
+        `A(z) „${label}” ennyi kártyán van rajta ebben a pakliban: ${pluralCards(used, 'hu')}. Ha törlöd, ezek a kártyák elvesztik a sávot, az ügynökikont vagy a rombuszt, ami megnevezi.`,
+      removeLabel: (label) => `${label} törlése`,
+    },
+    libraryFile: {
+      export: 'Exportálás…',
+      exportTitle:
+        'Az egész könyvtáradat — ikonokat és frakciókat — fájlba menti, hogy másik gépre vidd, vagy legyen róla másolatod. A könyvtár csak ebben a böngészőben él.',
+      import: 'Importálás…',
+      importTitle:
+        'Behozza a könyvtáradba, amit egy könyvtárfájl tartalmaz. Ami már megvolt ugyanazzal az id-vel, az marad, ahogy van.',
+      imported: (icons, factions) =>
+        `${pluralIcons(icons, 'hu')} és ${pluralFactions(factions, 'hu')} került a könyvtáradba.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'laponként.',
+      fitsOnOne: 'A pakli elfér egyen.',
+      spansPages: (pages) => `A pakli ${pages} lapot foglal el.`,
+      deckCopies: 'Az egész pakli másolatai',
+      onlyDoneHint: (cards) =>
+        `Csak a készek nyomtatódnak: a pakliból ${pluralCards(cards, 'hu')}.`,
+      copiesOtherValue: 'Más mennyiség',
+      copiesDecrease: 'Egy másolat elvétele',
+      copiesIncrease: 'Egy másolat hozzáadása',
+      copiesHint: (total) => `Összesen ${pluralCards(total, 'hu')}.`,
+      bleedToggle: '3 mm-es kifutó (nyomda)',
+      bleedOnHint:
+        'Minden kártya oldalanként 3 mm-rel nagyobbra rajzolódik feketében, és külön vágódik: ha a vágógép elcsúszik, feketébe vág, nem fehér élbe. Laponként kevesebb fér el.',
+      bleedOffHint:
+        'A kártyák egymáshoz érnek és osztoznak a vágáson, így egy vágás kettőt szolgál ki. Laponként több fér el, de minden eltérés meglátszik.',
+      buildingPdf: 'PDF készítése…',
+      downloadPdf: 'PDF letöltése nyomtatáshoz',
+      pdfSizeHintBefore:
+        'A PDF magában hordozza a lapméretet, tehát valós méretben nyomtat. Azért a nyomtatási párbeszédben válaszd a ',
+      pdfSizeHintBold: '100%',
+      pdfSizeHintAfter: ' vagy a „tényleges méret” lehetőséget, soha ne a „lapmérethez igazítást”.',
+      cardSizeHint: (w, h) =>
+        `Minden különálló kártya ${w} × ${h} px méretben jön ki — 63,5 × 88 mm a 300 DPI kétszeresén.`,
+    },
+    errors: {
+      openFailed: 'A fájlt nem sikerült megnyitni.',
+      artFailed: 'A képet nem sikerült betölteni.',
+      sheetFailed: 'Az ívet nem sikerült összeállítani.',
+      cardsFailed: 'A kártyákat nem sikerült exportálni.',
+      iconFailed: 'Az ikont nem sikerült betölteni.',
+      autosaveFull:
+        'A pakli nem fér bele a böngésző automatikus mentésébe: ha újratöltöd az oldalt, elvész minden, amit nem mentettél. Mentsd fájlba.',
+      noneFinished: 'Nincs exportálható kész kártya. Vedd ki a pipát a „Csak a készek” elől.',
+      permissionDenied: (fileName) =>
+        `A Chrome engedélyt kér, hogy ide írjon: ${fileName}. Nyomd meg újra a Mentést, és válaszd a „Fájl szerkesztése” lehetőséget, vagy használd a Mentés másként…-et egy másikhoz.`,
+      'not-a-card': () => 'Ez a fájl nem Dune: Imperium-kártya.',
+      'not-a-library': () => 'Ez a fájl nem Dune: Imperium-könyvtár.',
+      'empty-library': () => 'Abban a könyvtárban se ikon, se frakció nincs.',
+      'no-cards': () => 'A fájlban egyetlen kártya sincs.',
+      'empty-image': ({ name }) => `A kép üres: ${name}`,
+      'read-failed': ({ name }) => `A fájlt nem sikerült beolvasni: ${name}`,
+      'invalid-image': ({ name }) => `Nem érvényes kép: ${name}`,
+      'canvas-failed': () => 'A böngésző nem tudta előkészíteni a képet.',
+      'png-failed': () => 'A böngésző nem tudta létrehozni a PNG-t.',
+      'sheet-canvas-failed': () => 'A böngésző nem tudta előkészíteni az ívet.',
+      'sheet-read-failed': () => 'A böngésző nem tudta beolvasni az ívet.',
+      'card-canvas-failed': () => 'A kártya vásznát nem sikerült előkészíteni.',
+    },
+  },
+  ru: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Экспорт карты…',
+      export: 'Экспорт карты',
+      exportTitle: 'Экспортировать открытую карту в PNG',
+      defaultFileName: 'karta',
+      language: 'Язык',
+      undo: 'Отменить (Ctrl+Z)',
+      redo: 'Вернуть (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Личность', rules: 'Правила' },
+    doneBanner: {
+      locked: 'Карта готова и заблокирована, чтобы её не изменили по ошибке.',
+      unlock: 'Разблокировать',
+    },
+    doneBadge: {
+      done: 'Готова',
+      markDone: 'Отметить готовой',
+      reopenTitle: 'Готова — нажмите, чтобы открыть снова',
+      markDoneTitle: 'Отметить готовой',
+    },
+    dialogs: {
+      icons: 'Свои символы',
+      factions: 'Свои фракции',
+      print: 'Печать колоды',
+      about: 'О программе',
+      close: 'Закрыть',
+    },
+    about: {
+      fanMade:
+        'Это фанатский проект для фанатов, без коммерческой цели: он бесплатный, без рекламы, и за пользование ничего не берут.',
+      ownership:
+        'Dune: Imperium, её дополнения, иллюстрации, символы и графический дизайн принадлежат Dire Wolf Digital, LLC. «Дюна» и вселенная романа принадлежат Herbert Properties LLC. Все марки и права принадлежат их владельцам.',
+      notAffiliated:
+        'Это приложение не связано с Dire Wolf Digital и с владельцами марки «Дюна», не спонсируется и не одобрено ими.',
+      personalUse:
+        'Карты, которые вы здесь делаете, — для личного пользования: играть дома, пробовать идеи и делиться ими со своей компанией. Они не для продажи и не для коммерческого производства. Если игра вам нравится, купите оригинал и поддержите тех, кто её сделал.',
+      takedown:
+        'Если у вас есть права на какой-то из этих материалов и вы хотите, чтобы что-то убрали, напишите нам через репозиторий, и мы это решим.',
+      source: 'Код и контакты',
+    },
+    deckFooter: {
+      deckGroup: 'Колода',
+      libraryGroup: 'Библиотека',
+      libraryGroupHint:
+        'Ваши символы и фракции, сохранённые в этом браузере, чтобы использовать их в разных колодах. С файлом они не путешествуют: взять одну — значит скопировать её в колоду, а колода несёт PNG внутри.',
+      unsavedName: 'Несохранённая колода',
+      renameTitle: 'Переименовать колоду',
+      noNativeFsTooltip:
+        'Здесь файлы нельзя перезаписывать, поэтому «Сохранить» и «Сохранить как…» скачивают новую копию. Этот API есть только в Chrome и Edge, но не во встроенном предпросмотре редактора: если открыть приложение в окне браузера, «Сохранить» пишет в открытый файл без вопросов.',
+      noNativeFsBadge: 'Здесь «Сохранить» скачивает копию',
+      new: 'Новая',
+      confirmNew: 'В этой колоде есть несохранённые изменения. Всё равно начать новую?',
+      open: 'Открыть…',
+      save: 'Сохранить',
+      saveAs: 'Сохранить как…',
+      icons: 'Символы…',
+      factions: 'Фракции…',
+      print: 'Печать…',
+      exportAll: 'Экспорт колоды…',
+      exportingAll: 'Экспорт колоды…',
+      exportAllTitle: 'Экспортировать все карты отдельными PNG, в одном zip',
+      onlyDone: 'Только готовые',
+      onlyDoneTitle: (done, pending) =>
+        `PDF и zip берут только готовые карты (${done}); остальные ${pending} остаются вне.`,
+      onlyDoneEmpty: 'Пока ни одна карта не отмечена готовой.',
+    },
+    gallery: {
+      title: 'Карты',
+      newCardTitle: 'Новая карта',
+      newButton: 'Новая карта',
+      unnamed: 'Без названия',
+      duplicate: 'Дублировать',
+      remove: 'Удалить',
+      doneStamp: 'Готова',
+      reopenTitle: 'Готова — нажмите, чтобы открыть снова',
+      markDoneTitle: 'Отметить готовой',
+      markPendingAria: 'Отметить незавершённой',
+      copiesStamp: (copies) => `${copies} экземпляров в колоде`,
+    },
+    cardPanel: {
+      name: 'Название',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Написать название',
+      startingCard: 'Стартовая',
+      startingCardHint:
+        'На картах стартовой колоды перед названием стоит ромб, и заголовок начинается правее, чтобы дать ему место.',
+      faction: 'Фракция',
+      factionHint:
+        'Они складываются вниз именно в этом порядке, в каком бы вы их ни выбрали. До 4 на карту.',
+      cost: 'Стоимость покупки',
+      hasCost: 'Есть стоимость',
+      persuasion: 'Убеждение',
+      purchaseBenefit: 'Бонус за покупку',
+      none: 'Нет',
+      custom: (label) => `Свой · ${label}`,
+      amount: 'Количество',
+      otherValue: 'Другое значение',
+      agentIcons: 'Символы агента',
+      infiltrateHint:
+        'Rise of Ix: агент может пойти на поле, которое уже занял соперник. Это те же семь символов, в другой рамке.',
+      copies: 'Экземпляры',
+      copiesHint:
+        'Сколько раз эта карта входит в колоду. Сохраняется в файле и используется листом для печати; zip с PNG даёт по одному файлу на карту.',
+    },
+    contentEditor: {
+      empty: 'Пустое поле.',
+      textPlaceholder: 'Текст…',
+      emptyText: 'Текст',
+      editOnCard: 'Написать текст',
+      lineBreak: '— перенос строки —',
+      deletedIcon: 'Удалённый символ',
+      addTo: 'Добавить в',
+      close: 'Закрыть',
+      addIcon: 'Символ…',
+      addText: 'Текст',
+      addLineBreak: 'Перенос',
+      remove: 'Убрать',
+      custom: 'Свои',
+      core: 'Dune Imperium',
+      influence: 'Влияние по фракциям',
+      decrease: (label) => `Уменьшить ${label}`,
+      increase: (label) => `Увеличить ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Ход агента',
+      autoAdjust: 'Автоматическая высота',
+      autoAdjustHint:
+        'У поля три высоты — 1, 2 или 3 строки — и так оно остаётся на самой маленькой, в которую влезает содержимое. Выключите, чтобы задать её вручную.',
+      agentSilhouette: 'Силуэт агента',
+      agentSilhouetteHint:
+        'Фигура за содержимым поля. На готовой карте символы закрывают её почти целиком: сама по себе она выглядит заметнее, чем будет потом.',
+      reveal: 'Раскрытие',
+      contentHint: 'Перетаскивайте символы, текст и переносы, чтобы добавить их или переставить.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: раскрытие срабатывает и когда карту сбрасывают или уничтожают. Лента занимает начало полосы, поэтому содержимое влезает в меньшую ширину.',
+    },
+    artPanel: {
+      image: 'Изображение',
+      changeImage: 'Заменить изображение…',
+      chooseImage: 'Выбрать изображение…',
+      remove: 'Убрать',
+      zoom: 'Масштаб',
+      fit: 'Вписать',
+      center: 'По центру',
+      rotate: 'Повернуть на четверть оборота',
+      flip: 'Отразить',
+      dragZoomHint:
+        'Тяните изображение по карте, чтобы сдвинуть его; колесо меняет масштаб. Изображение можно и вставить через Ctrl+V.',
+      placeholder: 'Перетащите изображение сюда\nили нажмите, чтобы выбрать',
+      frame: 'Кадрирование',
+      frameFree: 'Кадрирование свободное',
+      frameLocked: 'Кадрирование заблокировано',
+    },
+    iconPanel: {
+      deckTitle: 'В этой колоде',
+      deckHint:
+        'Те, что есть у этой колоды: их предлагает выбор для полей, и они путешествуют внутри файла, так что на другой машине колода выглядит так же. Размер и название отсюда и библиотеку не трогают.',
+      libraryTitle: 'Моя библиотека',
+      libraryHint:
+        'Те, что вы когда-то загрузили, сохранены в этом браузере. С колодой они не путешествуют и не рисуются: отсюда копируют, чтобы не загружать одно и то же в каждую колоду.',
+      emptyLibraryHint: 'Вы ещё не сохранили в библиотеку ни одного символа.',
+      usedIn: (cards) => `В ${pluralCards(cards, 'ru')}`,
+      unused: 'Не используется',
+      alreadyInDeck: 'Уже в колоде',
+      toLibraryLabel: (label) => `Сохранить ${label} в мою библиотеку`,
+      toDeckLabel: (label) => `Перенести ${label} в эту колоду`,
+      forgetLabel: (label) => `Убрать ${label} из моей библиотеки`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» уходит из вашей библиотеки, и перенести его в другие колоды уже не выйдет. Колоды, где он уже внутри, не меняются. Убрать?`,
+      emptyHint:
+        'Для правил, которых нет в игре. Они остаются доступны во всех ваших колодах и появляются в конце выбора символов.',
+      nameLabel: (label) => `Название ${label}`,
+      heightTitle: 'Высота на карте, в % от символа игры',
+      heightLabel: (label) => `Высота ${label} на карте, в % от символа игры`,
+      decreaseHeightLabel: (label) => `Уменьшить ${label}`,
+      increaseHeightLabel: (label) => `Увеличить ${label}`,
+      showNumberText: 'Число',
+      showNumberLabel: (label) => `Показать число на ${label}`,
+      numberColorTitle: 'Цвет числа',
+      numberColorLabel: (label) => `Цвет числа ${label}`,
+      upload: 'Загрузить символ…',
+      hint: 'PNG с прозрачностью, сами обрезаются по содержимому. % — это высота на карте по сравнению с символом игры. Они остаются сохранёнными в этом браузере, а колода несёт внутри те, которые используют её карты.',
+      confirmRemove: (label, used) =>
+        `«${label}» есть в ${pluralCards(used, 'ru')} этой колоды. Если удалить, эти карты его потеряют.`,
+      removeLabel: (label) => `Удалить ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'В этой колоде',
+      deckHint:
+        'Те, что есть у этой колоды: их предлагает выбор фракции, и они путешествуют внутри файла. Название и цвет отсюда и библиотеку не трогают.',
+      libraryTitle: 'Моя библиотека',
+      libraryHint:
+        'Те, что вы когда-то собрали, сохранены в этом браузере. С колодой они не путешествуют: отсюда копируют, чтобы не загружать эмблему в каждую колоду.',
+      emptyLibraryHint: 'Вы ещё не сохранили в библиотеку ни одной фракции.',
+      usedIn: (cards) => `В ${pluralCards(cards, 'ru')}`,
+      unused: 'Не используется',
+      alreadyInDeck: 'Уже в колоде',
+      toLibraryLabel: (label) => `Сохранить ${label} в мою библиотеку`,
+      toDeckLabel: (label) => `Перенести ${label} в эту колоду`,
+      forgetLabel: (label) => `Убрать ${label} из моей библиотеки`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» уходит из вашей библиотеки, и перенести её в другие колоды уже не выйдет. Колоды, где она уже внутри, не меняются. Убрать?`,
+      emptyHint:
+        'Для колод с фракциями, которых нет в игре. Они остаются доступны во всех ваших колодах и сами создают 4 ромба «+1/−1 влияния» этой фракции, готовые к использованию в содержимом карты.',
+      nameLabel: (label) => `Название ${label}`,
+      colorTitle: 'Цвет полосы',
+      colorLabel: (label) => `Цвет полосы ${label}`,
+      hexLabel: (label) => `Цвет полосы ${label} в шестнадцатеричном виде`,
+      upload: 'Загрузить эмблему…',
+      hint: 'PNG с прозрачностью, сам обрезается по содержимому. Они остаются сохранёнными в этом браузере, а колода несёт внутри те, которые используют её карты. Как символ агента они сидят на простой чёрной пластине, без рамки тех, что в правилах.',
+      confirmRemove: (label, used) =>
+        `«${label}» есть в ${pluralCards(used, 'ru')} этой колоды. Если удалить, эти карты потеряют полосу, символ агента или ромб, который её называет.`,
+      removeLabel: (label) => `Удалить ${label}`,
+    },
+    libraryFile: {
+      export: 'Экспорт…',
+      exportTitle:
+        'Сохраняет всю вашу библиотеку — символы и фракции — в файл, чтобы перенести её на другой компьютер или иметь копию. Библиотека живёт только в этом браузере.',
+      import: 'Импорт…',
+      importTitle:
+        'Приносит в вашу библиотеку то, что есть в файле библиотеки. То, что уже было с тем же id, остаётся как есть.',
+      imported: (icons, factions) =>
+        `В вашу библиотеку добавлено ${pluralIcons(icons, 'ru')} и ${pluralFactions(factions, 'ru')}.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'на лист.',
+      fitsOnOne: 'Колода помещается на один.',
+      spansPages: (pages) => `Колода занимает ${pages}.`,
+      deckCopies: 'Копии всей колоды',
+      onlyDoneHint: (cards) =>
+        `Печатаются только готовые: ${pluralCards(cards, 'ru')} из колоды.`,
+      copiesOtherValue: 'Другое количество',
+      copiesDecrease: 'Убрать одну копию',
+      copiesIncrease: 'Добавить одну копию',
+      copiesHint: (total) => `Всего ${pluralCards(total, 'ru')}.`,
+      bleedToggle: 'Вылет 3 мм (типография)',
+      bleedOnHint:
+        'Каждая карта рисуется на 3 мм больше чёрным с каждой стороны и режется отдельно: если резак уйдёт, он врежется в чёрное, а не оставит белую кромку. На лист их влезает меньше.',
+      bleedOffHint:
+        'Карты лежат вплотную и делят рез, так что один рез служит двум. На лист их влезает больше, но любое отклонение видно.',
+      buildingPdf: 'Собираю PDF…',
+      downloadPdf: 'Скачать PDF для печати',
+      pdfSizeHintBefore:
+        'PDF несёт размер листа внутри, поэтому печатается в реальном масштабе. Всё же в окне печати выберите ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' или «реальный размер», но не «вписать в страницу».',
+      cardSizeHint: (w, h) =>
+        `Каждая отдельная карта выходит в ${w} × ${h} px — 63,5 × 88 мм при удвоенных 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Не удалось открыть файл.',
+      artFailed: 'Не удалось загрузить изображение.',
+      sheetFailed: 'Не удалось собрать лист.',
+      cardsFailed: 'Не удалось экспортировать карты.',
+      iconFailed: 'Не удалось загрузить символ.',
+      autosaveFull:
+        'Колода не помещается в автосохранение браузера: если перезагрузить страницу, всё несохранённое пропадёт. Сохраните её в файл.',
+      noneFinished: 'Нет ни одной готовой карты для экспорта. Снимите галочку «Только готовые».',
+      permissionDenied: (fileName) =>
+        `Chrome просит разрешение на запись в ${fileName}. Нажмите «Сохранить» ещё раз и выберите «Редактировать файл», или используйте «Сохранить как…», чтобы выбрать другой.`,
+      'not-a-card': () => 'Этот файл — не карта Dune: Imperium.',
+      'not-a-library': () => 'Этот файл — не библиотека Dune: Imperium.',
+      'empty-library': () => 'В этой библиотеке нет ни символов, ни фракций.',
+      'no-cards': () => 'В файле нет ни одной карты.',
+      'empty-image': ({ name }) => `Изображение пустое: ${name}`,
+      'read-failed': ({ name }) => `Не удалось прочитать файл: ${name}`,
+      'invalid-image': ({ name }) => `Это не подходящее изображение: ${name}`,
+      'canvas-failed': () => 'Браузер не смог подготовить изображение.',
+      'png-failed': () => 'Браузер не смог создать PNG.',
+      'sheet-canvas-failed': () => 'Браузер не смог подготовить лист.',
+      'sheet-read-failed': () => 'Браузер не смог прочитать лист.',
+      'card-canvas-failed': () => 'Не удалось подготовить холст карты.',
+    },
+  },
+  uk: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Експорт карти…',
+      export: 'Експортувати карту',
+      exportTitle: 'Експортувати відкриту карту як PNG',
+      defaultFileName: 'karta',
+      language: 'Мова',
+      undo: 'Скасувати (Ctrl+Z)',
+      redo: 'Повторити (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Особистість', rules: 'Правила' },
+    doneBanner: {
+      locked: 'Карта готова й заблокована, щоб її не змінили помилково.',
+      unlock: 'Розблокувати',
+    },
+    doneBadge: {
+      done: 'Готова',
+      markDone: 'Позначити готовою',
+      reopenTitle: 'Готова — натисніть, щоб відкрити знову',
+      markDoneTitle: 'Позначити готовою',
+    },
+    dialogs: {
+      icons: 'Власні символи',
+      factions: 'Власні фракції',
+      print: 'Друк колоди',
+      about: 'Про програму',
+      close: 'Закрити',
+    },
+    about: {
+      fanMade:
+        'Це фанатський проєкт для фанатів, без комерційної мети: він безкоштовний, без реклами, і за користування нічого не беруть.',
+      ownership:
+        'Dune: Imperium, її доповнення, ілюстрації, символи та графічний дизайн належать Dire Wolf Digital, LLC. «Дюна» і всесвіт роману належать Herbert Properties LLC. Усі марки й права належать їхнім власникам.',
+      notAffiliated:
+        'Цей застосунок не пов’язаний із Dire Wolf Digital і власниками марки «Дюна», не спонсорований і не схвалений ними.',
+      personalUse:
+        'Карти, які ви тут робите, — для особистого користування: грати вдома, пробувати ідеї та ділитися ними зі своєю компанією. Вони не для продажу й не для комерційного виробництва. Якщо гра вам подобається, купіть оригінал і підтримайте тих, хто її зробив.',
+      takedown:
+        'Якщо у вас є права на якийсь із цих матеріалів і ви хочете, щоб щось прибрали, напишіть нам через репозиторій, і ми це вирішимо.',
+      source: 'Код і контакти',
+    },
+    deckFooter: {
+      deckGroup: 'Колода',
+      libraryGroup: 'Бібліотека',
+      libraryGroupHint:
+        'Ваші символи й фракції, збережені в цьому браузері, щоб використовувати їх у різних колодах. З файлом вони не подорожують: узяти одну — це скопіювати її в колоду, а колода несе PNG усередині.',
+      unsavedName: 'Незбережена колода',
+      renameTitle: 'Перейменувати колоду',
+      noNativeFsTooltip:
+        'Тут файли не можна перезаписувати, тому «Зберегти» і «Зберегти як…» завантажують нову копію. Цей API є лише в Chrome та Edge, але не у вбудованому попередньому перегляді редактора: якщо відкрити застосунок у вікні браузера, «Зберегти» пише у відкритий файл без запитань.',
+      noNativeFsBadge: 'Тут «Зберегти» завантажує копію',
+      new: 'Нова',
+      confirmNew: 'У цій колоді є незбережені зміни. Усе одно почати нову?',
+      open: 'Відкрити…',
+      save: 'Зберегти',
+      saveAs: 'Зберегти як…',
+      icons: 'Символи…',
+      factions: 'Фракції…',
+      print: 'Друк…',
+      exportAll: 'Експорт колоди…',
+      exportingAll: 'Експорт колоди…',
+      exportAllTitle: 'Експортувати всі карти окремими PNG, в одному zip',
+      onlyDone: 'Лише готові',
+      onlyDoneTitle: (done, pending) =>
+        `PDF і zip беруть лише готові карти (${done}); решта ${pending} лишаються поза ними.`,
+      onlyDoneEmpty: 'Поки жодна карта не позначена готовою.',
+    },
+    gallery: {
+      title: 'Карти',
+      newCardTitle: 'Нова карта',
+      newButton: 'Нова карта',
+      unnamed: 'Без назви',
+      duplicate: 'Дублювати',
+      remove: 'Видалити',
+      doneStamp: 'Готова',
+      reopenTitle: 'Готова — натисніть, щоб відкрити знову',
+      markDoneTitle: 'Позначити готовою',
+      markPendingAria: 'Позначити незавершеною',
+      copiesStamp: (copies) => `${copies} примірників у колоді`,
+    },
+    cardPanel: {
+      name: 'Назва',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Написати назву',
+      startingCard: 'Стартова',
+      startingCardHint:
+        'На картах стартової колоди перед назвою стоїть ромб, а заголовок починається правіше, щоб дати йому місце.',
+      faction: 'Фракція',
+      factionHint:
+        'Вони складаються вниз саме в цьому порядку, у якому б ви їх не вибрали. До 4 на карту.',
+      cost: 'Вартість придбання',
+      hasCost: 'Має вартість',
+      persuasion: 'Переконання',
+      purchaseBenefit: 'Бонус за придбання',
+      none: 'Немає',
+      custom: (label) => `Власний · ${label}`,
+      amount: 'Кількість',
+      otherValue: 'Інше значення',
+      agentIcons: 'Символи агента',
+      infiltrateHint:
+        'Rise of Ix: агент може піти на поле, яке вже зайняв суперник. Це ті самі сім символів, в іншій рамці.',
+      copies: 'Примірники',
+      copiesHint:
+        'Скільки разів ця карта входить у колоду. Зберігається у файлі й використовується аркушем для друку; zip із PNG дає по одному файлу на карту.',
+    },
+    contentEditor: {
+      empty: 'Порожнє поле.',
+      textPlaceholder: 'Текст…',
+      emptyText: 'Текст',
+      editOnCard: 'Написати текст',
+      lineBreak: '— перенесення рядка —',
+      deletedIcon: 'Видалений символ',
+      addTo: 'Додати до',
+      close: 'Закрити',
+      addIcon: 'Символ…',
+      addText: 'Текст',
+      addLineBreak: 'Перенесення',
+      remove: 'Прибрати',
+      custom: 'Власні',
+      core: 'Dune Imperium',
+      influence: 'Вплив за фракціями',
+      decrease: (label) => `Зменшити ${label}`,
+      increase: (label) => `Збільшити ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Хід агента',
+      autoAdjust: 'Автоматична висота',
+      autoAdjustHint:
+        'У поля три висоти — 1, 2 або 3 рядки — і так воно лишається на найменшій, у яку влазить вміст. Вимкніть, щоб задати її вручну.',
+      agentSilhouette: 'Силует агента',
+      agentSilhouetteHint:
+        'Фігура за вмістом поля. На готовій карті символи закривають її майже повністю: сама по собі вона виглядає помітнішою, ніж буде потім.',
+      reveal: 'Розкриття',
+      contentHint: 'Перетягуйте символи, текст і перенесення, щоб додати їх або переставити.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: розкриття спрацьовує і коли карту скидають чи знищують. Стрічка займає початок смуги, тому вміст влазить у меншу ширину.',
+    },
+    artPanel: {
+      image: 'Зображення',
+      changeImage: 'Замінити зображення…',
+      chooseImage: 'Вибрати зображення…',
+      remove: 'Прибрати',
+      zoom: 'Масштаб',
+      fit: 'Вписати',
+      center: 'По центру',
+      rotate: 'Повернути на чверть оберту',
+      flip: 'Віддзеркалити',
+      dragZoomHint:
+        'Тягніть зображення по карті, щоб зсунути його; коліщатко змінює масштаб. Зображення можна й вставити через Ctrl+V.',
+      placeholder: 'Перетягніть зображення сюди\nабо натисніть, щоб вибрати',
+      frame: 'Кадрування',
+      frameFree: 'Кадрування вільне',
+      frameLocked: 'Кадрування заблоковане',
+    },
+    iconPanel: {
+      deckTitle: 'У цій колоді',
+      deckHint:
+        'Ті, що є в цієї колоди: їх пропонує вибір для полів, і вони подорожують усередині файлу, тож на іншій машині колода виглядає так само. Розмір і назва звідси й бібліотеки не чіпають.',
+      libraryTitle: 'Моя бібліотека',
+      libraryHint:
+        'Ті, що ви колись завантажили, збережені в цьому браузері. З колодою вони не подорожують і не малюються: звідси копіюють, щоб не завантажувати те саме в кожну колоду.',
+      emptyLibraryHint: 'Ви ще не зберегли в бібліотеку жодного символу.',
+      usedIn: (cards) => `У ${pluralCards(cards, 'uk')}`,
+      unused: 'Не використовується',
+      alreadyInDeck: 'Уже в колоді',
+      toLibraryLabel: (label) => `Зберегти ${label} у мою бібліотеку`,
+      toDeckLabel: (label) => `Перенести ${label} у цю колоду`,
+      forgetLabel: (label) => `Прибрати ${label} з моєї бібліотеки`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» іде з вашої бібліотеки, і перенести його в інші колоди вже не вийде. Колоди, де він уже всередині, не змінюються. Прибрати?`,
+      emptyHint:
+        'Для правил, яких немає у грі. Вони лишаються доступними в усіх ваших колодах і з’являються в кінці вибору символів.',
+      nameLabel: (label) => `Назва ${label}`,
+      heightTitle: 'Висота на карті, у % від символу гри',
+      heightLabel: (label) => `Висота ${label} на карті, у % від символу гри`,
+      decreaseHeightLabel: (label) => `Зменшити ${label}`,
+      increaseHeightLabel: (label) => `Збільшити ${label}`,
+      showNumberText: 'Число',
+      showNumberLabel: (label) => `Показати число на ${label}`,
+      numberColorTitle: 'Колір числа',
+      numberColorLabel: (label) => `Колір числа ${label}`,
+      upload: 'Завантажити символ…',
+      hint: 'PNG із прозорістю, самі обрізаються за вмістом. % — це висота на карті порівняно із символом гри. Вони лишаються збереженими в цьому браузері, а колода несе всередині ті, які використовують її карти.',
+      confirmRemove: (label, used) =>
+        `«${label}» є в ${pluralCards(used, 'uk')} цієї колоди. Якщо видалити, ці карти його втратять.`,
+      removeLabel: (label) => `Видалити ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'У цій колоді',
+      deckHint:
+        'Ті, що є в цієї колоди: їх пропонує вибір фракції, і вони подорожують усередині файлу. Назва й колір звідси й бібліотеки не чіпають.',
+      libraryTitle: 'Моя бібліотека',
+      libraryHint:
+        'Ті, що ви колись зібрали, збережені в цьому браузері. З колодою вони не подорожують: звідси копіюють, щоб не завантажувати емблему в кожну колоду.',
+      emptyLibraryHint: 'Ви ще не зберегли в бібліотеку жодної фракції.',
+      usedIn: (cards) => `У ${pluralCards(cards, 'uk')}`,
+      unused: 'Не використовується',
+      alreadyInDeck: 'Уже в колоді',
+      toLibraryLabel: (label) => `Зберегти ${label} у мою бібліотеку`,
+      toDeckLabel: (label) => `Перенести ${label} у цю колоду`,
+      forgetLabel: (label) => `Прибрати ${label} з моєї бібліотеки`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» іде з вашої бібліотеки, і перенести її в інші колоди вже не вийде. Колоди, де вона вже всередині, не змінюються. Прибрати?`,
+      emptyHint:
+        'Для колод із фракціями, яких немає у грі. Вони лишаються доступними в усіх ваших колодах і самі створюють 4 ромби «+1/−1 впливу» цієї фракції, готові до використання у вмісті карти.',
+      nameLabel: (label) => `Назва ${label}`,
+      colorTitle: 'Колір смуги',
+      colorLabel: (label) => `Колір смуги ${label}`,
+      hexLabel: (label) => `Колір смуги ${label} у шістнадцятковому вигляді`,
+      upload: 'Завантажити емблему…',
+      hint: 'PNG із прозорістю, сам обрізається за вмістом. Вони лишаються збереженими в цьому браузері, а колода несе всередині ті, які використовують її карти. Як символ агента вони сидять на простій чорній пластині, без рамки тих, що в правилах.',
+      confirmRemove: (label, used) =>
+        `«${label}» є в ${pluralCards(used, 'uk')} цієї колоди. Якщо видалити, ці карти втратять смугу, символ агента або ромб, який її називає.`,
+      removeLabel: (label) => `Видалити ${label}`,
+    },
+    libraryFile: {
+      export: 'Експорт…',
+      exportTitle:
+        'Зберігає всю вашу бібліотеку — символи й фракції — у файл, щоб перенести її на інший комп’ютер або мати копію. Бібліотека живе лише в цьому браузері.',
+      import: 'Імпорт…',
+      importTitle:
+        'Приносить у вашу бібліотеку те, що є у файлі бібліотеки. Те, що вже було з тим самим id, лишається як є.',
+      imported: (icons, factions) =>
+        `У вашу бібліотеку додано ${pluralIcons(icons, 'uk')} і ${pluralFactions(factions, 'uk')}.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'на аркуш.',
+      fitsOnOne: 'Колода вміщається на один.',
+      spansPages: (pages) => `Колода займає ${pages}.`,
+      deckCopies: 'Копії всієї колоди',
+      onlyDoneHint: (cards) =>
+        `Друкуються лише готові: ${pluralCards(cards, 'uk')} з колоди.`,
+      copiesOtherValue: 'Інша кількість',
+      copiesDecrease: 'Прибрати одну копію',
+      copiesIncrease: 'Додати одну копію',
+      copiesHint: (total) => `Усього ${pluralCards(total, 'uk')}.`,
+      bleedToggle: 'Виліт 3 мм (друкарня)',
+      bleedOnHint:
+        'Кожна карта малюється на 3 мм більшою чорним з кожного боку й ріжеться окремо: якщо різак зійде, він вріжеться в чорне, а не лишить білу кромку. На аркуш їх влазить менше.',
+      bleedOffHint:
+        'Карти лежать впритул і ділять різ, тож один різ служить двом. На аркуш їх влазить більше, але будь-яке відхилення видно.',
+      buildingPdf: 'Збираю PDF…',
+      downloadPdf: 'Завантажити PDF для друку',
+      pdfSizeHintBefore:
+        'PDF несе розмір аркуша всередині, тому друкується в реальному масштабі. Усе ж у вікні друку виберіть ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' або «реальний розмір», але не «вписати в сторінку».',
+      cardSizeHint: (w, h) =>
+        `Кожна окрема карта виходить у ${w} × ${h} px — 63,5 × 88 мм при подвоєних 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Не вдалося відкрити файл.',
+      artFailed: 'Не вдалося завантажити зображення.',
+      sheetFailed: 'Не вдалося зібрати аркуш.',
+      cardsFailed: 'Не вдалося експортувати карти.',
+      iconFailed: 'Не вдалося завантажити символ.',
+      autosaveFull:
+        'Колода не вміщається в автозбереження браузера: якщо перезавантажити сторінку, усе незбережене зникне. Збережіть її у файл.',
+      noneFinished: 'Немає жодної готової карти для експорту. Зніміть галочку «Лише готові».',
+      permissionDenied: (fileName) =>
+        `Chrome просить дозвіл на запис у ${fileName}. Натисніть «Зберегти» ще раз і виберіть «Редагувати файл», або скористайтеся «Зберегти як…», щоб вибрати інший.`,
+      'not-a-card': () => 'Цей файл — не карта Dune: Imperium.',
+      'not-a-library': () => 'Цей файл — не бібліотека Dune: Imperium.',
+      'empty-library': () => 'У цій бібліотеці немає ні символів, ні фракцій.',
+      'no-cards': () => 'У файлі немає жодної карти.',
+      'empty-image': ({ name }) => `Зображення порожнє: ${name}`,
+      'read-failed': ({ name }) => `Не вдалося прочитати файл: ${name}`,
+      'invalid-image': ({ name }) => `Це не придатне зображення: ${name}`,
+      'canvas-failed': () => 'Браузер не зміг підготувати зображення.',
+      'png-failed': () => 'Браузер не зміг створити PNG.',
+      'sheet-canvas-failed': () => 'Браузер не зміг підготувати аркуш.',
+      'sheet-read-failed': () => 'Браузер не зміг прочитати аркуш.',
+      'card-canvas-failed': () => 'Не вдалося підготувати полотно карти.',
+    },
+  },
+  bg: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Експортиране на картата…',
+      export: 'Експортиране на картата',
+      exportTitle: 'Експортиране на отворената карта като PNG',
+      defaultFileName: 'karta',
+      language: 'Език',
+      undo: 'Отмяна (Ctrl+Z)',
+      redo: 'Повтаряне (Ctrl+Shift+Z)',
+    },
+    tabs: { front: 'Идентичност', rules: 'Правила' },
+    doneBanner: {
+      locked: 'Картата е готова и заключена, за да не се променя по погрешка.',
+      unlock: 'Отключване',
+    },
+    doneBadge: {
+      done: 'Готова',
+      markDone: 'Отбелязване като готова',
+      reopenTitle: 'Готова — щракнете, за да я отворите отново',
+      markDoneTitle: 'Отбелязване като готова',
+    },
+    dialogs: {
+      icons: 'Собствени символи',
+      factions: 'Собствени фракции',
+      print: 'Печат на тестето',
+      about: 'Относно',
+      close: 'Затваряне',
+    },
+    about: {
+      fanMade:
+        'Това е фенски проект за фенове, с нестопанска цел: безплатен е, няма реклами и за използването му не се плаща нищо.',
+      ownership:
+        'Dune: Imperium, разширенията ѝ, илюстрациите, символите и графичният ѝ дизайн са собственост на Dire Wolf Digital, LLC. «Дюна» и вселената на романа принадлежат на Herbert Properties LLC. Всички марки и права принадлежат на съответните им собственици.',
+      notAffiliated:
+        'Това приложение не е свързано с Dire Wolf Digital, нито с притежателите на марката «Дюна», и не е спонсорирано или одобрено от тях.',
+      personalUse:
+        'Картите, които правите тук, са за лично ползване: да играете вкъщи, да пробвате идеи и да ги споделяте с компанията си. Не са за продажба, нито за търговско производство. Ако играта ви харесва, купете оригинала и подкрепете тези, които са я направили.',
+      takedown:
+        'Ако имате права върху някой от тези материали и искате нещо да бъде свалено, пишете ни през хранилището и ще го решим.',
+      source: 'Код и контакт',
+    },
+    deckFooter: {
+      deckGroup: 'Тесте',
+      libraryGroup: 'Библиотека',
+      libraryGroupHint:
+        'Вашите символи и фракции, запазени в този браузър, за да ги ползвате в различни тестета. С файла не пътуват: да вземете един означава да го копирате в тестето, а тестето носи PNG-то вътре.',
+      unsavedName: 'Незапазено тесте',
+      renameTitle: 'Преименуване на тестето',
+      noNativeFsTooltip:
+        'Тук файловете не могат да се презаписват, затова «Запазване» и «Запазване като…» свалят ново копие. Този API го има само в Chrome и Edge, но не и във вградения преглед на редактора: ако отворите приложението в прозорец на браузъра, «Запазване» пише в отворения файл без да пита.',
+      noNativeFsBadge: 'Тук «Запазване» сваля копие',
+      new: 'Ново',
+      confirmNew: 'Това тесте има незапазени промени. Все пак да започнем ново?',
+      open: 'Отваряне…',
+      save: 'Запазване',
+      saveAs: 'Запазване като…',
+      icons: 'Символи…',
+      factions: 'Фракции…',
+      print: 'Печат…',
+      exportAll: 'Експортиране на тестето…',
+      exportingAll: 'Експортиране на тестето…',
+      exportAllTitle: 'Експортиране на всички карти като отделни PNG, в един zip',
+      onlyDone: 'Само готовите',
+      onlyDoneTitle: (done, pending) =>
+        `PDF-ът и zip-ът носят само готовите карти (${done}); останалите ${pending} остават отвън.`,
+      onlyDoneEmpty: 'Още няма карта, отбелязана като готова.',
+    },
+    gallery: {
+      title: 'Карти',
+      newCardTitle: 'Нова карта',
+      newButton: 'Нова карта',
+      unnamed: 'Без име',
+      duplicate: 'Дублиране',
+      remove: 'Изтриване',
+      doneStamp: 'Готова',
+      reopenTitle: 'Готова — щракнете, за да я отворите отново',
+      markDoneTitle: 'Отбелязване като готова',
+      markPendingAria: 'Отбелязване като незавършена',
+      copiesStamp: (copies) => `${copies} екземпляра в тестето`,
+    },
+    cardPanel: {
+      name: 'Име',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Написване на името',
+      startingCard: 'Начална',
+      startingCardHint:
+        'Картите от началното тесте имат ромб преди името, а заглавието започва по-надясно, за да му остави място.',
+      faction: 'Фракция',
+      factionHint:
+        'Подреждат се надолу точно в този ред, независимо в какъв ред ги изберете. До 4 на карта.',
+      cost: 'Цена за придобиване',
+      hasCost: 'Има цена',
+      persuasion: 'Убеждаване',
+      purchaseBenefit: 'Бонус при придобиване',
+      none: 'Няма',
+      custom: (label) => `Собствен · ${label}`,
+      amount: 'Количество',
+      otherValue: 'Друга стойност',
+      agentIcons: 'Символи на агента',
+      infiltrateHint:
+        'Rise of Ix: агентът може да отиде на поле, вече заето от съперник. Това са същите седем символа, с друга рамка.',
+      copies: 'Екземпляри',
+      copiesHint:
+        'Колко пъти тази карта е в тестето. Запазва се във файла и се използва от печатния лист; zip-ът с PNG дава по един файл на карта.',
+    },
+    contentEditor: {
+      empty: 'Празно поле.',
+      textPlaceholder: 'Текст…',
+      emptyText: 'Текст',
+      editOnCard: 'Написване на текста',
+      lineBreak: '— нов ред —',
+      deletedIcon: 'Изтрит символ',
+      addTo: 'Добавяне към',
+      close: 'Затваряне',
+      addIcon: 'Символ…',
+      addText: 'Текст',
+      addLineBreak: 'Нов ред',
+      remove: 'Премахване',
+      custom: 'Собствени',
+      core: 'Dune Imperium',
+      influence: 'Влияние по фракции',
+      decrease: (label) => `Намаляване на ${label}`,
+      increase: (label) => `Увеличаване на ${label}`,
+    },
+    rulesPanel: {
+      playTurn: 'Ход на агента',
+      autoAdjust: 'Автоматична височина',
+      autoAdjustHint:
+        'Полето има три височини — 1, 2 или 3 реда — и така остава на най-малката, в която съдържанието се побира. Изключете го, за да я зададете ръчно.',
+      agentSilhouette: 'Силует на агента',
+      agentSilhouetteHint:
+        'Фигурата зад съдържанието на полето. На готовата карта символите я покриват почти изцяло: сама изглежда по-подчертана, отколкото ще изглежда после.',
+      reveal: 'Разкриване',
+      contentHint: 'Плъзгайте символи, текст и нови редове, за да ги добавите или подредите.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: разкриването важи и когато картата се изхвърля или унищожава. Лентата заема началото на ивицата, затова съдържанието се побира по-тясно.',
+    },
+    artPanel: {
+      image: 'Изображение',
+      changeImage: 'Смяна на изображението…',
+      chooseImage: 'Избор на изображение…',
+      remove: 'Премахване',
+      zoom: 'Мащаб',
+      fit: 'Побиране',
+      center: 'Центриране',
+      rotate: 'Завъртане на четвърт оборот',
+      flip: 'Огледално',
+      dragZoomHint:
+        'Влачете изображението по картата, за да го местите; колелцето мащабира. Може и да поставите изображение с Ctrl+V.',
+      placeholder: 'Пуснете изображение тук\nили докоснете, за да изберете',
+      frame: 'Кадриране',
+      frameFree: 'Свободно кадриране',
+      frameLocked: 'Заключено кадриране',
+    },
+    iconPanel: {
+      deckTitle: 'В това тесте',
+      deckHint:
+        'Тези, с които това тесте разполага: тях предлага изборът за полетата и те пътуват във файла, така че тестето изглежда еднакво и на друга машина. Размерът и името са оттук и не пипат библиотеката.',
+      libraryTitle: 'Моята библиотека',
+      libraryHint:
+        'Тези, които някога сте качили, запазени в този браузър. С тестето не пътуват и не се рисуват: оттук се копира, за да не качвате едно и също във всяко тесте.',
+      emptyLibraryHint: 'Още не сте запазили нито един символ в библиотеката.',
+      usedIn: (cards) => `В ${pluralCards(cards, 'bg')}`,
+      unused: 'Неизползван',
+      alreadyInDeck: 'Вече е в тестето',
+      toLibraryLabel: (label) => `Запазване на ${label} в моята библиотека`,
+      toDeckLabel: (label) => `Прехвърляне на ${label} в това тесте`,
+      forgetLabel: (label) => `Премахване на ${label} от моята библиотека`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» излиза от библиотеката ви и няма да можете да го прехвърлите в други тестета. Тестетата, които вече го имат вътре, не се променят. Да го премахнем ли?`,
+      emptyHint:
+        'За правила, които играта не носи. Остават достъпни във всичките ви тестета и се появяват в края на избора на символи.',
+      nameLabel: (label) => `Име на ${label}`,
+      heightTitle: 'Височина върху картата, в % от символа на играта',
+      heightLabel: (label) => `Височина на ${label} върху картата, в % от символа на играта`,
+      decreaseHeightLabel: (label) => `Смаляване на ${label}`,
+      increaseHeightLabel: (label) => `Уголемяване на ${label}`,
+      showNumberText: 'Число',
+      showNumberLabel: (label) => `Показване на число върху ${label}`,
+      numberColorTitle: 'Цвят на числото',
+      numberColorLabel: (label) => `Цвят на числото на ${label}`,
+      upload: 'Качване на символ…',
+      hint: 'PNG с прозрачност, изрязват се сами по съдържанието. Процентът е височината върху картата в сравнение със символ на играта. Остават запазени в този браузър, а тестето носи вътре тези, които картите му използват.',
+      confirmRemove: (label, used) =>
+        `«${label}» е в ${pluralCards(used, 'bg')} от това тесте. Ако го изтриете, тези карти го губят.`,
+      removeLabel: (label) => `Изтриване на ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'В това тесте',
+      deckHint:
+        'Тези, с които това тесте разполага: тях предлага изборът на фракция и те пътуват във файла. Името и цветът са оттук и не пипат библиотеката.',
+      libraryTitle: 'Моята библиотека',
+      libraryHint:
+        'Тези, които някога сте сглобили, запазени в този браузър. С тестето не пътуват: оттук се копира, за да не качвате емблемата във всяко тесте.',
+      emptyLibraryHint: 'Още не сте запазили нито една фракция в библиотеката.',
+      usedIn: (cards) => `В ${pluralCards(cards, 'bg')}`,
+      unused: 'Неизползвана',
+      alreadyInDeck: 'Вече е в тестето',
+      toLibraryLabel: (label) => `Запазване на ${label} в моята библиотека`,
+      toDeckLabel: (label) => `Прехвърляне на ${label} в това тесте`,
+      forgetLabel: (label) => `Премахване на ${label} от моята библиотека`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» излиза от библиотеката ви и няма да можете да я прехвърлите в други тестета. Тестетата, които вече я имат вътре, не се променят. Да я премахнем ли?`,
+      emptyHint:
+        'За тестета с фракции, които играта не носи. Остават достъпни във всичките ви тестета и сами генерират 4-те ромба «+1/−1 влияние» на тази фракция, готови за използване в съдържанието на карта.',
+      nameLabel: (label) => `Име на ${label}`,
+      colorTitle: 'Цвят на ивицата',
+      colorLabel: (label) => `Цвят на ивицата на ${label}`,
+      hexLabel: (label) => `Цвят на ивицата на ${label} в шестнадесетичен вид`,
+      upload: 'Качване на емблема…',
+      hint: 'PNG с прозрачност, изрязва се сам по съдържанието. Остават запазени в този браузър, а тестето носи вътре тези, които картите му използват. Като символ на агент седят върху обикновена черна плочка, без рамката на тези от правилата.',
+      confirmRemove: (label, used) =>
+        `«${label}» е в ${pluralCards(used, 'bg')} от това тесте. Ако я изтриете, тези карти губят ивицата, символа на агента или ромба, който я назовава.`,
+      removeLabel: (label) => `Изтриване на ${label}`,
+    },
+    libraryFile: {
+      export: 'Експортиране…',
+      exportTitle:
+        'Запазва цялата ви библиотека — символи и фракции — във файл, за да я пренесете на друг компютър или да имате копие. Библиотеката живее само в този браузър.',
+      import: 'Импортиране…',
+      importTitle:
+        'Внася в библиотеката ви това, което съдържа файл на библиотека. Каквото вече сте имали със същото id, си остава както е.',
+      imported: (icons, factions) =>
+        `Към библиотеката ви са добавени ${pluralIcons(icons, 'bg')} и ${pluralFactions(factions, 'bg')}.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'на лист.',
+      fitsOnOne: 'Тестето се побира на един.',
+      spansPages: (pages) => `Тестето заема ${pages}.`,
+      deckCopies: 'Копия на цялото тесте',
+      onlyDoneHint: (cards) =>
+        `Печатат се само готовите: ${pluralCards(cards, 'bg')} от тестето.`,
+      copiesOtherValue: 'Друго количество',
+      copiesDecrease: 'Махане на едно копие',
+      copiesIncrease: 'Добавяне на едно копие',
+      copiesHint: (total) => `Общо ${pluralCards(total, 'bg')}.`,
+      bleedToggle: 'Отстъп 3 мм (печатница)',
+      bleedOnHint:
+        'Всяка карта се рисува с 3 мм по-голяма в черно от всяка страна и се реже отделно: ако гилотината се измести, реже в черното, а не оставя бял кант. На лист се побират по-малко.',
+      bleedOffHint:
+        'Картите са долепени и делят реза, така че един рез служи за две. На лист се побират повече, но всяко отклонение си личи.',
+      buildingPdf: 'Сглобяване на PDF…',
+      downloadPdf: 'Изтегляне на PDF за печат',
+      pdfSizeHintBefore:
+        'PDF-ът носи размера на листа вътре, така че се печата в реален мащаб. Все пак в прозореца за печат изберете ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' или «реален размер», никога «побиране в страницата».',
+      cardSizeHint: (w, h) =>
+        `Всяка отделна карта излиза в ${w} × ${h} px — 63,5 × 88 мм при удвоени 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Файлът не можа да бъде отворен.',
+      artFailed: 'Изображението не можа да бъде заредено.',
+      sheetFailed: 'Листът не можа да бъде сглобен.',
+      cardsFailed: 'Картите не можаха да бъдат експортирани.',
+      iconFailed: 'Символът не можа да бъде зареден.',
+      autosaveFull:
+        'Тестето не се побира в автоматичното запазване на браузъра: ако презаредите страницата, всичко незапазено се губи. Запазете го във файл.',
+      noneFinished: 'Няма нито една готова карта за експортиране. Махнете отметката «Само готовите».',
+      permissionDenied: (fileName) =>
+        `Chrome иска разрешение да пише в ${fileName}. Натиснете «Запазване» отново и изберете «Редактиране на файла», или използвайте «Запазване като…», за да изберете друг.`,
+      'not-a-card': () => 'Този файл не е карта на Dune: Imperium.',
+      'not-a-library': () => 'Този файл не е библиотека на Dune: Imperium.',
+      'empty-library': () => 'В тази библиотека няма нито символи, нито фракции.',
+      'no-cards': () => 'Файлът няма нито една карта.',
+      'empty-image': ({ name }) => `Изображението е празно: ${name}`,
+      'read-failed': ({ name }) => `Файлът не можа да бъде прочетен: ${name}`,
+      'invalid-image': ({ name }) => `Не е валидно изображение: ${name}`,
+      'canvas-failed': () => 'Браузърът не успя да подготви изображението.',
+      'png-failed': () => 'Браузърът не успя да създаде PNG.',
+      'sheet-canvas-failed': () => 'Браузърът не успя да подготви листа.',
+      'sheet-read-failed': () => 'Браузърът не успя да прочете листа.',
+      'card-canvas-failed': () => 'Платното на картата не можа да бъде подготвено.',
+    },
+  },
 }
 
 /** El texto de una cantidad de cartas, con el número adelante. */
@@ -1665,11 +3611,36 @@ const STRINGS: Record<Language, Strings> = {
  * `Strings` porque son la misma cuenta en los tres idiomas: singular o plural
  * de dos palabras.
  */
+/**
+ * El polaco, el checo, el ruso y el ucraniano tienen **tres** formas de plural
+ * y las cuatro las eligen igual: 1 (pero no 11), 2–4 (pero no 12–14), y el
+ * resto. Con dos ramas —una para el singular y otra para todo lo demás—
+ * saldrían cosas como «5 karty» o «22 карт», que es exactamente el error que
+ * delata una traducción hecha desde el inglés.
+ *
+ * El húngaro va al revés: después de un número el sustantivo queda en
+ * singular, así que no lleva rama de plural en ningún lado.
+ */
+const slavic = (n: number, one: string, few: string, many: string): string => {
+  const mod10 = n % 10
+  const mod100 = n % 100
+  if (mod10 === 1 && mod100 !== 11) return one
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
+  return many
+}
+
 export function pluralIcons(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 icon' : `${n} icons`
   if (language === 'pt') return n === 1 ? '1 ícone' : `${n} ícones`
   if (language === 'fr') return n === 1 ? '1 icône' : `${n} icônes`
   if (language === 'de') return n === 1 ? '1 Symbol' : `${n} Symbole`
+  if (language === 'it') return n === 1 ? '1 icona' : `${n} icone`
+  if (language === 'hu') return `${n} ikon`
+  if (language === 'bg') return n === 1 ? '1 символ' : `${n} символа`
+  if (language === 'pl') return `${n} ${slavic(n, 'ikona', 'ikony', 'ikon')}`
+  if (language === 'cs') return `${n} ${slavic(n, 'symbol', 'symboly', 'symbolů')}`
+  if (language === 'ru') return `${n} ${slavic(n, 'символ', 'символа', 'символов')}`
+  if (language === 'uk') return `${n} ${slavic(n, 'символ', 'символи', 'символів')}`
   return n === 1 ? '1 icono' : `${n} iconos`
 }
 
@@ -1678,6 +3649,13 @@ export function pluralFactions(n: number, language: Language): string {
   if (language === 'pt') return n === 1 ? '1 facção' : `${n} facções`
   if (language === 'fr') return n === 1 ? '1 faction' : `${n} factions`
   if (language === 'de') return n === 1 ? '1 Fraktion' : `${n} Fraktionen`
+  if (language === 'it') return n === 1 ? '1 fazione' : `${n} fazioni`
+  if (language === 'hu') return `${n} frakció`
+  if (language === 'bg') return n === 1 ? '1 фракция' : `${n} фракции`
+  if (language === 'pl') return `${n} ${slavic(n, 'frakcja', 'frakcje', 'frakcji')}`
+  if (language === 'cs') return `${n} ${slavic(n, 'frakce', 'frakce', 'frakcí')}`
+  if (language === 'ru') return `${n} ${slavic(n, 'фракция', 'фракции', 'фракций')}`
+  if (language === 'uk') return `${n} ${slavic(n, 'фракція', 'фракції', 'фракцій')}`
   return n === 1 ? '1 facción' : `${n} facciones`
 }
 
@@ -1686,14 +3664,31 @@ export function pluralCards(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 card' : `${n} cards`
   if (language === 'fr') return n === 1 ? '1 carte' : `${n} cartes`
   if (language === 'de') return n === 1 ? '1 Karte' : `${n} Karten`
+  if (language === 'it') return n === 1 ? '1 carta' : `${n} carte`
+  if (language === 'hu') return `${n} kártya`
+  if (language === 'bg') return n === 1 ? '1 карта' : `${n} карти`
+  if (language === 'pl') return `${n} ${slavic(n, 'karta', 'karty', 'kart')}`
+  if (language === 'cs') return `${n} ${slavic(n, 'karta', 'karty', 'karet')}`
+  if (language === 'ru') return `${n} ${slavic(n, 'карта', 'карты', 'карт')}`
+  if (language === 'uk') return `${n} ${slavic(n, 'карта', 'карти', 'карт')}`
   return n === 1 ? '1 carta' : `${n} cartas`
 }
 
-/** Sólo la palabra, para cuando el número ya va aparte en el texto. */
+/**
+ * Sólo la palabra, para cuando el número ya va aparte en el texto. Igual
+ * recibe `n`, porque la forma depende de la cantidad que la precede.
+ */
 export function cardWord(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? 'card' : 'cards'
   if (language === 'fr') return n === 1 ? 'carte' : 'cartes'
   if (language === 'de') return n === 1 ? 'Karte' : 'Karten'
+  if (language === 'it') return n === 1 ? 'carta' : 'carte'
+  if (language === 'hu') return 'kártya'
+  if (language === 'bg') return n === 1 ? 'карта' : 'карти'
+  if (language === 'pl') return slavic(n, 'karta', 'karty', 'kart')
+  if (language === 'cs') return slavic(n, 'karta', 'karty', 'karet')
+  if (language === 'ru') return slavic(n, 'карта', 'карты', 'карт')
+  if (language === 'uk') return slavic(n, 'карта', 'карти', 'карт')
   return n === 1 ? 'carta' : 'cartas'
 }
 
@@ -1703,6 +3698,13 @@ export function pluralDone(n: number, language: Language): string {
   if (language === 'pt') return n === 1 ? '1 finalizada' : `${n} finalizadas`
   if (language === 'fr') return n === 1 ? '1 terminée' : `${n} terminées`
   if (language === 'de') return n === 1 ? '1 fertig' : `${n} fertige`
+  if (language === 'it') return n === 1 ? '1 finita' : `${n} finite`
+  if (language === 'hu') return `${n} kész`
+  if (language === 'bg') return n === 1 ? '1 готова' : `${n} готови`
+  if (language === 'pl') return `${n} ${slavic(n, 'gotowa', 'gotowe', 'gotowych')}`
+  if (language === 'cs') return `${n} ${slavic(n, 'hotová', 'hotové', 'hotových')}`
+  if (language === 'ru') return `${n} ${slavic(n, 'готовая', 'готовые', 'готовых')}`
+  if (language === 'uk') return `${n} ${slavic(n, 'готова', 'готові', 'готових')}`
   return n === 1 ? '1 terminada' : `${n} terminadas`
 }
 

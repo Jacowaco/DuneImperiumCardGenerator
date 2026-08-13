@@ -5,7 +5,7 @@ import { createRoot, type Root } from 'react-dom/client'
 
 import { ICONS } from '../assets/icons'
 import { AGENT_ICON_URLS } from '../assets/icons/agents'
-import type { Card } from '../model/card'
+import { FACTIONS, FACTION_IDS, type Card } from '../model/card'
 import { AppError } from '../model/errors'
 import {
   warmAllFactionBandTints,
@@ -41,14 +41,41 @@ const templateLayers = import.meta.glob('../assets/layers/*.png', {
   import: 'default',
 }) as Record<string, string>
 
-export async function prepare({ cards, icons, factions }: Deck): Promise<void> {
+/**
+ * Todo lo que las cartas del mazo pueden llegar a **escribir**: el título, el
+ * texto de las cajas y el nombre de cada banda de facción.
+ *
+ * Hace falta porque Jost viene partida por `unicode-range` —latin, latin-ext y
+ * cyrillic son tres archivos— y `document.fonts.load` sin texto sólo garantiza
+ * el subset del espacio, o sea el latin. Una banda que diga «Космическая
+ * гильдия», o una carta titulada en polaco, puede llegar a `toCanvas()` con su
+ * archivo todavía sin bajar y salir en la fuente de respaldo. Pasando el texto
+ * de verdad, el navegador baja los subsets que ese mazo necesita y ninguno más.
+ */
+function cardText({ cards, factions }: Deck, language: Language): string {
+  const parts = [
+    ...FACTION_IDS.map((id) => FACTIONS[id][language]),
+    ...factions.map((faction) => faction.label),
+    ...cards.flatMap((card) => [
+      card.title,
+      ...[...card.playContent, ...card.revealContent]
+        .filter((part) => part.type === 'text')
+        .map((part) => part.text),
+    ]),
+  ]
+  return parts.join(' ')
+}
+
+export async function prepare(deck: Deck, language: Language): Promise<void> {
+  const { cards, icons, factions } = deck
   const art = cards.map((card) => card.art?.src).filter((src): src is string => Boolean(src))
+  const text = cardText(deck, language)
 
   await Promise.all([
     // Los dos pesos que usa la carta. Jost es variable, así que es el mismo
     // archivo, pero pedirlos por separado es lo que garantiza que estén.
-    document.fonts.load(`400 16px '${CARD_FONT_NAME}'`),
-    document.fonts.load(`500 16px '${CARD_FONT_NAME}'`),
+    document.fonts.load(`400 16px '${CARD_FONT_NAME}'`, text),
+    document.fonts.load(`500 16px '${CARD_FONT_NAME}'`, text),
     preloadImages([
       ...Object.values(templateLayers),
       ...Object.values(ICONS).map((icon) => icon.url),

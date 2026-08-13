@@ -1,4 +1,4 @@
-import type { Language } from '../model/language'
+import { LANGUAGE_IDS, type Language } from '../model/language'
 import { CARD_HEIGHT, CARD_WIDTH } from '../render/constants'
 
 /**
@@ -17,22 +17,40 @@ export const mm = (value: number) => Math.round(value * MM)
 
 export type PaperId = 'a4' | 'letter' | 'a3' | 'sra3'
 
+/**
+ * Los tamaños ISO se llaman igual en todos lados, así que repetir «A4» doce
+ * veces sólo daba lugar a una errata. «Letter» tampoco se traduce fuera del
+ * castellano y el portugués, pero ahí sí hay dos valores distintos y va escrito
+ * a mano.
+ */
+const sameEverywhere = (name: string): Record<Language, string> =>
+  Object.fromEntries(LANGUAGE_IDS.map((id) => [id, name])) as Record<Language, string>
+
 export const PAPERS: Record<
   PaperId,
   { label: Record<Language, string>; widthMm: number; heightMm: number }
 > = {
-  a4: { label: { es: 'A4', en: 'A4', pt: 'A4', fr: 'A4', de: 'A4' }, widthMm: 210, heightMm: 297 },
+  a4: { label: sameEverywhere('A4'), widthMm: 210, heightMm: 297 },
   letter: {
-    label: { es: 'Carta', en: 'Letter', pt: 'Carta', fr: 'Letter', de: 'Letter' },
+    label: {
+      es: 'Carta',
+      en: 'Letter',
+      pt: 'Carta',
+      fr: 'Letter',
+      de: 'Letter',
+      it: 'Letter',
+      pl: 'Letter',
+      cs: 'Letter',
+      hu: 'Letter',
+      ru: 'Letter',
+      uk: 'Letter',
+      bg: 'Letter',
+    },
     widthMm: 215.9,
     heightMm: 279.4,
   },
-  a3: { label: { es: 'A3', en: 'A3', pt: 'A3', fr: 'A3', de: 'A3' }, widthMm: 297, heightMm: 420 },
-  sra3: {
-    label: { es: 'SRA3', en: 'SRA3', pt: 'SRA3', fr: 'SRA3', de: 'SRA3' },
-    widthMm: 320,
-    heightMm: 450,
-  },
+  a3: { label: sameEverywhere('A3'), widthMm: 297, heightMm: 420 },
+  sra3: { label: sameEverywhere('SRA3'), widthMm: 320, heightMm: 450 },
 }
 
 export const PAPER_IDS = Object.keys(PAPERS) as PaperId[]

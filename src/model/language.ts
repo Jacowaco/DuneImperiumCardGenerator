@@ -6,14 +6,43 @@ import { createContext, useContext, useState } from 'react'
  * en el idioma que esa máquina tenga elegido, igual que el resto de la UI —
  * por eso no es un campo de `Card` ni de `Deck`.
  */
-export type Language = 'es' | 'en' | 'pt' | 'fr' | 'de'
+export type Language =
+  | 'es'
+  | 'en'
+  | 'pt'
+  | 'fr'
+  | 'de'
+  | 'it'
+  | 'pl'
+  | 'cs'
+  | 'hu'
+  | 'ru'
+  | 'uk'
+  | 'bg'
 
+/**
+ * Los idiomas en los que Dune: Imperium tiene edición oficial y la fuente de
+ * la carta puede dibujar. Jost embarca latin, latin-ext y cyrillic, así que
+ * faltan el griego y los cuatro CJK (japonés, chino simplificado y
+ * tradicional, coreano): sin fuente propia la banda de facción caería en
+ * `system-ui` y el PNG saldría distinto según la máquina que lo exportó.
+ *
+ * Cada nombre va escrito en su propio idioma, que es como se busca el suyo en
+ * una lista de doce.
+ */
 export const LANGUAGE_NAMES: Record<Language, string> = {
   es: 'Español',
   en: 'English',
   pt: 'Português',
   fr: 'Français',
   de: 'Deutsch',
+  it: 'Italiano',
+  pl: 'Polski',
+  cs: 'Čeština',
+  hu: 'Magyar',
+  ru: 'Русский',
+  uk: 'Українська',
+  bg: 'Български',
 }
 
 export const LANGUAGE_IDS = Object.keys(LANGUAGE_NAMES) as Language[]

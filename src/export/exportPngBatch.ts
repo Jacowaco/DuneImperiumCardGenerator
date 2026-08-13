@@ -27,7 +27,7 @@ export async function exportCardsPng(
   deck: Deck,
   { language, onProgress }: BatchExportOptions,
 ): Promise<void> {
-  await prepare(deck)
+  await prepare(deck, language)
 
   const renderer = createCardRenderer(
     buildIconLibrary(deck.icons, deck.factions, language),

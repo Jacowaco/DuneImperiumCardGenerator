@@ -786,6 +786,21 @@ Si se agrega un tipo de imagen nuevo a la carta, hay que sumarlo a `prepare()`.
 Es el único lugar donde el export sabe qué cargar, y olvidarse no rompe nada
 visible: sale un hueco.
 
+**La fuente es el mismo problema y se resuelve igual.** Jost viene partida por
+`unicode-range` —`latin`, `latin-ext` y `cyrillic` son tres archivos— y
+`document.fonts.load()` sin texto sólo garantiza el subset del espacio, o sea
+el latin: medido en el navegador, `fonts.check` daba `false` tanto para
+«ИМПЕРАТОР» como para «GILDIA KOSMICZNA» justo después de ese `load`. Por eso
+`prepare()` recibe el idioma y le pasa a `fonts.load` **el texto que las cartas
+van a escribir** (`cardText`): nombres de facción, títulos y las piezas de texto
+de las cajas. Sin eso el navegador baja el subset recién cuando lo ve en
+pantalla, y una carta que llegue a `toCanvas()` antes sale en la fuente de
+respaldo — el mismo hueco silencioso de los iconos, pero en letra.
+
+Que le pase los títulos y el contenido, y no sólo las facciones, es a propósito:
+el texto que escribe el usuario puede estar en cualquier alfabeto, sin importar
+en qué idioma tenga la UI.
+
 ## El export en lote
 
 `src/export/exportPngBatch.ts` baja **todas las cartas del mazo, cada una como
@@ -874,8 +889,24 @@ y el estado de los botones; el diálogo en sí hay que probarlo a mano.
 ## Idioma
 
 La UI y las palabras del juego (nombres de facción, iconos, papeles) se pueden
-ver en **español, inglés, portugués, francés y alemán**. Dos decisiones lo
-mantienen simple:
+ver en **doce idiomas**: español, inglés, portugués, francés, alemán, italiano,
+polaco, checo, húngaro, ruso, ucraniano y búlgaro.
+
+**No es una lista de mercados, es la lista de ediciones oficiales que la fuente
+puede dibujar.** Los doce son idiomas en los que Dune: Imperium salió publicado
+—el listado sale de los reglamentos por edición de Dire Wolf—, y eso importa
+porque quien arma cartas custom espera leer «Persuasione» o «Убеждение» tal como
+están en su caja; sin edición oficial habría que inventar la terminología, y se
+lee mal justo para el que la usaría.
+
+Faltan cinco de esas ediciones y las cinco por el mismo motivo: Jost embarca
+`latin`, `latin-ext` y `cyrillic`, y no trae griego ni CJK. El griego, el
+japonés, los dos chinos y el coreano necesitan una fuente aparte —megabytes
+contra los 26 kB de Jost— o aceptar que la banda de facción caiga en `system-ui`
+y el PNG salga distinto según la máquina que lo exportó, que es justo lo que la
+hoja de impresión evita montando el mismo `CardStage`.
+
+Dos decisiones lo mantienen simple:
 
 **Es una preferencia del navegador, no del mazo.** `src/model/language.ts`
 guarda el idioma elegido en su propio `localStorage`, aparte del autoguardado.
@@ -892,8 +923,8 @@ en algún lado de la lista— ganaba el orden en que están escritos en
 `LANGUAGE_NAMES`, que no dice nada.
 
 **Diccionario propio, sin librería.** `src/i18n/strings.ts` tiene un objeto
-`Strings` por idioma (`es`, `en`, `pt`, `fr` y `de`), no un mapa
-`clave -> {es, en, …}`: así TypeScript obliga a que todos los idiomas tengan
+`Strings` por idioma, no un mapa `clave -> {es, en, …}`: así TypeScript obliga
+a que todos los idiomas tengan
 exactamente los mismos campos, con el mismo tipo — si a una función traducida
 (una que arma texto con un número o un nombre adentro) le falta un parámetro en
 un solo idioma, no compila. Es consistente con el resto del proyecto, que evita
@@ -915,6 +946,20 @@ Ojo también con los **ayudantes de plural** del pie de `strings.ts`
 castellano al final. Un idioma nuevo que no tenga su rama no rompe nada, sale
 en castellano — el portugués cae ahí a propósito, porque «carta / cartas» es
 igual.
+
+Ahí vive el otro detalle que no se deduce: el polaco, el checo, el ruso y el
+ucraniano tienen **tres** formas de plural, y las cuatro lenguas las eligen con
+la misma cuenta (1 pero no 11, 2–4 pero no 12–14, y el resto). Por eso hay un
+`slavic()` compartido en vez de un ternario por idioma: con dos ramas saldría
+«5 karty» o «22 карт», que es la marca de agua de una traducción hecha desde el
+inglés. El húngaro va al revés —después de un número el sustantivo queda en
+singular—, así que nunca lleva rama de plural.
+
+Y las **palabras del juego** que se traducen por tabla (`ICONS`, `AGENT_ICONS`,
+`FACTIONS`…) pasaron de tomar los idiomas por posición a tomarlos por nombre:
+con cinco todavía se leían doce comillas seguidas, con doce no, y un orden
+cambiado pasaba el typecheck sin chistar. Los tamaños ISO de `paper.ts` van por
+`sameEverywhere()`, porque repetir «A4» doce veces sólo daba lugar a una errata.
 
 Las palabras del **juego** —facciones, iconos, estilos de agente, variantes de
 influencia, tamaños de papel— no viven en `strings.ts`: se traducen donde ya

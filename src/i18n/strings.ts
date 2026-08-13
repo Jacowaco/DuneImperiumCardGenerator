@@ -60,6 +60,8 @@ type Strings = {
   cardPanel: {
     name: string
     namePlaceholder: string
+    /** El tirador del nombre sobre la carta, además del campo del panel. */
+    editOnCard: string
     startingCard: string
     faction: string
     factionHint: string
@@ -76,6 +78,8 @@ type Strings = {
   contentEditor: {
     empty: string
     textPlaceholder: string
+    /** Con qué palabra se dibuja en la carta una pieza de texto todavía vacía. */
+    emptyText: string
     lineBreak: string
     deletedIcon: string
     addTo: string
@@ -259,6 +263,7 @@ const STRINGS: Record<Language, Strings> = {
     cardPanel: {
       name: 'Nombre',
       namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Escribir el nombre',
       startingCard: 'Inicial',
       faction: 'Facción',
       factionHint:
@@ -276,6 +281,7 @@ const STRINGS: Record<Language, Strings> = {
     contentEditor: {
       empty: 'Caja vacía.',
       textPlaceholder: 'Texto…',
+      emptyText: 'Texto',
       lineBreak: '— corte de renglón —',
       deletedIcon: 'Icono borrado',
       addTo: 'Agregar a',
@@ -485,6 +491,7 @@ const STRINGS: Record<Language, Strings> = {
     cardPanel: {
       name: 'Name',
       namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Type the name',
       startingCard: 'Starting',
       faction: 'Faction',
       factionHint:
@@ -502,6 +509,7 @@ const STRINGS: Record<Language, Strings> = {
     contentEditor: {
       empty: 'Empty box.',
       textPlaceholder: 'Text…',
+      emptyText: 'Text',
       lineBreak: '— line break —',
       deletedIcon: 'Deleted icon',
       addTo: 'Add to',
@@ -712,6 +720,7 @@ const STRINGS: Record<Language, Strings> = {
     cardPanel: {
       name: 'Nome',
       namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Escrever o nome',
       startingCard: 'Inicial',
       faction: 'Facção',
       factionHint:
@@ -729,6 +738,7 @@ const STRINGS: Record<Language, Strings> = {
     contentEditor: {
       empty: 'Caixa vazia.',
       textPlaceholder: 'Texto…',
+      emptyText: 'Texto',
       lineBreak: '— quebra de linha —',
       deletedIcon: 'Ícone excluído',
       addTo: 'Adicionar a',

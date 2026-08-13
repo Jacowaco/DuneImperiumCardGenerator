@@ -32,6 +32,14 @@ type Props = {
   onArtChange?: (transform: ArtTransform) => void
   /** Sin imagen, tocar el hueco del arte abre el diálogo para elegir una. */
   onArtPick?: () => void
+  /**
+   * Si una pieza de texto vacía se dibuja con la palabra de relleno. Es una
+   * ayuda del editor —por eso viene prendida con la carta editable— y se puede
+   * apagar aparte: el PNG de la carta abierta sale de este mismo stage, y ahí
+   * no alcanza con ocultar el relleno, porque el lugar que ocupaba correría el
+   * resto del renglón.
+   */
+  placeholders?: boolean
 }
 
 const ZOOM_SPEED = 0.0015
@@ -41,11 +49,19 @@ const ZOOM_SPEED = 0.0015
  * apilado del PSD, de abajo hacia arriba — las capas nuevas se insertan en
  * el punto que les corresponde y nada más cambia.
  */
-export function CardStage({ card, scale, stageRef, onArtChange, onArtPick }: Props) {
+export function CardStage({
+  card,
+  scale,
+  stageRef,
+  onArtChange,
+  onArtPick,
+  placeholders = Boolean(onArtChange),
+}: Props) {
   const background = useCardImage(backgroundUrl)
   const artContainer = useCardImage(cardArtContainerUrl)
   const blackBorder = useCardImage(blackBorderUrl)
-  const placeholderText = useT().artPanel.placeholder
+  const t = useT()
+  const placeholderText = t.artPanel.placeholder
   useFontsReady()
 
   const handleWheel = (event: KonvaEventObject<WheelEvent>) => {
@@ -124,10 +140,12 @@ export function CardStage({ card, scale, stageRef, onArtChange, onArtPick }: Pro
         {!card.art && onArtChange && <ArtPlaceholder onPick={onArtPick} placeholder={placeholderText} />}
 
         <ContentBoxes card={card} />
-        <ContentBlock card={card} />
+        {/* La galería y las hojas de impresión no la piden, así que ven la
+            carta igual que el PNG exportado. */}
+        <ContentBlock card={card} placeholder={placeholders ? t.contentEditor.emptyText : undefined} />
         <AgentIcons icons={card.agentIcons} style={card.agentIconStyle} />
         <FactionBand factions={card.factions} />
-        <CardTitle card={card} />
+        <CardTitle card={card} placeholder={placeholders ? t.cardPanel.name : undefined} />
         <CostBadge card={card} />
 
         {/* Borde negro: siempre la última capa, tapa lo que se desborde */}

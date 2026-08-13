@@ -15,8 +15,8 @@ import {
 import { useContentDrag, type ContentBox } from './contentDrag'
 
 /**
- * Manipular el contenido **sobre la carta**: agarrar un icono donde se lo ve y
- * soltarlo en el lugar donde se lo quiere.
+ * Manipular el contenido **sobre la carta**: agarrar una pieza donde se la ve
+ * y soltarla en el lugar donde se la quiere.
  *
  * Es el mismo arrastre que el de las listas del panel, con otro destino. Lo
  * que lo hace posible es que `layoutContent` diga de qué pieza salió cada cosa
@@ -39,22 +39,26 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
   // redibuja en cada `dragover` —o sea, muchas veces por segundo mientras se
   // arrastra— aunque el contenido no cambió.
   const rows = effectivePlayRows(card, library)
+  // La misma palabra de relleno que dibuja `CardStage` mientras la carta se
+  // puede editar. Las dos cuentas tienen que dar igual: si acá faltara, los
+  // tiradores y el cursor de inserción quedarían corridos de lo que se ve.
+  const placeholder = card.done ? undefined : t.contentEditor.emptyText
   const boxes: { box: ContentBox; label: string; area: Box; placements: Placement[] }[] = useMemo(
     () => [
       {
         box: 'play',
         label: t.rulesPanel.playTurn,
         area: playBox(rows),
-        placements: layoutContent(card.playContent, playBox(rows), library),
+        placements: layoutContent(card.playContent, playBox(rows), library, placeholder),
       },
       {
         box: 'reveal',
         label: t.rulesPanel.reveal,
         area: revealBox(rows),
-        placements: layoutContent(card.revealContent, revealBox(rows), library),
+        placements: layoutContent(card.revealContent, revealBox(rows), library, placeholder),
       },
     ],
-    [card.playContent, card.revealContent, rows, library, t],
+    [card.playContent, card.revealContent, rows, library, placeholder, t],
   )
 
   const dragging = dragSource !== null
@@ -69,12 +73,17 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
       {!card.done &&
         boxes.map(({ box, placements }) =>
           placements
-            .filter((placement) => placement.kind === 'icon')
+            // Un renglón puede juntar palabras de varias piezas seguidas en
+            // una sola corrida; ahí no hay una pieza que agarrar, así que sólo
+            // se puede tirar de las que se dibujaron solas.
+            .filter((placement) => placement.kind === 'icon' || placement.from === placement.to)
             .map((placement) => (
               <div
                 key={`${box}-${placement.from}-${placement.x}`}
                 draggable
-                title={library[placement.icon]?.label}
+                title={
+                  placement.kind === 'icon' ? library[placement.icon]?.label : placement.text
+                }
                 onDragStart={(event) => {
                   event.dataTransfer.effectAllowed = 'move'
                   // Un tick después y no acá mismo: si el estado cambia
@@ -89,11 +98,14 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                   setDragSource(null)
                   setCaret(null)
                 }}
+                // El texto no tiene alto propio: se toma el del renglón, que
+                // es lo que se ve como una línea de palabras.
                 style={{
                   left: placement.x * scale,
-                  top: placement.y * scale,
+                  top: (placement.kind === 'icon' ? placement.y : placement.lineTop) * scale,
                   width: placement.width * scale,
-                  height: placement.height * scale,
+                  height:
+                    (placement.kind === 'icon' ? placement.height : placement.lineHeight) * scale,
                 }}
                 className="pointer-events-auto absolute cursor-grab rounded transition-shadow hover:ring-2 hover:ring-sand-300 active:cursor-grabbing"
               />

@@ -1,5 +1,6 @@
 import type Konva from 'konva'
 import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
+import { flushSync } from 'react-dom'
 
 import { exportCardsPng } from './export/exportPngBatch'
 import { exportCardPng } from './export/exportPng'
@@ -39,6 +40,7 @@ import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
 import { CardDropZones } from './ui/CardDropZones'
+import { CardNameField } from './ui/CardNameField'
 import { CardGallery } from './ui/CardGallery'
 import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
@@ -493,7 +495,11 @@ export function App() {
   const handleExport = async () => {
     const stage = stageRef.current
     if (!stage) return
-    setExporting(true)
+    // El PNG sale del mismo stage del preview, así que primero hay que sacarle
+    // el relleno de los textos vacíos y esperar a que se redibuje sin él:
+    // ocultarlo al exportar no alcanzaría, porque el lugar que ocupaba corre el
+    // resto del renglón.
+    flushSync(() => setExporting(true))
     try {
       await exportCardPng(stage, { filename: `${card.title.trim() || t.topBar.defaultFileName}.png` })
     } finally {
@@ -617,9 +623,16 @@ export function App() {
                 card={card}
                 scale={previewScale}
                 stageRef={stageRef}
+                placeholders={!card.done && !exporting}
                 onArtChange={card.done ? undefined : setTransform}
                 onArtPick={card.done ? undefined : () => fileInputRef.current?.click()}
               />
+
+              {/* El nombre se escribe también acá, sobre la placa: es lo mismo
+                  que el campo de la pestaña Identidad, tocado donde se ve. */}
+              {!card.done && (
+                <CardNameField card={card} scale={previewScale} onChange={patchCard} />
+              )}
 
               {/* Sólo aparecen mientras se arrastra contenido, y encima de la
                   carta: es la otra forma de decir en qué caja va la pieza. */}

@@ -8,8 +8,13 @@ import { useCardImage } from '../imageCache'
 import { fontSizeForCapHeight, textWidth } from '../text'
 import { TextShape } from './TextShape'
 
-/** El contenido de las dos cajas: iconos y texto mezclados. */
-export function ContentBlock({ card }: { card: Card }) {
+/**
+ * El contenido de las dos cajas: iconos y texto mezclados.
+ *
+ * `placeholder` es la palabra con la que se dibuja una pieza de texto vacía —
+ * la manda el editor y no el export, así que la carta impresa nunca la lleva.
+ */
+export function ContentBlock({ card, placeholder }: { card: Card; placeholder?: string }) {
   const library = useIconLibrary()
   const rows = effectivePlayRows(card, library)
 
@@ -17,12 +22,12 @@ export function ContentBlock({ card }: { card: Card }) {
     <>
       <Block
         library={library}
-        placements={layoutContent(card.playContent, playBox(rows), library)}
+        placements={layoutContent(card.playContent, playBox(rows), library, placeholder)}
         textColor={CONTENT.text.playColor}
       />
       <Block
         library={library}
-        placements={layoutContent(card.revealContent, revealBox(rows), library)}
+        placements={layoutContent(card.revealContent, revealBox(rows), library, placeholder)}
         textColor={CONTENT.text.revealColor}
       />
     </>
@@ -44,6 +49,8 @@ function Block({
         placement.kind === 'icon' ? (
           <ContentIcon key={index} placement={placement} entry={library[placement.icon]} />
         ) : (
+          // El relleno de una pieza vacía se dibuja atenuado, para que no se
+          // lea como contenido de la carta.
           <TextShape
             key={index}
             glyphs={[{ char: placement.text, x: 0, size: placement.size }]}
@@ -51,6 +58,7 @@ function Block({
             baseline={placement.baseline}
             fill={textColor}
             weight={CONTENT.text.weight}
+            opacity={placement.placeholder ? 0.45 : undefined}
           />
         ),
       )}

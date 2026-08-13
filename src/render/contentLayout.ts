@@ -52,11 +52,12 @@ type Item =
 const NOMINAL_FONT = fontSizeForCapHeight(CONTENT.text.capHeight, CONTENT.text.weight)
 const SPACE = textWidth(' ', NOMINAL_FONT, CONTENT.text.weight)
 
-const word = (text: string, part: number): Item => ({
+const word = (text: string, part: number, placeholder = false): Item => ({
   kind: 'word',
   text,
   width: textWidth(text, NOMINAL_FONT, CONTENT.text.weight),
   part,
+  placeholder,
 })
 
 /**
@@ -79,7 +80,7 @@ function measure(parts: ContentPart[], library: IconLibrary, placeholder?: strin
     }
 
     const text = part.text.trim()
-    if (!text) return placeholder ? [{ ...word(placeholder, index), placeholder: true }] : []
+    if (!text) return placeholder ? [word(placeholder, index, true)] : []
 
     return text.split(/\s+/).map((item) => word(item, index))
   })
@@ -141,8 +142,9 @@ export function layoutContent(
   parts: ContentPart[],
   box: Box,
   library: IconLibrary,
+  placeholder?: string,
 ): Placement[] {
-  const items = measure(parts, library)
+  const items = measure(parts, library, placeholder)
   if (!items.length) return []
 
   const maxWidth = CONTENT.right - CONTENT.left - CONTENT.paddingX * 2
@@ -170,6 +172,7 @@ export function layoutContent(
     let runStart = x
     let runFrom = 0
     let runTo = 0
+    let runPlaceholder = false
 
     const flush = () => {
       if (!run.length) return
@@ -180,6 +183,7 @@ export function layoutContent(
         baseline: middle + (CONTENT.text.capHeight * scale) / 2,
         size: NOMINAL_FONT * scale,
         width: x - runStart,
+        placeholder: runPlaceholder,
         from: runFrom,
         to: runTo,
         lineTop: y,
@@ -193,9 +197,14 @@ export function layoutContent(
       x += separation(line.items[position - 1], item) * scale
 
       if (item.kind === 'word') {
+        // El relleno de una pieza vacía nunca se junta con las palabras de al
+        // lado: se dibuja distinto, y así el tirador de la carta cae sobre esa
+        // pieza sola.
+        if (run.length && runPlaceholder !== Boolean(item.placeholder)) flush()
         if (!run.length) {
           runStart = x
           runFrom = item.part
+          runPlaceholder = Boolean(item.placeholder)
         }
         runTo = item.part
         run.push(item.text)

@@ -13,16 +13,19 @@ export function TextShape({
   baseline,
   fill,
   weight,
+  opacity,
 }: {
   glyphs: Glyph[]
   x: number
   baseline: number
   fill: string
   weight: number
+  opacity?: number
 }) {
   return (
     <Shape
       listening={false}
+      opacity={opacity}
       sceneFunc={(context) => {
         context.setAttr('textBaseline', 'alphabetic')
         context.setAttr('fillStyle', fill)

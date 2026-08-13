@@ -71,6 +71,7 @@ type Strings = {
     custom: (label: string) => string
     amount: string
     otherValue: string
+    agentIcons: string
   }
   contentEditor: {
     empty: string
@@ -90,7 +91,6 @@ type Strings = {
     increase: (label: string) => string
   }
   rulesPanel: {
-    agentIcons: string
     playTurn: string
     autoAdjust: string
     agentSilhouette: string
@@ -237,6 +237,7 @@ const STRINGS: Record<Language, Strings> = {
       custom: (label) => `Propio · ${label}`,
       amount: 'Cantidad',
       otherValue: 'Otro valor',
+      agentIcons: 'Iconos de agente',
     },
     contentEditor: {
       empty: 'Caja vacía.',
@@ -256,7 +257,6 @@ const STRINGS: Record<Language, Strings> = {
       increase: (label) => `Sumar ${label}`,
     },
     rulesPanel: {
-      agentIcons: 'Iconos de agente',
       playTurn: 'Turno de agente',
       autoAdjust: 'Alto automático',
       agentSilhouette: 'Silueta del agente',
@@ -418,6 +418,7 @@ const STRINGS: Record<Language, Strings> = {
       custom: (label) => `Custom · ${label}`,
       amount: 'Amount',
       otherValue: 'Custom value',
+      agentIcons: 'Agent Icons',
     },
     contentEditor: {
       empty: 'Empty box.',
@@ -437,7 +438,6 @@ const STRINGS: Record<Language, Strings> = {
       increase: (label) => `Increase ${label}`,
     },
     rulesPanel: {
-      agentIcons: 'Agent Icons',
       playTurn: 'Agent Turn',
       autoAdjust: 'Auto height',
       agentSilhouette: 'Agent Silhouette',
@@ -600,6 +600,7 @@ const STRINGS: Record<Language, Strings> = {
       custom: (label) => `Próprio · ${label}`,
       amount: 'Quantidade',
       otherValue: 'Outro valor',
+      agentIcons: 'Ícones de agente',
     },
     contentEditor: {
       empty: 'Caixa vazia.',
@@ -619,7 +620,6 @@ const STRINGS: Record<Language, Strings> = {
       increase: (label) => `Aumentar ${label}`,
     },
     rulesPanel: {
-      agentIcons: 'Ícones de agente',
       playTurn: 'Turno de agente',
       autoAdjust: 'Altura automática',
       agentSilhouette: 'Silhueta do agente',

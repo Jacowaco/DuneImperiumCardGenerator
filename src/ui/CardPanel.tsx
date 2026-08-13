@@ -1,7 +1,19 @@
 import { useState } from 'react'
-import { AGENT_BADGE_URLS } from '../assets/icons/agents'
+import {
+  AGENT_BADGE_URLS,
+  AGENT_ICON_IDS,
+  AGENT_ICON_STYLES,
+  AGENT_ICONS,
+} from '../assets/icons/agents'
 import { useT } from '../i18n/strings'
-import { FACTION_COLORS, FACTION_IDS, FACTIONS, type AnyFactionId, type Card } from '../model/card'
+import {
+  FACTION_COLORS,
+  FACTION_IDS,
+  FACTIONS,
+  type AnyAgentIcon,
+  type AnyFactionId,
+  type Card,
+} from '../model/card'
 import { isCustomFactionId } from '../model/customFaction'
 import { useFactionLibrary } from '../model/factionLibrary'
 import { groupIconIds, useIconLibrary } from '../model/iconLibrary'
@@ -12,6 +24,9 @@ import { Grid } from './ContentPalette'
 
 /** Ninguna banda tiene arte para una posición 5: no hay dónde apilarla. */
 const MAX_FACTIONS = 4
+
+/** La columna tiene exactamente esta cantidad de ranuras — ver `AgentIcons.tsx`. */
+const MAX_AGENT_ICONS = AGENT_ICON_IDS.length
 
 type Props = {
   card: Card
@@ -24,11 +39,17 @@ const COST_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 const BENEFIT_AMOUNT_QUICK_PICKS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 /**
- * Los datos de la carta: nombre, facción y qué cuesta comprarla. Son las tres
- * cosas que se dibujan **arriba** —placa del nombre, banda de facción y rombo
- * del costo—, igual que `RulesPanel` es todo lo de las cajas de abajo.
+ * Quién es la carta: nombre, facción, a qué espacios puede mandar el agente y
+ * qué cuesta comprarla. `RulesPanel` se quedó con lo que dicen las dos cajas
+ * de abajo.
  *
- * La pestaña se llama "Encabezado" y no "Carta" porque en un editor de cartas
+ * Los iconos de agente son de la identidad y no de las reglas: dicen a dónde
+ * puede ir esa carta, no qué pasa cuando se juega. Van pegados a la facción
+ * —y no al final— porque se eligen de la mano: los siete emblemas son los
+ * mismos de las facciones, y una carta de una facción suele mandar agentes a
+ * los espacios de esa misma facción.
+ *
+ * La pestaña se llama "Identidad" y no "Carta" porque en un editor de cartas
  * todo es la carta: el nombre no distinguía nada, y encima repetía el de la
  * sección de adentro.
  */
@@ -97,6 +118,46 @@ export function CardPanel({ card, onChange }: Props) {
               value: id,
               label: factionLibrary[id].label,
               color: factionLibrary[id].color,
+              icon: factionLibrary[id].badge ?? factionLibrary[id].emblem,
+            })),
+          ]}
+        />
+      </Section>
+
+      <Section
+        title={t.cardPanel.agentIcons}
+        action={
+          <Toggle
+            label={pick(AGENT_ICON_STYLES.infiltrate, language)}
+            checked={card.agentIconStyle === 'infiltrate'}
+            onChange={(checked) => onChange({ agentIconStyle: checked ? 'infiltrate' : 'locations' })}
+          />
+        }
+      >
+        <MultiChoice<AnyAgentIcon>
+          values={card.agentIcons}
+          iconsOnly
+          columns={AGENT_ICON_IDS.length}
+          onChange={(next) => {
+            // La columna tiene exactamente MAX_AGENT_ICONS ranuras: un click
+            // de más que agregaría se ignora, no hay dónde apilarlo.
+            if (next.length > card.agentIcons.length && next.length > MAX_AGENT_ICONS) return
+            onChange({ agentIcons: next })
+          }}
+          options={[
+            ...AGENT_ICON_IDS.map((id) => ({
+              value: id as AnyAgentIcon,
+              label: pick(AGENT_ICONS[id], language),
+              icon: AGENT_BADGE_URLS[id],
+            })),
+            /*
+              Sin arte de marco (`locations`/`infiltrate`) para una facción
+              propia: usan la misma placa negra generada que el selector de
+              facción, sea cual sea el estilo elegido arriba.
+            */
+            ...customFactionIds.map((id) => ({
+              value: id as AnyAgentIcon,
+              label: factionLibrary[id].label,
               icon: factionLibrary[id].badge ?? factionLibrary[id].emblem,
             })),
           ]}

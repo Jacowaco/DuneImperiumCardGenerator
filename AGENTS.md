@@ -581,6 +581,29 @@ cursor caería en cualquier lado menos donde se está escribiendo. Al salir se v
 el título de verdad. Por eso también el fondo del campo es opaco: el título
 sigue abajo, actualizándose letra por letra.
 
+Las piezas de texto de las cajas se escriben igual, con el mismo campo puesto
+encima: los tiradores de `CardDropZones` se arrastran para mover la pieza y **un
+clic las abre para escribirlas**. Los dos gestos no se pisan —el clic sale del
+mouseup sin movimiento, así que un arrastre no lo dispara— y por eso no hace
+falta ni doble clic ni esperar apretado.
+
+El campo se pone sobre **todo lo que la pieza dibuja** y se recalcula en cada
+tecla, así que sigue al texto mientras se escribe: el bloque va centrado, y cada
+letra corre el renglón entero. Son varios pedazos cuando el texto corta de
+renglón y hay que taparlos a todos —dejar uno afuera lo deja asomando debajo del
+campo, que se lee como texto repetido—, así que la caja del campo es la unión de
+los pedazos y no la del que se clickeó.
+
+Se puede escribir sólo lo que se dibujó **solo**: dos piezas de texto seguidas
+en el mismo renglón se dibujan como una sola corrida de palabras, y ahí no hay
+una pieza que agarrar. Es el mismo límite que ya tenía el arrastre (`from` ===
+`to` en el `Placement`), y la lista del panel sigue siendo el lugar donde se
+edita cualquier pieza.
+
+`CardDropZones` va con `key={index}`: lo que se está escribiendo es de esta
+carta, y Alt+←/→ cambia de carta aunque el foco esté en un campo. Sin eso, el
+campo abierto seguiría abierto sobre la carta siguiente, apuntando a otra pieza.
+
 ### Iconos de la interfaz
 
 **Nada de emoji.** Se dibujan a todo color con la fuente del sistema y el único

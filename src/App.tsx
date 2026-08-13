@@ -783,9 +783,16 @@ export function App() {
                 <CardNameField card={card} scale={previewScale} onChange={patchCard} />
               )}
 
-              {/* Sólo aparecen mientras se arrastra contenido, y encima de la
-                  carta: es la otra forma de decir en qué caja va la pieza. */}
-              <CardDropZones card={card} scale={previewScale} />
+              {/* Los tiradores del contenido: se arrastran para moverlo y los
+                  de texto se clickean para escribirlo ahí mismo. Las zonas de
+                  soltar sólo aparecen mientras se arrastra, y son la otra forma
+                  de decir en qué caja va la pieza.
+
+                  Va con `key` porque lo que se está escribiendo es de esta
+                  carta: Alt+←/→ cambia de carta aunque el foco esté en un
+                  campo, y sin esto el campo abierto seguiría abierto sobre la
+                  carta siguiente, apuntando a otra pieza. */}
+              <CardDropZones key={index} card={card} scale={previewScale} />
             </div>
 
             {/* Mismo sello que la galería, para que se note sin tener que

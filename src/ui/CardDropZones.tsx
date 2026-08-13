@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { useT } from '../i18n/strings'
-import type { Card } from '../model/card'
+import type { Card, ContentPart } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
 import { CONTENT } from '../render/constants'
 import {
@@ -12,6 +12,7 @@ import {
   type Box,
   type Placement,
 } from '../render/contentLayout'
+import { CARD_FONT } from '../render/text'
 import { useContentDrag, type ContentBox } from './contentDrag'
 
 /**
@@ -28,12 +29,20 @@ import { useContentDrag, type ContentBox } from './contentDrag'
  * sola cosa aunque se dibuje en varias palabras, así que soltando en el medio
  * de una frase la pieza entra antes o después de esa frase, según de qué lado
  * quedó el puntero.
+ *
+ * Los tiradores de texto además se **escriben**: un clic los abre en un campo
+ * puesto encima, igual que `CardNameField` con el nombre. Es el mismo camino de
+ * siempre —tocar la cosa donde se la ve—, y es el que hace falta cuando lo que
+ * se está mirando es la carta y no la lista del panel.
  */
 export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
   const t = useT()
   const library = useIconLibrary()
-  const { dragSource, setDragSource, drop, parts } = useContentDrag()
+  const { dragSource, setDragSource, drop, parts, update } = useContentDrag()
   const [caret, setCaret] = useState<Caret | null>(null)
+  // Qué pieza de texto se está escribiendo, y con qué texto se entró — para que
+  // Escape lo devuelva, igual que en el campo del nombre.
+  const [editing, setEditing] = useState<Editing | null>(null)
 
   // Acomodar el contenido cuesta medir texto contra un canvas, y acá se
   // redibuja en cada `dragover` —o sea, muchas veces por segundo mientras se
@@ -68,6 +77,44 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
 
   const dragging = dragSource !== null
 
+  const partAt = (box: ContentBox, index: number): ContentPart | undefined => parts(box)[index]
+
+  const editingPart = editing && partAt(editing.box, editing.index)
+  // Todo lo que la pieza dibuja, tal como quedó en el último acomodo: el campo
+  // se pone encima y por eso sigue al texto mientras se escribe — el bloque va
+  // centrado y cada letra lo corre. Son varios pedazos cuando el texto corta de
+  // renglón, y hay que taparlos a todos: dejar uno afuera lo deja asomando
+  // debajo del campo, leyéndose como texto repetido.
+  const editingPlacements =
+    editing && editingPart?.type === 'text'
+      ? (boxes.find((item) => item.box === editing.box)?.placements ?? []).filter(
+          (placement): placement is Extract<Placement, { kind: 'text' }> =>
+            placement.kind === 'text' &&
+            placement.from <= editing.index &&
+            editing.index <= placement.to,
+        )
+      : []
+
+  const setEditingText = (text: string) => {
+    if (!editing) return
+    update(
+      editing.box,
+      parts(editing.box).map(
+        (part, index): ContentPart => (index === editing.index ? { type: 'text', text } : part),
+      ),
+    )
+  }
+
+  const closeEditing = () => {
+    // El texto se dibuja trimmeado igual; esto es para que no queden espacios
+    // guardados en el mazo. Si no sobra nada, no se toca la carta: un patch de
+    // más abriría un paso de deshacer que no cambia nada.
+    if (editingPart?.type === 'text' && editingPart.text.trim() !== editingPart.text) {
+      setEditingText(editingPart.text.trim())
+    }
+    setEditing(null)
+  }
+
   return (
     <div className="pointer-events-none absolute inset-0">
       {/* Los tiradores van primero y las zonas después, para que mientras se
@@ -87,7 +134,21 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                 key={`${box}-${placement.from}-${placement.x}`}
                 draggable
                 title={
-                  placement.kind === 'icon' ? library[placement.icon]?.label : placement.text
+                  placement.kind === 'icon'
+                    ? library[placement.icon]?.label
+                    : t.contentEditor.editOnCard
+                }
+                // Un clic escribe la pieza acá mismo; arrastrarla la mueve. No
+                // se pisan: el clic sale del mouseup sin movimiento, así que un
+                // arrastre no lo dispara.
+                onClick={
+                  placement.kind === 'text'
+                    ? () => {
+                        const part = partAt(box, placement.from)
+                        if (part?.type !== 'text') return
+                        setEditing({ box, index: placement.from, before: part.text })
+                      }
+                    : undefined
                 }
                 onDragStart={(event) => {
                   event.dataTransfer.effectAllowed = 'move'
@@ -112,7 +173,9 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
                   height:
                     (placement.kind === 'icon' ? placement.height : placement.lineHeight) * scale,
                 }}
-                className="pointer-events-auto absolute cursor-grab rounded transition-shadow hover:ring-2 hover:ring-sand-300 active:cursor-grabbing"
+                className={`pointer-events-auto absolute rounded transition-shadow hover:ring-2 hover:ring-sand-300 active:cursor-grabbing ${
+                  placement.kind === 'text' ? 'cursor-text' : 'cursor-grab'
+                }`}
               />
             )),
         )}
@@ -166,11 +229,63 @@ export function CardDropZones({ card, scale }: { card: Card; scale: number }) {
           className="absolute w-0.5 rounded-full bg-sand-300 shadow shadow-black/50"
         />
       )}
+
+      {!card.done && editing && editingPart?.type === 'text' && editingPlacements.length > 0 && (
+        <input
+          autoFocus
+          value={editingPart.text}
+          placeholder={t.contentEditor.emptyText}
+          aria-label={t.contentEditor.addText}
+          onChange={(event) => setEditingText(event.target.value)}
+          onBlur={closeEditing}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') closeEditing()
+            if (event.key === 'Escape') {
+              setEditingText(editing.before)
+              setEditing(null)
+            }
+          }}
+          style={fieldStyle(editingPlacements, scale)}
+          // Fondo opaco y del mismo tamaño que lo dibujado, por lo mismo que el
+          // campo del nombre: el texto de la carta sigue abajo actualizándose
+          // letra por letra, y verlo asomar detrás se lee como un error de
+          // dibujo. Centrado porque el bloque de contenido va centrado.
+          className="pointer-events-auto absolute rounded bg-zinc-950 px-1 text-center text-sand-100 ring-2 ring-sand-500 outline-none placeholder:text-zinc-600"
+        />
+      )}
     </div>
   )
 }
 
 type Caret = { index: number; x: number; top: number; height: number }
+
+/** La pieza de texto que se está escribiendo, y con qué texto se entró. */
+type Editing = { box: ContentBox; index: number; before: string }
+
+/**
+ * El campo va sobre la caja que ocupa todo lo que la pieza dibuja: un renglón
+ * en el caso común, y los dos cuando el texto corta. Nunca más angosto que
+ * `MIN_FIELD`: una pieza de una sola letra —o la que se acaba de vaciar— deja
+ * un campo al que no se le puede ni apuntar.
+ */
+const MIN_FIELD = 72
+
+function fieldStyle(placements: Extract<Placement, { kind: 'text' }>[], scale: number) {
+  const left = Math.min(...placements.map((placement) => placement.x))
+  const right = Math.max(...placements.map((placement) => placement.x + placement.width))
+  const top = Math.min(...placements.map((placement) => placement.lineTop))
+  const bottom = Math.max(...placements.map((placement) => placement.lineTop + placement.lineHeight))
+
+  const width = Math.max((right - left) * scale + 12, MIN_FIELD)
+  return {
+    left: ((left + right) / 2) * scale - width / 2,
+    top: top * scale,
+    width,
+    height: (bottom - top) * scale,
+    fontFamily: CARD_FONT,
+    fontSize: placements[0].size * scale,
+  }
+}
 
 const boxStyle = (area: Box, scale: number) => ({
   left: (area.left ?? CONTENT.left) * scale,

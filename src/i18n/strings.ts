@@ -119,6 +119,8 @@ type Strings = {
     textPlaceholder: string
     /** Con qué palabra se dibuja en la carta una pieza de texto todavía vacía. */
     emptyText: string
+    /** Tocar la pieza sobre la carta para escribirla ahí mismo. */
+    editOnCard: string
     lineBreak: string
     deletedIcon: string
     addTo: string
@@ -362,6 +364,7 @@ const STRINGS: Record<Language, Strings> = {
       empty: 'Caja vacía.',
       textPlaceholder: 'Texto…',
       emptyText: 'Texto',
+      editOnCard: 'Escribir el texto',
       lineBreak: '— corte de renglón —',
       deletedIcon: 'Icono borrado',
       addTo: 'Agregar a',
@@ -628,6 +631,7 @@ const STRINGS: Record<Language, Strings> = {
       empty: 'Empty box.',
       textPlaceholder: 'Text…',
       emptyText: 'Text',
+      editOnCard: 'Type the text',
       lineBreak: '— line break —',
       deletedIcon: 'Deleted icon',
       addTo: 'Add to',
@@ -895,6 +899,7 @@ const STRINGS: Record<Language, Strings> = {
       empty: 'Caixa vazia.',
       textPlaceholder: 'Texto…',
       emptyText: 'Texto',
+      editOnCard: 'Escrever o texto',
       lineBreak: '— quebra de linha —',
       deletedIcon: 'Ícone excluído',
       addTo: 'Adicionar a',

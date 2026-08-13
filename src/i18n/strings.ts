@@ -65,8 +65,14 @@ type Strings = {
     exportingAll: string
     /** Igual que `topBar.exportTitle`: el formato, que ya no va en la etiqueta. */
     exportAllTitle: string
-    /** Vale para los dos botones de sacar el mazo: el PDF y el zip. */
-    onlyDone: (done: number) => string
+    /**
+     * Vale para los dos botones de sacar el mazo: el PDF y el zip. El número
+     * de terminadas no va en la etiqueta —lo muestra el contador de la
+     * derecha—, así que acá va sólo el nombre.
+     */
+    onlyDone: string
+    onlyDoneTitle: (done: number, pending: number) => string
+    onlyDoneEmpty: string
   }
   gallery: {
     /**
@@ -313,7 +319,10 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Exportar mazo…',
       exportingAll: 'Exportando mazo…',
       exportAllTitle: 'Exportar todas las cartas como PNGs sueltos, en un zip',
-      onlyDone: (done) => `Sólo las terminadas (${done})`,
+      onlyDone: 'Sólo las terminadas',
+      onlyDoneTitle: (done, pending) =>
+        `El PDF y el zip llevan sólo las ${done} terminadas; las otras ${pending} quedan afuera.`,
+      onlyDoneEmpty: 'Todavía no hay ninguna carta marcada como terminada.',
     },
     gallery: {
       title: 'Cartas',
@@ -576,7 +585,10 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Export deck…',
       exportingAll: 'Exporting deck…',
       exportAllTitle: 'Export every card as a loose PNG, inside a zip',
-      onlyDone: (done) => `Finished cards only (${done})`,
+      onlyDone: 'Finished cards only',
+      onlyDoneTitle: (done, pending) =>
+        `The PDF and the zip carry only the ${done} finished cards; the other ${pending} are left out.`,
+      onlyDoneEmpty: 'No card is marked as finished yet.',
     },
     gallery: {
       title: 'Cards',
@@ -840,7 +852,10 @@ const STRINGS: Record<Language, Strings> = {
       exportAll: 'Exportar baralho…',
       exportingAll: 'Exportando baralho…',
       exportAllTitle: 'Exportar todas as cartas como PNGs soltos, dentro de um zip',
-      onlyDone: (done) => `Só as finalizadas (${done})`,
+      onlyDone: 'Só as finalizadas',
+      onlyDoneTitle: (done, pending) =>
+        `O PDF e o zip levam só as ${done} finalizadas; as outras ${pending} ficam de fora.`,
+      onlyDoneEmpty: 'Nenhuma carta está marcada como finalizada ainda.',
     },
     gallery: {
       title: 'Cartas',

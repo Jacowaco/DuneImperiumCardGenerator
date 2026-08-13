@@ -6,7 +6,7 @@ import { exportCardsPng } from './export/exportPngBatch'
 import { exportCardPng } from './export/exportPng'
 import type { PaperId } from './export/paper'
 import { exportPrintSheets } from './export/printSheet'
-import { describeError, stringsFor } from './i18n/strings'
+import { describeError, stringsFor, useT } from './i18n/strings'
 import { loadArtFromFile } from './model/art'
 import { emptyCard, type ArtTransform, type Card } from './model/card'
 import { mergeFactions, type CustomFaction } from './model/customFaction'
@@ -46,7 +46,7 @@ import { CardGallery } from './ui/CardGallery'
 import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
-import { Button, Toggle } from './ui/controls'
+import { Button } from './ui/controls'
 import { Dialog } from './ui/Dialog'
 import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
@@ -911,10 +911,10 @@ export function App() {
                     adentro del diálogo de uno solo. Sin ninguna terminada no
                     hay nada que filtrar: el tilde de la galería es el que lo
                     habilita. */}
-                <Toggle
-                  label={t.deckFooter.onlyDone(doneCount)}
+                <OnlyDoneFilter
+                  done={doneCount}
+                  pending={cards.length - doneCount}
                   checked={onlyDone}
-                  disabled={doneCount === 0}
                   onChange={setOnlyDone}
                 />
               </div>
@@ -1029,6 +1029,64 @@ export function App() {
     </IconLibraryProvider>
     </FactionLibraryProvider>
     </LanguageProvider>
+  )
+}
+
+/**
+ * El filtro de los dos botones de sacar el mazo.
+ *
+ * Tiene la forma de un botón y del ancho del par, y no la de una casilla
+ * suelta: es lo que los modifica, y colgando abajo con otra forma y otra
+ * alineación se leía como una línea huérfana en una columna que si no es toda
+ * botones de a dos.
+ *
+ * Va en el verde de la marca de terminada —el mismo del sello de la galería,
+ * la casilla del pie y el aviso del panel— y con su mismo tilde, así que dice
+ * de qué marca habla sin tener que explicarlo. El número de la derecha es
+ * cuántas hay: lo que se está por sacar.
+ */
+function OnlyDoneFilter({
+  done,
+  pending,
+  checked,
+  onChange,
+}: {
+  done: number
+  pending: number
+  checked: boolean
+  onChange: (checked: boolean) => void
+}) {
+  const t = useT()
+  const empty = done === 0
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={empty}
+      title={empty ? t.deckFooter.onlyDoneEmpty : t.deckFooter.onlyDoneTitle(done, pending)}
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+        checked
+          ? 'border-emerald-500/40 bg-emerald-950/40 text-emerald-400'
+          : 'border-zinc-800 bg-zinc-900/60 text-zinc-400 not-disabled:hover:border-zinc-700 not-disabled:hover:text-zinc-200'
+      }`}
+    >
+      {/* El mismo tilde que el pie de cada miniatura, con las mismas medidas:
+          es la misma marca, vista desde el mazo entero. */}
+      <span
+        className={`flex size-3.5 shrink-0 items-center justify-center rounded-[3px] border transition-colors [&_svg]:size-2.5 [&_svg]:stroke-[2.6] ${
+          checked
+            ? 'border-emerald-500 bg-emerald-500 text-zinc-950'
+            : 'border-zinc-700 text-transparent'
+        }`}
+      >
+        <CheckIcon />
+      </span>
+      <span className="min-w-0 flex-1 truncate text-left">{t.deckFooter.onlyDone}</span>
+      <span className="shrink-0 tabular-nums opacity-70">{done}</span>
+    </button>
   )
 }
 

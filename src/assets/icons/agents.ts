@@ -27,13 +27,31 @@ import type { Language } from '../../model/language'
  * en que se eligieron.
  */
 export const AGENT_ICONS: Record<AgentIcon, Record<Language, string>> = {
-  emperor: { es: 'Emperador', en: 'Emperor', pt: 'Imperador' },
-  'spacing-guild': { es: 'Cofradía Espacial', en: 'Spacing Guild', pt: 'Guilda Espacial' },
-  'bene-gesserit': { es: 'Bene Gesserit', en: 'Bene Gesserit', pt: 'Bene Gesserit' },
-  fremen: { es: 'Fremen', en: 'Fremen', pt: 'Fremen' },
-  landsraad: { es: 'Landsraad', en: 'Landsraad', pt: 'Landsraad' },
-  city: { es: 'Ciudad', en: 'City', pt: 'Cidade' },
-  'spice-trade': { es: 'Comercio de especia', en: 'Spice Trade', pt: 'Comércio de Especiaria' },
+  emperor: { es: 'Emperador', en: 'Emperor', pt: 'Imperador', fr: 'Empereur', de: 'Imperator' },
+  'spacing-guild': {
+    es: 'Cofradía Espacial',
+    en: 'Spacing Guild',
+    pt: 'Guilda Espacial',
+    fr: 'Guilde Spatiale',
+    de: 'Raumgilde',
+  },
+  'bene-gesserit': {
+    es: 'Bene Gesserit',
+    en: 'Bene Gesserit',
+    pt: 'Bene Gesserit',
+    fr: 'Bene Gesserit',
+    de: 'Bene Gesserit',
+  },
+  fremen: { es: 'Fremen', en: 'Fremen', pt: 'Fremen', fr: 'Fremen', de: 'Fremen' },
+  landsraad: { es: 'Landsraad', en: 'Landsraad', pt: 'Landsraad', fr: 'Landsraad', de: 'Landsraad' },
+  city: { es: 'Ciudad', en: 'City', pt: 'Cidade', fr: 'Ville', de: 'Stadt' },
+  'spice-trade': {
+    es: 'Comercio de especia',
+    en: 'Spice Trade',
+    pt: 'Comércio de Especiaria',
+    fr: "Commerce d'Épice",
+    de: 'Spice-Handel',
+  },
 }
 
 export type AgentIcon =
@@ -51,8 +69,14 @@ export type AgentIconStyle = 'locations' | 'infiltrate'
 
 /** El PSD trae dos estilos para la misma columna. */
 export const AGENT_ICON_STYLES: Record<AgentIconStyle, Record<Language, string>> = {
-  locations: { es: 'Normal', en: 'Normal', pt: 'Normal' },
-  infiltrate: { es: 'Infiltración', en: 'Infiltrate', pt: 'Infiltração' },
+  locations: { es: 'Normal', en: 'Normal', pt: 'Normal', fr: 'Normal', de: 'Normal' },
+  infiltrate: {
+    es: 'Infiltración',
+    en: 'Infiltrate',
+    pt: 'Infiltração',
+    fr: 'Infiltration',
+    de: 'Infiltration',
+  },
 }
 
 export const AGENT_ICON_STYLE_IDS = Object.keys(AGENT_ICON_STYLES) as AgentIconStyle[]

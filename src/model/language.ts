@@ -6,28 +6,42 @@ import { createContext, useContext, useState } from 'react'
  * en el idioma que esa máquina tenga elegido, igual que el resto de la UI —
  * por eso no es un campo de `Card` ni de `Deck`.
  */
-export type Language = 'es' | 'en' | 'pt'
+export type Language = 'es' | 'en' | 'pt' | 'fr' | 'de'
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   es: 'Español',
   en: 'English',
   pt: 'Português',
+  fr: 'Français',
+  de: 'Deutsch',
 }
 
 export const LANGUAGE_IDS = Object.keys(LANGUAGE_NAMES) as Language[]
 
 const STORAGE_KEY = 'dune-card-generator:language'
 
+/**
+ * Se recorre lo que pide el navegador y no la lista de idiomas: `navigator.
+ * languages` ya viene en orden de preferencia, así que a alguien con
+ * `['fr', 'es']` le tiene que tocar francés. Buscando al revés —el primer
+ * idioma de la app que aparezca en algún lado de la lista— ganaba el orden en
+ * que están escritos acá, que no dice nada.
+ */
 const detectLanguage = (): Language => {
   const preferred = navigator.languages ?? [navigator.language]
-  const prefixes: Language[] = ['es', 'pt', 'en']
-  return prefixes.find((prefix) => preferred.some((lang) => lang?.toLowerCase().startsWith(prefix))) ?? 'en'
+  for (const lang of preferred) {
+    const match = LANGUAGE_IDS.find((id) => lang?.toLowerCase().startsWith(id))
+    if (match) return match
+  }
+  return 'en'
 }
+
+const isLanguage = (value: string | null): value is Language =>
+  value !== null && (LANGUAGE_IDS as string[]).includes(value)
 
 const loadLanguage = (): Language => {
   const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'en' || stored === 'es' || stored === 'pt') return stored
-  return detectLanguage()
+  return isLanguage(stored) ? stored : detectLanguage()
 }
 
 export function useLanguageState() {

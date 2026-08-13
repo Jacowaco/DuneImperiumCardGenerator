@@ -7,8 +7,8 @@ import { useLanguage, type Language } from '../model/language'
  * `influence.ts`, `assets/icons/index.ts`, `paper.ts`— porque además de la UI
  * los necesita el render de la carta o el catálogo de iconos.
  *
- * Es un objeto por idioma y no un diccionario `clave -> {es, en}`: así
- * TypeScript obliga a que los dos idiomas tengan exactamente los mismos
+ * Es un objeto por idioma y no un diccionario `clave -> {es, en, …}`: así
+ * TypeScript obliga a que todos los idiomas tengan exactamente los mismos
  * campos, con el mismo tipo — a una función le falta un parámetro en un solo
  * idioma y ya no compila.
  */
@@ -1097,6 +1097,566 @@ const STRINGS: Record<Language, Strings> = {
       'card-canvas-failed': () => 'Não foi possível preparar a tela da carta.',
     },
   },
+  fr: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Export de la carte…',
+      export: 'Exporter la carte',
+      exportTitle: 'Exporter la carte ouverte en PNG',
+      defaultFileName: 'carte',
+      language: 'Langue',
+      undo: 'Annuler (Ctrl+Z)',
+      redo: 'Rétablir (Ctrl+Maj+Z)',
+    },
+    tabs: { front: 'Identité', rules: 'Règles' },
+    doneBanner: {
+      locked: 'Carte terminée, verrouillée pour ne pas la modifier par erreur.',
+      unlock: 'Déverrouiller',
+    },
+    doneBadge: {
+      done: 'Terminée',
+      markDone: 'Marquer terminée',
+      reopenTitle: 'Terminée — cliquer pour rouvrir',
+      markDoneTitle: 'Marquer comme terminée',
+    },
+    dialogs: {
+      icons: 'Icônes personnalisées',
+      factions: 'Factions personnalisées',
+      print: 'Imprimer le deck',
+      about: 'À propos',
+      close: 'Fermer',
+    },
+    about: {
+      fanMade:
+        "Ceci est un projet de fans pour les fans, sans but lucratif : il est gratuit, sans publicité, et rien n'est facturé pour l'utiliser.",
+      ownership:
+        "Dune: Imperium, ses extensions, ses illustrations, ses icônes et son design graphique sont la propriété de Dire Wolf Digital, LLC. « Dune » et l'univers du roman appartiennent à Herbert Properties LLC. Toutes les marques et tous les droits appartiennent à leurs propriétaires respectifs.",
+      notAffiliated:
+        "Cette application n'est ni affiliée à Dire Wolf Digital ou aux détenteurs de la marque Dune, ni sponsorisée ni approuvée par eux.",
+      personalUse:
+        "Les cartes que vous créez ici sont à usage personnel : jouer chez soi, tester des idées et les partager avec votre groupe. Elles ne sont pas destinées à être vendues ni produites commercialement. Si le jeu vous plaît, achetez l'original et soutenez ceux qui l'ont fait.",
+      takedown:
+        "Si vous détenez des droits sur l'un de ces contenus et souhaitez qu'un élément soit retiré, écrivez-nous via le dépôt et nous le réglerons.",
+      source: 'Code source et contact',
+    },
+    deckFooter: {
+      deckGroup: 'Deck',
+      libraryGroup: 'Bibliothèque',
+      libraryGroupHint:
+        "Vos icônes et vos factions, gardées dans ce navigateur pour les réutiliser d'un deck à l'autre. Elles ne voyagent pas avec le fichier : en importer une la copie dans le deck, et le deck emporte le PNG à l'intérieur.",
+      unsavedName: 'Deck non enregistré',
+      renameTitle: 'Renommer le deck',
+      noNativeFsTooltip:
+        "Ici, les fichiers ne peuvent pas être écrasés : « Enregistrer » et « Enregistrer sous… » téléchargent une nouvelle copie. L'API n'existe que dans Chrome et Edge, et pas dans l'aperçu intégré de l'éditeur : en ouvrant l'application dans une fenêtre du navigateur, « Enregistrer » écrit dans le fichier ouvert sans rien demander.",
+      noNativeFsBadge: 'Ici, « Enregistrer » télécharge une copie',
+      new: 'Nouveau',
+      confirmNew:
+        'Ce deck a des modifications non enregistrées. Commencer quand même un nouveau deck ?',
+      open: 'Ouvrir…',
+      save: 'Enregistrer',
+      saveAs: 'Enregistrer sous…',
+      icons: 'Icônes…',
+      factions: 'Factions…',
+      print: 'Imprimer…',
+      exportAll: 'Exporter le deck…',
+      exportingAll: 'Export du deck…',
+      exportAllTitle: 'Exporter toutes les cartes en PNG séparés, dans un zip',
+      onlyDone: 'Seulement les terminées',
+      onlyDoneTitle: (done, pending) =>
+        `Le PDF et le zip n'emportent que les ${done} cartes terminées ; les ${pending} autres restent de côté.`,
+      onlyDoneEmpty: "Aucune carte n'est encore marquée comme terminée.",
+    },
+    gallery: {
+      title: 'Cartes',
+      newCardTitle: 'Nouvelle carte',
+      newButton: 'Nouvelle carte',
+      unnamed: 'Sans nom',
+      duplicate: 'Dupliquer',
+      remove: 'Supprimer',
+      doneStamp: 'Terminée',
+      reopenTitle: 'Terminée — cliquer pour rouvrir',
+      markDoneTitle: 'Marquer comme terminée',
+      markPendingAria: 'Marquer comme à faire',
+      copiesStamp: (copies) => `${copies} exemplaires dans le deck`,
+    },
+    cardPanel: {
+      name: 'Nom',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Écrire le nom',
+      startingCard: 'De départ',
+      startingCardHint:
+        'Les cartes du deck de départ portent un losange avant le nom, et le titre commence plus à droite pour lui laisser la place.',
+      faction: 'Faction',
+      factionHint:
+        "Elles s'empilent vers le bas dans cet ordre, quel que soit l'ordre dans lequel vous les choisissez. Jusqu'à 4 par carte.",
+      cost: "Coût d'acquisition",
+      hasCost: 'A un coût',
+      persuasion: 'Persuasion',
+      purchaseBenefit: "Bonus d'acquisition",
+      none: 'Aucun',
+      custom: (label) => `Perso · ${label}`,
+      amount: 'Quantité',
+      otherValue: 'Autre valeur',
+      agentIcons: "Icônes d'agent",
+      infiltrateHint:
+        "Rise of Ix : l'agent peut aller sur un espace déjà occupé par un rival. Ce sont les mêmes sept icônes, avec un autre cadre.",
+      copies: 'Exemplaires',
+      copiesHint:
+        "Combien de fois cette carte est dans le deck. C'est enregistré dans le fichier et utilisé par la planche d'impression ; le zip de PNG n'en sort qu'un par carte.",
+    },
+    contentEditor: {
+      empty: 'Zone vide.',
+      textPlaceholder: 'Texte…',
+      emptyText: 'Texte',
+      editOnCard: 'Écrire le texte',
+      lineBreak: '— saut de ligne —',
+      deletedIcon: 'Icône supprimée',
+      addTo: 'Ajouter à',
+      close: 'Fermer',
+      addIcon: 'Icône…',
+      addText: 'Texte',
+      addLineBreak: 'Saut de ligne',
+      remove: 'Retirer',
+      custom: 'Perso',
+      core: 'Dune Imperium',
+      influence: 'Influence par faction',
+      decrease: (label) => `Diminuer ${label}`,
+      increase: (label) => `Augmenter ${label}`,
+    },
+    rulesPanel: {
+      playTurn: "Tour d'agent",
+      autoAdjust: 'Hauteur automatique',
+      autoAdjustHint:
+        'La zone a trois hauteurs — 1, 2 ou 3 lignes — et ceci la laisse à la plus petite où le contenu tient. Désactivez-le pour la fixer à la main.',
+      agentSilhouette: "Silhouette de l'agent",
+      agentSilhouetteHint:
+        "La figure derrière le contenu de la zone. Sur une carte terminée, les icônes la recouvrent presque entièrement : seule, elle paraît plus marquée qu'elle ne le sera.",
+      reveal: 'Révélation',
+      contentHint:
+        'Faites glisser icônes, textes et sauts de ligne pour les ajouter ou les réordonner.',
+      unload: 'Unload',
+      unloadHint:
+        "Rise of Ix : la révélation s'applique aussi quand la carte est défaussée ou détruite. La banderole occupe le début de la bande, donc le contenu tient dans moins de largeur.",
+    },
+    artPanel: {
+      image: 'Image',
+      changeImage: "Changer d'image…",
+      chooseImage: 'Choisir une image…',
+      remove: 'Retirer',
+      zoom: 'Zoom',
+      fit: 'Ajuster',
+      center: 'Centrer',
+      rotate: "Tourner d'un quart de tour",
+      flip: 'Miroir',
+      dragZoomHint:
+        "Faites glisser l'image sur la carte pour la déplacer ; la molette zoome. Vous pouvez aussi coller une image avec Ctrl+V.",
+      placeholder: 'Glissez une image ici\nou touchez pour la choisir',
+      frame: 'Cadrage',
+      frameFree: 'Cadrage libre',
+      frameLocked: 'Cadrage verrouillé',
+    },
+    iconPanel: {
+      deckTitle: 'Dans ce deck',
+      deckHint:
+        "Celles dont ce deck dispose : ce sont celles que propose le sélecteur des zones et celles qui voyagent dans le fichier, donc le deck s'affiche pareil sur une autre machine. La taille et le nom sont d'ici et ne touchent pas la bibliothèque.",
+      libraryTitle: 'Ma bibliothèque',
+      libraryHint:
+        "Celles que vous avez importées un jour, gardées dans ce navigateur. Elles ne voyagent pas avec le deck et ne sont pas dessinées : c'est de là qu'on copie, pour ne pas réimporter la même chose dans chaque deck.",
+      emptyLibraryHint: "Vous n'avez encore enregistré aucune icône dans la bibliothèque.",
+      usedIn: (cards) => `Dans ${pluralCards(cards, 'fr')}`,
+      unused: 'Inutilisée',
+      alreadyInDeck: 'Déjà dans le deck',
+      toLibraryLabel: (label) => `Enregistrer ${label} dans ma bibliothèque`,
+      toDeckLabel: (label) => `Importer ${label} dans ce deck`,
+      forgetLabel: (label) => `Retirer ${label} de ma bibliothèque`,
+      confirmRemoveFromLibrary: (label) =>
+        `« ${label} » quitte votre bibliothèque et vous ne pourrez plus l'importer dans d'autres decks. Les decks qui l'ont déjà à l'intérieur ne changent pas. La retirer ?`,
+      emptyHint:
+        "Pour des règles que le jeu ne propose pas. Elles restent disponibles dans tous vos decks et apparaissent à la fin du sélecteur d'icônes.",
+      nameLabel: (label) => `Nom de ${label}`,
+      heightTitle: "Hauteur sur la carte, en % de l'icône du jeu",
+      heightLabel: (label) => `Hauteur de ${label} sur la carte, en % de l'icône du jeu`,
+      decreaseHeightLabel: (label) => `Réduire ${label}`,
+      increaseHeightLabel: (label) => `Agrandir ${label}`,
+      showNumberText: 'Nombre',
+      showNumberLabel: (label) => `Afficher le nombre sur ${label}`,
+      numberColorTitle: 'Couleur du nombre',
+      numberColorLabel: (label) => `Couleur du nombre de ${label}`,
+      upload: 'Importer une icône…',
+      hint: "PNG avec transparence, rognés automatiquement au contenu. Le % est la hauteur sur la carte comparée à une icône du jeu. Ils restent enregistrés dans ce navigateur, et le deck emporte celles que ses cartes utilisent.",
+      confirmRemove: (label, used) =>
+        `« ${label} » est dans ${pluralCards(used, 'fr')} de ce deck. Si vous la supprimez, ces cartes la perdent.`,
+      removeLabel: (label) => `Supprimer ${label}`,
+    },
+    factionPanel: {
+      deckTitle: 'Dans ce deck',
+      deckHint:
+        "Celles dont ce deck dispose : ce sont celles que propose le sélecteur de faction et celles qui voyagent dans le fichier. Le nom et la couleur sont d'ici et ne touchent pas la bibliothèque.",
+      libraryTitle: 'Ma bibliothèque',
+      libraryHint:
+        "Celles que vous avez créées un jour, gardées dans ce navigateur. Elles ne voyagent pas avec le deck : c'est de là qu'on copie, pour ne pas réimporter l'emblème dans chaque deck.",
+      emptyLibraryHint: "Vous n'avez encore enregistré aucune faction dans la bibliothèque.",
+      usedIn: (cards) => `Dans ${pluralCards(cards, 'fr')}`,
+      unused: 'Inutilisée',
+      alreadyInDeck: 'Déjà dans le deck',
+      toLibraryLabel: (label) => `Enregistrer ${label} dans ma bibliothèque`,
+      toDeckLabel: (label) => `Importer ${label} dans ce deck`,
+      forgetLabel: (label) => `Retirer ${label} de ma bibliothèque`,
+      confirmRemoveFromLibrary: (label) =>
+        `« ${label} » quitte votre bibliothèque et vous ne pourrez plus l'importer dans d'autres decks. Les decks qui l'ont déjà à l'intérieur ne changent pas. La retirer ?`,
+      emptyHint:
+        "Pour des decks avec des factions que le jeu ne propose pas. Elles restent disponibles dans tous vos decks, et leur emblème seul génère les 4 losanges « +1/−1 Influence » de cette faction, prêts à servir de contenu de carte.",
+      nameLabel: (label) => `Nom de ${label}`,
+      colorTitle: 'Couleur de la bande',
+      colorLabel: (label) => `Couleur de la bande de ${label}`,
+      hexLabel: (label) => `Couleur de la bande de ${label} en hexadécimal`,
+      upload: 'Importer un emblème…',
+      hint: "PNG avec transparence, rogné automatiquement au contenu. Elles restent enregistrées dans ce navigateur, et le deck emporte celles que ses cartes utilisent. Comme icône d'agent, elles se posent sur une plaque noire simple, sans le cadre de celles du livret de règles.",
+      confirmRemove: (label, used) =>
+        `« ${label} » est dans ${pluralCards(used, 'fr')} de ce deck. Si vous la supprimez, ces cartes perdent la bande, l'icône d'agent ou le losange qui la nomme.`,
+      removeLabel: (label) => `Supprimer ${label}`,
+    },
+    libraryFile: {
+      export: 'Exporter…',
+      exportTitle:
+        "Enregistre toute votre bibliothèque — icônes et factions — dans un fichier, pour l'emporter sur un autre ordinateur ou en garder une copie. La bibliothèque ne vit que dans ce navigateur.",
+      import: 'Importer…',
+      importTitle:
+        'Amène dans votre bibliothèque ce que contient un fichier de bibliothèque. Ce que vous aviez déjà sous le même id reste tel quel.',
+      imported: (icons, factions) =>
+        `${pluralIcons(icons, 'fr')} et ${pluralFactions(factions, 'fr')} ajoutées à votre bibliothèque.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'par feuille.',
+      fitsOnOne: 'Le deck tient sur une.',
+      spansPages: (pages) => `Le deck en occupe ${pages}.`,
+      deckCopies: 'Copies du deck entier',
+      onlyDoneHint: (cards) =>
+        `Seules les cartes terminées sont imprimées : ${pluralCards(cards, 'fr')} du deck.`,
+      copiesOtherValue: 'Autre quantité',
+      copiesDecrease: 'Retirer une copie',
+      copiesIncrease: 'Ajouter une copie',
+      copiesHint: (total) => `${pluralCards(total, 'fr')} au total.`,
+      bleedToggle: 'Fond perdu de 3 mm (imprimeur)',
+      bleedOnHint:
+        'Chaque carte est dessinée 3 mm plus grande en noir de chaque côté et découpée seule : si le massicot dévie, il coupe dans le noir et non sur un liseré blanc. Il en tient moins par feuille.',
+      bleedOffHint:
+        'Les cartes sont collées et partagent la coupe, donc une coupe sert pour deux. Il en tient plus par feuille, mais le moindre écart se voit.',
+      buildingPdf: 'Création du PDF…',
+      downloadPdf: 'Télécharger le PDF à imprimer',
+      pdfSizeHintBefore:
+        "Le PDF contient la taille de la feuille, donc il s'imprime à l'échelle réelle. Malgré tout, dans la fenêtre d'impression choisissez ",
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' ou « taille réelle », jamais « ajuster à la page ».',
+      cardSizeHint: (w, h) =>
+        `Chaque carte séparée sort en ${w} × ${h} px — 63,5 × 88 mm au double de 300 DPI.`,
+    },
+    errors: {
+      openFailed: "Impossible d'ouvrir le fichier.",
+      artFailed: "Impossible de charger l'image.",
+      sheetFailed: 'Impossible de composer la planche.',
+      cardsFailed: "Impossible d'exporter les cartes.",
+      iconFailed: "Impossible de charger l'icône.",
+      autosaveFull:
+        "Le deck ne tient pas dans l'enregistrement automatique du navigateur : si vous rechargez la page, tout ce qui n'est pas enregistré est perdu. Enregistrez-le dans un fichier.",
+      noneFinished:
+        "Il n'y a aucune carte terminée à exporter. Décochez « Seulement les terminées ».",
+      permissionDenied: (fileName) =>
+        `Chrome demande l'autorisation d'écrire dans ${fileName}. Appuyez de nouveau sur Enregistrer et choisissez « Modifier le fichier », ou passez par Enregistrer sous… pour en choisir un autre.`,
+      'not-a-card': () => "Ce fichier n'est pas une carte de Dune: Imperium.",
+      'not-a-library': () => "Ce fichier n'est pas une bibliothèque de Dune: Imperium.",
+      'empty-library': () => "Cette bibliothèque n'a ni icônes ni factions à l'intérieur.",
+      'no-cards': () => "Le fichier n'a aucune carte.",
+      'empty-image': ({ name }) => `L'image est vide : ${name}`,
+      'read-failed': ({ name }) => `Impossible de lire le fichier : ${name}`,
+      'invalid-image': ({ name }) => `Ce n'est pas une image valide : ${name}`,
+      'canvas-failed': () => "Le navigateur n'a pas pu préparer l'image.",
+      'png-failed': () => "Le navigateur n'a pas pu générer le PNG.",
+      'sheet-canvas-failed': () => "Le navigateur n'a pas pu préparer la planche.",
+      'sheet-read-failed': () => "Le navigateur n'a pas pu lire la planche.",
+      'card-canvas-failed': () => 'Impossible de préparer le canevas de la carte.',
+    },
+  },
+  de: {
+    topBar: {
+      title: 'Dune: Imperium',
+      subtitle: 'Card Generator',
+      exporting: 'Karte wird exportiert…',
+      export: 'Karte exportieren',
+      exportTitle: 'Die geöffnete Karte als PNG exportieren',
+      defaultFileName: 'karte',
+      language: 'Sprache',
+      undo: 'Rückgängig (Strg+Z)',
+      redo: 'Wiederherstellen (Strg+Umschalt+Z)',
+    },
+    tabs: { front: 'Identität', rules: 'Regeln' },
+    doneBanner: {
+      locked: 'Karte fertig, gesperrt, damit sie nicht versehentlich geändert wird.',
+      unlock: 'Entsperren',
+    },
+    doneBadge: {
+      done: 'Fertig',
+      markDone: 'Als fertig markieren',
+      reopenTitle: 'Fertig — zum Wiederöffnen klicken',
+      markDoneTitle: 'Als fertig markieren',
+    },
+    dialogs: {
+      icons: 'Eigene Symbole',
+      factions: 'Eigene Fraktionen',
+      print: 'Deck drucken',
+      about: 'Über',
+      close: 'Schließen',
+    },
+    about: {
+      fanMade:
+        'Dies ist ein Fanprojekt von Fans für Fans, ohne Gewinnabsicht: Es ist kostenlos, enthält keine Werbung, und für die Nutzung wird nichts berechnet.',
+      ownership:
+        'Dune: Imperium, seine Erweiterungen, seine Illustrationen, seine Symbole und sein Grafikdesign sind Eigentum von Dire Wolf Digital, LLC. „Dune“ und das Universum des Romans gehören Herbert Properties LLC. Alle Marken und Rechte liegen bei ihren jeweiligen Eigentümern.',
+      notAffiliated:
+        'Diese App ist weder mit Dire Wolf Digital noch mit den Inhabern der Marke Dune verbunden und wird von ihnen weder gesponsert noch genehmigt.',
+      personalUse:
+        'Die Karten, die du hier baust, sind für den privaten Gebrauch: zu Hause spielen, Ideen ausprobieren und sie mit deiner Gruppe teilen. Sie sind nicht zum Verkauf oder zur kommerziellen Herstellung gedacht. Wenn dir das Spiel gefällt, kauf das Original und unterstütze die Leute, die es gemacht haben.',
+      takedown:
+        'Wenn du Rechte an einem dieser Materialien hast und möchtest, dass etwas entfernt wird, schreib uns über das Repository und wir klären das.',
+      source: 'Quellcode und Kontakt',
+    },
+    deckFooter: {
+      deckGroup: 'Deck',
+      libraryGroup: 'Bibliothek',
+      libraryGroupHint:
+        'Deine Symbole und Fraktionen, in diesem Browser gespeichert, um sie zwischen Decks wiederzuverwenden. Sie reisen nicht mit der Datei: Eines zu holen kopiert es ins Deck, und das Deck trägt das PNG in sich.',
+      unsavedName: 'Nicht gespeichertes Deck',
+      renameTitle: 'Deck umbenennen',
+      noNativeFsTooltip:
+        'Hier können Dateien nicht überschrieben werden, deshalb laden „Speichern“ und „Speichern unter…“ eine neue Kopie herunter. Die API gibt es nur in Chrome und Edge, und nicht in der eingebetteten Vorschau des Editors: Öffnest du die App in einem Browserfenster, schreibt „Speichern“ ohne Nachfrage in die geöffnete Datei.',
+      noNativeFsBadge: 'Hier lädt „Speichern“ eine Kopie herunter',
+      new: 'Neu',
+      confirmNew: 'Dieses Deck hat ungespeicherte Änderungen. Trotzdem ein neues Deck anfangen?',
+      open: 'Öffnen…',
+      save: 'Speichern',
+      saveAs: 'Speichern unter…',
+      icons: 'Symbole…',
+      factions: 'Fraktionen…',
+      print: 'Drucken…',
+      exportAll: 'Deck exportieren…',
+      exportingAll: 'Deck wird exportiert…',
+      exportAllTitle: 'Alle Karten als einzelne PNGs exportieren, in einem Zip',
+      onlyDone: 'Nur die fertigen',
+      onlyDoneTitle: (done, pending) =>
+        `PDF und Zip enthalten nur die ${done} fertigen Karten; die anderen ${pending} bleiben draußen.`,
+      onlyDoneEmpty: 'Noch ist keine Karte als fertig markiert.',
+    },
+    gallery: {
+      title: 'Karten',
+      newCardTitle: 'Neue Karte',
+      newButton: 'Neue Karte',
+      unnamed: 'Ohne Namen',
+      duplicate: 'Duplizieren',
+      remove: 'Löschen',
+      doneStamp: 'Fertig',
+      reopenTitle: 'Fertig — zum Wiederöffnen klicken',
+      markDoneTitle: 'Als fertig markieren',
+      markPendingAria: 'Als offen markieren',
+      copiesStamp: (copies) => `${copies} Exemplare im Deck`,
+    },
+    cardPanel: {
+      name: 'Name',
+      namePlaceholder: 'Duncan Idaho',
+      editOnCard: 'Den Namen schreiben',
+      startingCard: 'Startkarte',
+      startingCardHint:
+        'Karten des Startdecks tragen eine Raute vor dem Namen, und der Titel beginnt weiter rechts, um ihr Platz zu lassen.',
+      faction: 'Fraktion',
+      factionHint:
+        'Sie stapeln sich in genau dieser Reihenfolge nach unten, egal in welcher Reihenfolge du sie auswählst. Bis zu 4 pro Karte.',
+      cost: 'Kaufkosten',
+      hasCost: 'Hat Kosten',
+      persuasion: 'Überzeugung',
+      purchaseBenefit: 'Kaufbonus',
+      none: 'Keiner',
+      custom: (label) => `Eigen · ${label}`,
+      amount: 'Menge',
+      otherValue: 'Anderer Wert',
+      agentIcons: 'Agentensymbole',
+      infiltrateHint:
+        'Rise of Ix: Der Agent darf auf ein Feld, das ein Rivale schon besetzt. Es sind dieselben sieben Symbole, mit einem anderen Rahmen.',
+      copies: 'Exemplare',
+      copiesHint:
+        'Wie oft diese Karte im Deck steckt. Es wird in der Datei gespeichert und vom Druckbogen benutzt; das PNG-Zip legt nur eines pro Karte an.',
+    },
+    contentEditor: {
+      empty: 'Leeres Feld.',
+      textPlaceholder: 'Text…',
+      emptyText: 'Text',
+      editOnCard: 'Den Text schreiben',
+      lineBreak: '— Zeilenumbruch —',
+      deletedIcon: 'Gelöschtes Symbol',
+      addTo: 'Hinzufügen zu',
+      close: 'Schließen',
+      addIcon: 'Symbol…',
+      addText: 'Text',
+      addLineBreak: 'Zeilenumbruch',
+      remove: 'Entfernen',
+      custom: 'Eigene',
+      core: 'Dune Imperium',
+      influence: 'Einfluss nach Fraktion',
+      decrease: (label) => `${label} verringern`,
+      increase: (label) => `${label} erhöhen`,
+    },
+    rulesPanel: {
+      playTurn: 'Agentenzug',
+      autoAdjust: 'Automatische Höhe',
+      autoAdjustHint:
+        'Das Feld hat drei Höhen — 1, 2 oder 3 Zeilen — und damit bleibt es auf der kleinsten, in die der Inhalt passt. Schalte es aus, um sie von Hand festzulegen.',
+      agentSilhouette: 'Agentensilhouette',
+      agentSilhouetteHint:
+        'Die Figur hinter dem Inhalt des Feldes. Auf der fertigen Karte verdecken die Symbole sie fast ganz: allein wirkt sie kräftiger, als sie am Ende aussehen wird.',
+      reveal: 'Enthüllung',
+      contentHint: 'Zieh Symbole, Text und Zeilenumbrüche hierher, um sie hinzuzufügen oder umzuordnen.',
+      unload: 'Unload',
+      unloadHint:
+        'Rise of Ix: Die Enthüllung greift auch, wenn die Karte abgeworfen oder vernichtet wird. Das Banner belegt den Anfang der Leiste, deshalb wird der Inhalt schmaler.',
+    },
+    artPanel: {
+      image: 'Bild',
+      changeImage: 'Bild wechseln…',
+      chooseImage: 'Bild wählen…',
+      remove: 'Entfernen',
+      zoom: 'Zoom',
+      fit: 'Anpassen',
+      center: 'Zentrieren',
+      rotate: 'Eine Vierteldrehung drehen',
+      flip: 'Spiegeln',
+      dragZoomHint:
+        'Zieh das Bild über die Karte, um es zu bewegen; das Mausrad zoomt. Du kannst auch mit Strg+V ein Bild einfügen.',
+      placeholder: 'Zieh ein Bild hierher\noder tippe, um eines zu wählen',
+      frame: 'Bildausschnitt',
+      frameFree: 'Ausschnitt frei',
+      frameLocked: 'Ausschnitt gesperrt',
+    },
+    iconPanel: {
+      deckTitle: 'In diesem Deck',
+      deckHint:
+        'Die, über die dieses Deck verfügt: Sie sind das, was die Auswahl der Felder anbietet und was in der Datei mitreist, damit das Deck auf einem anderen Rechner gleich aussieht. Größe und Name gehören hierher und rühren die Bibliothek nicht an.',
+      libraryTitle: 'Meine Bibliothek',
+      libraryHint:
+        'Die, die du irgendwann hochgeladen hast, in diesem Browser gespeichert. Sie reisen nicht mit dem Deck und werden nicht gezeichnet: Von hier wird kopiert, damit du nicht in jedem Deck dasselbe erneut hochlädst.',
+      emptyLibraryHint: 'Du hast noch kein Symbol in der Bibliothek gespeichert.',
+      usedIn: (cards) => `In ${pluralCards(cards, 'de')}`,
+      unused: 'Unbenutzt',
+      alreadyInDeck: 'Schon im Deck',
+      toLibraryLabel: (label) => `${label} in meiner Bibliothek speichern`,
+      toDeckLabel: (label) => `${label} in dieses Deck holen`,
+      forgetLabel: (label) => `${label} aus meiner Bibliothek entfernen`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}“ verlässt deine Bibliothek und du kannst es nicht mehr in andere Decks holen. Decks, die es schon enthalten, ändern sich nicht. Entfernen?`,
+      emptyHint:
+        'Für Regeln, die das Spiel nicht mitbringt. Sie bleiben in allen deinen Decks verfügbar und erscheinen am Ende der Symbolauswahl.',
+      nameLabel: (label) => `Name von ${label}`,
+      heightTitle: 'Höhe auf der Karte, in % des Spielsymbols',
+      heightLabel: (label) => `Höhe von ${label} auf der Karte, in % des Spielsymbols`,
+      decreaseHeightLabel: (label) => `${label} verkleinern`,
+      increaseHeightLabel: (label) => `${label} vergrößern`,
+      showNumberText: 'Zahl',
+      showNumberLabel: (label) => `Zahl über ${label} anzeigen`,
+      numberColorTitle: 'Farbe der Zahl',
+      numberColorLabel: (label) => `Farbe der Zahl von ${label}`,
+      upload: 'Symbol hochladen…',
+      hint: 'PNGs mit Transparenz, sie werden automatisch auf den Inhalt zugeschnitten. Das % ist die Höhe auf der Karte im Vergleich zu einem Spielsymbol. Sie bleiben in diesem Browser gespeichert, und das Deck nimmt die mit, die seine Karten benutzen.',
+      confirmRemove: (label, used) =>
+        `„${label}“ steckt in ${pluralCards(used, 'de')} dieses Decks. Wenn du es löschst, verlieren diese Karten es.`,
+      removeLabel: (label) => `${label} löschen`,
+    },
+    factionPanel: {
+      deckTitle: 'In diesem Deck',
+      deckHint:
+        'Die, über die dieses Deck verfügt: Sie sind das, was die Fraktionsauswahl anbietet und was in der Datei mitreist. Name und Farbe gehören hierher und rühren die Bibliothek nicht an.',
+      libraryTitle: 'Meine Bibliothek',
+      libraryHint:
+        'Die, die du irgendwann gebaut hast, in diesem Browser gespeichert. Sie reisen nicht mit dem Deck: Von hier wird kopiert, damit du nicht in jedem Deck das Emblem erneut hochlädst.',
+      emptyLibraryHint: 'Du hast noch keine Fraktion in der Bibliothek gespeichert.',
+      usedIn: (cards) => `In ${pluralCards(cards, 'de')}`,
+      unused: 'Unbenutzt',
+      alreadyInDeck: 'Schon im Deck',
+      toLibraryLabel: (label) => `${label} in meiner Bibliothek speichern`,
+      toDeckLabel: (label) => `${label} in dieses Deck holen`,
+      forgetLabel: (label) => `${label} aus meiner Bibliothek entfernen`,
+      confirmRemoveFromLibrary: (label) =>
+        `„${label}“ verlässt deine Bibliothek und du kannst sie nicht mehr in andere Decks holen. Decks, die sie schon enthalten, ändern sich nicht. Entfernen?`,
+      emptyHint:
+        'Für Decks mit Fraktionen, die das Spiel nicht mitbringt. Sie bleiben in allen deinen Decks verfügbar und erzeugen von selbst die 4 Rauten „+1/−1 Einfluss“ dieser Fraktion, fertig zum Einsetzen als Karteninhalt.',
+      nameLabel: (label) => `Name von ${label}`,
+      colorTitle: 'Farbe der Leiste',
+      colorLabel: (label) => `Farbe der Leiste von ${label}`,
+      hexLabel: (label) => `Farbe der Leiste von ${label} in Hexadezimal`,
+      upload: 'Emblem hochladen…',
+      hint: 'PNG mit Transparenz, wird automatisch auf den Inhalt zugeschnitten. Sie bleiben in diesem Browser gespeichert, und das Deck nimmt die mit, die seine Karten benutzen. Als Agentensymbol sitzen sie auf einer schlichten schwarzen Platte, ohne den Rahmen der Symbole aus dem Regelheft.',
+      confirmRemove: (label, used) =>
+        `„${label}“ steckt in ${pluralCards(used, 'de')} dieses Decks. Wenn du sie löschst, verlieren diese Karten die Leiste, das Agentensymbol oder die Raute, die sie nennt.`,
+      removeLabel: (label) => `${label} löschen`,
+    },
+    libraryFile: {
+      export: 'Exportieren…',
+      exportTitle:
+        'Speichert deine ganze Bibliothek — Symbole und Fraktionen — in einer Datei, um sie auf einen anderen Rechner mitzunehmen oder eine Kopie zu haben. Die Bibliothek lebt nur in diesem Browser.',
+      import: 'Importieren…',
+      importTitle:
+        'Holt in deine Bibliothek, was eine Bibliotheksdatei enthält. Was du unter derselben id schon hattest, bleibt, wie es ist.',
+      imported: (icons, factions) =>
+        `${pluralIcons(icons, 'de')} und ${pluralFactions(factions, 'de')} zu deiner Bibliothek hinzugefügt.`,
+    },
+    printPanel: {
+      perSheetSuffix: 'pro Blatt.',
+      fitsOnOne: 'Das Deck passt auf eines.',
+      spansPages: (pages) => `Das Deck belegt ${pages} davon.`,
+      deckCopies: 'Kopien des ganzen Decks',
+      onlyDoneHint: (cards) =>
+        `Es werden nur die fertigen gedruckt: ${pluralCards(cards, 'de')} des Decks.`,
+      copiesOtherValue: 'Andere Menge',
+      copiesDecrease: 'Eine Kopie abziehen',
+      copiesIncrease: 'Eine Kopie hinzufügen',
+      copiesHint: (total) => `${pluralCards(total, 'de')} insgesamt.`,
+      bleedToggle: '3 mm Anschnitt (Druckerei)',
+      bleedOnHint:
+        'Jede Karte wird an jeder Seite 3 mm größer in Schwarz gezeichnet und einzeln geschnitten: Verläuft die Schneidemaschine, schneidet sie ins Schwarze statt in eine weiße Kante. Es passen weniger pro Blatt.',
+      bleedOffHint:
+        'Die Karten liegen aneinander und teilen sich den Schnitt, ein Schnitt reicht also für zwei. Es passen mehr pro Blatt, aber jede Abweichung fällt auf.',
+      buildingPdf: 'PDF wird gebaut…',
+      downloadPdf: 'PDF zum Drucken herunterladen',
+      pdfSizeHintBefore:
+        'Das PDF trägt die Blattgröße in sich, es druckt also in echter Größe. Wähle trotzdem im Druckdialog ',
+      pdfSizeHintBold: '100 %',
+      pdfSizeHintAfter: ' oder „tatsächliche Größe“, niemals „an Seite anpassen“.',
+      cardSizeHint: (w, h) =>
+        `Jede einzelne Karte kommt mit ${w} × ${h} px heraus — 63,5 × 88 mm beim Doppelten von 300 DPI.`,
+    },
+    errors: {
+      openFailed: 'Die Datei konnte nicht geöffnet werden.',
+      artFailed: 'Das Bild konnte nicht geladen werden.',
+      sheetFailed: 'Der Bogen konnte nicht gebaut werden.',
+      cardsFailed: 'Die Karten konnten nicht exportiert werden.',
+      iconFailed: 'Das Symbol konnte nicht geladen werden.',
+      autosaveFull:
+        'Das Deck passt nicht in die automatische Speicherung des Browsers: Wenn du die Seite neu lädst, geht alles Ungespeicherte verloren. Speichere es in einer Datei.',
+      noneFinished:
+        'Es gibt keine fertige Karte zum Exportieren. Nimm den Haken bei „Nur die fertigen“ weg.',
+      permissionDenied: (fileName) =>
+        `Chrome fragt nach der Erlaubnis, in ${fileName} zu schreiben. Drück noch einmal auf Speichern und wähle „Datei bearbeiten“, oder nimm Speichern unter…, um eine andere zu wählen.`,
+      'not-a-card': () => 'Die Datei ist keine Dune: Imperium-Karte.',
+      'not-a-library': () => 'Diese Datei ist keine Dune: Imperium-Bibliothek.',
+      'empty-library': () => 'In dieser Bibliothek sind weder Symbole noch Fraktionen.',
+      'no-cards': () => 'Die Datei hat keine einzige Karte.',
+      'empty-image': ({ name }) => `Das Bild ist leer: ${name}`,
+      'read-failed': ({ name }) => `Die Datei konnte nicht gelesen werden: ${name}`,
+      'invalid-image': ({ name }) => `Kein gültiges Bild: ${name}`,
+      'canvas-failed': () => 'Der Browser konnte das Bild nicht vorbereiten.',
+      'png-failed': () => 'Der Browser konnte das PNG nicht erzeugen.',
+      'sheet-canvas-failed': () => 'Der Browser konnte den Bogen nicht vorbereiten.',
+      'sheet-read-failed': () => 'Der Browser konnte den Bogen nicht lesen.',
+      'card-canvas-failed': () => 'Die Zeichenfläche der Karte konnte nicht vorbereitet werden.',
+    },
+  },
 }
 
 /** El texto de una cantidad de cartas, con el número adelante. */
@@ -1108,23 +1668,32 @@ const STRINGS: Record<Language, Strings> = {
 export function pluralIcons(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 icon' : `${n} icons`
   if (language === 'pt') return n === 1 ? '1 ícone' : `${n} ícones`
+  if (language === 'fr') return n === 1 ? '1 icône' : `${n} icônes`
+  if (language === 'de') return n === 1 ? '1 Symbol' : `${n} Symbole`
   return n === 1 ? '1 icono' : `${n} iconos`
 }
 
 export function pluralFactions(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 faction' : `${n} factions`
   if (language === 'pt') return n === 1 ? '1 facção' : `${n} facções`
+  if (language === 'fr') return n === 1 ? '1 faction' : `${n} factions`
+  if (language === 'de') return n === 1 ? '1 Fraktion' : `${n} Fraktionen`
   return n === 1 ? '1 facción' : `${n} facciones`
 }
 
+/** El portugués cae en el mismo «carta / cartas» del castellano. */
 export function pluralCards(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 card' : `${n} cards`
+  if (language === 'fr') return n === 1 ? '1 carte' : `${n} cartes`
+  if (language === 'de') return n === 1 ? '1 Karte' : `${n} Karten`
   return n === 1 ? '1 carta' : `${n} cartas`
 }
 
 /** Sólo la palabra, para cuando el número ya va aparte en el texto. */
 export function cardWord(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? 'card' : 'cards'
+  if (language === 'fr') return n === 1 ? 'carte' : 'cartes'
+  if (language === 'de') return n === 1 ? 'Karte' : 'Karten'
   return n === 1 ? 'carta' : 'cartas'
 }
 
@@ -1132,6 +1701,8 @@ export function cardWord(n: number, language: Language): string {
 export function pluralDone(n: number, language: Language): string {
   if (language === 'en') return n === 1 ? '1 finished' : `${n} finished`
   if (language === 'pt') return n === 1 ? '1 finalizada' : `${n} finalizadas`
+  if (language === 'fr') return n === 1 ? '1 terminée' : `${n} terminées`
+  if (language === 'de') return n === 1 ? '1 fertig' : `${n} fertige`
   return n === 1 ? '1 terminada' : `${n} terminadas`
 }
 

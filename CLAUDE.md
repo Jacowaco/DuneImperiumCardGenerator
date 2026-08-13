@@ -539,7 +539,7 @@ De ahí salen cuatro decisiones, todas para no gastar alto:
   de la app entera. Adentro va el descargo —proyecto de fans, sin fines de
   lucro, las marcas y el arte son de Dire Wolf Digital y de los dueños de
   Dune—, el mismo que está en el README, y como cualquier texto de la UI vive
-  en `strings.ts` en los tres idiomas.
+  en `strings.ts` en todos los idiomas.
 
 **Las dos grillas de iconos del panel se abren distinto, y las dos tienen que
 quedar a la vista.** La de las cajas de contenido (`ContentPalette`) está
@@ -873,8 +873,9 @@ y el estado de los botones; el diálogo en sí hay que probarlo a mano.
 
 ## Idioma
 
-La UI y las palabras del juego (nombres de facción, iconos, papeles) se
-pueden ver en español o en inglés. Dos decisiones lo mantienen simple:
+La UI y las palabras del juego (nombres de facción, iconos, papeles) se pueden
+ver en **español, inglés, portugués, francés y alemán**. Dos decisiones lo
+mantienen simple:
 
 **Es una preferencia del navegador, no del mazo.** `src/model/language.ts`
 guarda el idioma elegido en su propio `localStorage`, aparte del autoguardado.
@@ -883,24 +884,37 @@ el idioma que esa máquina tenga elegido, igual que el resto de la UI. Por eso
 no es un campo de `Card` ni de `Deck`, y por eso `exportPrintSheets` recibe el
 idioma como parámetro (`SheetOptions.language`) en vez de leerlo del mazo.
 
+La primera vez se adivina con `navigator.languages`, y el recorrido va **por
+lo que pide el navegador**, no por la lista de idiomas de la app: esa lista ya
+viene en orden de preferencia, así que a alguien con `['fr', 'es']` le tiene
+que tocar francés. Buscando al revés —el primer idioma de la app que aparezca
+en algún lado de la lista— ganaba el orden en que están escritos en
+`LANGUAGE_NAMES`, que no dice nada.
+
 **Diccionario propio, sin librería.** `src/i18n/strings.ts` tiene un objeto
-`Strings` por idioma (`es`, `en` y `pt`), no un mapa `clave -> {es, en, pt}`:
-así TypeScript obliga a que los tres idiomas tengan exactamente los mismos
-campos, con el mismo tipo — si a una función traducida (una que arma texto con un
-número o un nombre adentro) le falta un parámetro en un solo idioma, no
-compila. Es consistente con el resto del proyecto, que evita dependencias
-pesadas para poco (el PDF de las hojas de impresión también se escribe a
-mano).
+`Strings` por idioma (`es`, `en`, `pt`, `fr` y `de`), no un mapa
+`clave -> {es, en, …}`: así TypeScript obliga a que todos los idiomas tengan
+exactamente los mismos campos, con el mismo tipo — si a una función traducida
+(una que arma texto con un número o un nombre adentro) le falta un parámetro en
+un solo idioma, no compila. Es consistente con el resto del proyecto, que evita
+dependencias pesadas para poco (el PDF de las hojas de impresión también se
+escribe a mano).
 
 **Lo que el tipo no puede ver es el idioma del valor.** Un `string` en español
 dentro del bloque `en` compila igual, y así se colaron 22 textos sin traducir —
-los dos bloques de biblioteca de `iconPanel` y `factionPanel`, agregados en
-español a los tres idiomas y traducidos sólo en uno—: la app en inglés mostraba
+los dos bloques de biblioteca de `iconPanel` y `factionPanel`, copiados en
+español a todos los idiomas y traducidos sólo en uno—: la app en inglés mostraba
 «EN ESTE MAZO» y «MI BIBLIOTECA». Peor de agarrar todavía es cuando el idioma va
 como **parámetro**: `usedIn: (cards) => \`In ${pluralCards(cards, 'es')}\`` es
 válido para el compilador y devuelve texto en español. Al agregar una clave hay
-que escribir los tres valores en el momento, y al revisar conviene abrir los
+que escribir todos los valores en el momento, y al revisar conviene abrir los
 diálogos en cada idioma y leerlos — es lo único que lo encuentra.
+
+Ojo también con los **ayudantes de plural** del pie de `strings.ts`
+(`pluralCards`, `cardWord`, `pluralDone`…): son una escalera de `if` que cae en
+castellano al final. Un idioma nuevo que no tenga su rama no rompe nada, sale
+en castellano — el portugués cae ahí a propósito, porque «carta / cartas» es
+igual.
 
 Las palabras del **juego** —facciones, iconos, estilos de agente, variantes de
 influencia, tamaños de papel— no viven en `strings.ts`: se traducen donde ya

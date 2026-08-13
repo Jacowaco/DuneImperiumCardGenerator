@@ -21,14 +21,18 @@ export const PAPERS: Record<
   PaperId,
   { label: Record<Language, string>; widthMm: number; heightMm: number }
 > = {
-  a4: { label: { es: 'A4', en: 'A4', pt: 'A4' }, widthMm: 210, heightMm: 297 },
+  a4: { label: { es: 'A4', en: 'A4', pt: 'A4', fr: 'A4', de: 'A4' }, widthMm: 210, heightMm: 297 },
   letter: {
-    label: { es: 'Carta', en: 'Letter', pt: 'Carta' },
+    label: { es: 'Carta', en: 'Letter', pt: 'Carta', fr: 'Letter', de: 'Letter' },
     widthMm: 215.9,
     heightMm: 279.4,
   },
-  a3: { label: { es: 'A3', en: 'A3', pt: 'A3' }, widthMm: 297, heightMm: 420 },
-  sra3: { label: { es: 'SRA3', en: 'SRA3', pt: 'SRA3' }, widthMm: 320, heightMm: 450 },
+  a3: { label: { es: 'A3', en: 'A3', pt: 'A3', fr: 'A3', de: 'A3' }, widthMm: 297, heightMm: 420 },
+  sra3: {
+    label: { es: 'SRA3', en: 'SRA3', pt: 'SRA3', fr: 'SRA3', de: 'SRA3' },
+    widthMm: 320,
+    heightMm: 450,
+  },
 }
 
 export const PAPER_IDS = Object.keys(PAPERS) as PaperId[]

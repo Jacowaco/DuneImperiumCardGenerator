@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useT } from '../i18n/strings'
 import { LANGUAGE_IDS, LANGUAGE_NAMES, type Language } from '../model/language'
 import { Button } from './controls'
-import { ChevronDownIcon, DownloadIcon, GlobeIcon, RedoIcon, UndoIcon } from './icons'
+import { ChevronDownIcon, DownloadIcon, GlobeIcon, InfoIcon, RedoIcon, UndoIcon } from './icons'
 
 type Props = {
   exporting: boolean
@@ -13,6 +13,7 @@ type Props = {
   onUndo: () => void
   onRedo: () => void
   onExport: () => void
+  onAbout: () => void
 }
 
 /**
@@ -33,6 +34,7 @@ export function TopBar({
   onUndo,
   onRedo,
   onExport,
+  onAbout,
 }: Props) {
   const t = useT()
 
@@ -45,6 +47,21 @@ export function TopBar({
           {t.topBar.subtitle}
         </span>
         <span className="text-[10px] text-zinc-600">v{__APP_VERSION__}</span>
+
+        {/*
+          El descargo de fans va acá, pegado al nombre de la app: es de la app
+          entera, no del mazo ni de la carta abierta. Botón al ras y no uno con
+          fondo, para no competir con las acciones de la derecha.
+        */}
+        <button
+          type="button"
+          onClick={onAbout}
+          title={t.dialogs.about}
+          aria-label={t.dialogs.about}
+          className="self-center rounded p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+        >
+          <InfoIcon />
+        </button>
       </div>
 
       <div className="h-5 w-px shrink-0 bg-zinc-800" />

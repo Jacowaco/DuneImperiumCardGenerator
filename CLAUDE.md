@@ -455,6 +455,14 @@ De ahí salen cuatro decisiones, todas para no gastar alto:
   ocupan lugar fijo mientras no se usan. Ese pie es `children` de
   `CardGallery`, para que la galería siga siendo sólo cartas.
 
+  El cuarto diálogo, **Acerca de** (`src/ui/AboutPanel.tsx`), es la excepción a
+  esa regla de dónde se abre: se abre con el (i) de la barra de arriba, pegado
+  al nombre y a la versión, porque no es del mazo ni de la carta abierta sino
+  de la app entera. Adentro va el descargo —proyecto de fans, sin fines de
+  lucro, las marcas y el arte son de Dire Wolf Digital y de los dueños de
+  Dune—, el mismo que está en el README, y como cualquier texto de la UI vive
+  en `strings.ts` en los tres idiomas.
+
 Donde el navegador no tiene la File System Access API, el aviso de que
 «Guardar» baja una copia va al lado de `DeckFileControls`, en el pie de la
 galería; la versión larga está en su `title`.

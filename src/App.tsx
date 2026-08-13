@@ -38,6 +38,7 @@ import { recallDeckFile, rememberDeckFile } from './model/recentFile'
 import { emptyDeck, loadAutosave, saveAutosave, type Deck } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
+import { AboutPanel } from './ui/AboutPanel'
 import { ArtPanel } from './ui/ArtPanel'
 import { CardDropZones } from './ui/CardDropZones'
 import { CardNameField } from './ui/CardNameField'
@@ -58,7 +59,7 @@ import { TopBar } from './ui/TopBar'
 type TabId = 'front' | 'rules'
 
 /** Lo del mazo se abre en diálogo: se usa cada tanto y no gana lugar fijo. */
-type DialogId = 'icons' | 'factions' | 'print'
+type DialogId = 'icons' | 'factions' | 'print' | 'about'
 
 /** Un punto del historial de deshacer: el mazo y qué carta estaba abierta. */
 type HistoryPoint = { deck: Deck; selected: number }
@@ -569,6 +570,7 @@ export function App() {
           onUndo={undo}
           onRedo={redo}
           onExport={() => void handleExport()}
+          onAbout={() => setDialog('about')}
         />
 
         <div className="flex min-h-0 flex-1">
@@ -824,6 +826,12 @@ export function App() {
               busy={sheetExporting}
               onExportSheets={() => void handleExportSheets()}
             />
+          </Dialog>
+        )}
+
+        {dialog === 'about' && (
+          <Dialog title={t.dialogs.about} onClose={() => setDialog(null)}>
+            <AboutPanel />
           </Dialog>
         )}
 

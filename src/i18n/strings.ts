@@ -26,7 +26,20 @@ type Strings = {
   tabs: { front: string; rules: string }
   doneBanner: { locked: string; unlock: string }
   doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
-  dialogs: { icons: string; factions: string; print: string }
+  dialogs: { icons: string; factions: string; print: string; about: string }
+  /**
+   * El descargo: esto es un proyecto de fans y las marcas son de otros. Va
+   * entero acá y no en un `<p>` suelto del componente porque, como cualquier
+   * texto de la UI, tiene que verse en los tres idiomas.
+   */
+  about: {
+    fanMade: string
+    ownership: string
+    notAffiliated: string
+    personalUse: string
+    takedown: string
+    source: string
+  }
   deckFooter: {
     deckGroup: string
     libraryGroup: string
@@ -225,7 +238,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Terminada — clic para reabrir',
       markDoneTitle: 'Marcar como terminada',
     },
-    dialogs: { icons: 'Iconos propios', factions: 'Facciones propias', print: 'Imprimir el mazo' },
+    dialogs: {
+      icons: 'Iconos propios',
+      factions: 'Facciones propias',
+      print: 'Imprimir el mazo',
+      about: 'Acerca de',
+    },
+    about: {
+      fanMade:
+        'Este es un proyecto de fans para fans, sin fines de lucro: es gratis, no tiene publicidad y no se cobra nada por usarlo.',
+      ownership:
+        'Dune: Imperium, sus expansiones, su arte, sus iconos y su diseño gráfico son propiedad de Dire Wolf Digital, LLC. «Dune» y el universo de la novela pertenecen a Herbert Properties LLC. Todas las marcas y los derechos son de sus respectivos dueños.',
+      notAffiliated:
+        'Esta app no está afiliada a Dire Wolf Digital ni a los titulares de la marca Dune, ni cuenta con su patrocinio ni con su aprobación.',
+      personalUse:
+        'Las cartas que armes acá son para uso personal: jugar en casa, probar ideas y compartirlas con tu grupo. No son para venderlas ni para producirlas comercialmente. Si te gusta el juego, comprá el original y apoyá a quienes lo hicieron.',
+      takedown:
+        'Si tenés derechos sobre alguno de estos materiales y querés que algo se dé de baja, escribinos por el repositorio y lo resolvemos.',
+      source: 'Código y contacto',
+    },
     deckFooter: {
       deckGroup: 'Mazo',
       libraryGroup: 'Biblioteca',
@@ -452,7 +483,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finished — click to reopen',
       markDoneTitle: 'Mark as finished',
     },
-    dialogs: { icons: 'Custom icons', factions: 'Custom factions', print: 'Print the deck' },
+    dialogs: {
+      icons: 'Custom icons',
+      factions: 'Custom factions',
+      print: 'Print the deck',
+      about: 'About',
+    },
+    about: {
+      fanMade:
+        'This is a fan project, made by fans for fans and not for profit: it is free, it carries no ads and nothing is charged for using it.',
+      ownership:
+        'Dune: Imperium, its expansions, artwork, icons and graphic design are property of Dire Wolf Digital, LLC. “Dune” and the universe of the novel belong to Herbert Properties LLC. All trademarks and rights belong to their respective owners.',
+      notAffiliated:
+        'This app is not affiliated with, sponsored by or endorsed by Dire Wolf Digital or the holders of the Dune trademark.',
+      personalUse:
+        'The cards you build here are for personal use: playing at home, trying out ideas and sharing them with your group. They are not meant to be sold or produced commercially. If you enjoy the game, buy the original and support the people who made it.',
+      takedown:
+        'If you hold rights over any of this material and want something taken down, get in touch through the repository and it will be sorted out.',
+      source: 'Source code and contact',
+    },
     deckFooter: {
       deckGroup: 'Deck',
       libraryGroup: 'Library',
@@ -678,7 +727,25 @@ const STRINGS: Record<Language, Strings> = {
       reopenTitle: 'Finalizada — clique para reabrir',
       markDoneTitle: 'Marcar como finalizada',
     },
-    dialogs: { icons: 'Ícones próprios', factions: 'Facções próprias', print: 'Imprimir o baralho' },
+    dialogs: {
+      icons: 'Ícones próprios',
+      factions: 'Facções próprias',
+      print: 'Imprimir o baralho',
+      about: 'Sobre',
+    },
+    about: {
+      fanMade:
+        'Este é um projeto de fãs para fãs, sem fins lucrativos: é gratuito, não tem publicidade e nada é cobrado para usá-lo.',
+      ownership:
+        'Dune: Imperium, suas expansões, sua arte, seus ícones e seu design gráfico são propriedade da Dire Wolf Digital, LLC. “Dune” e o universo do romance pertencem à Herbert Properties LLC. Todas as marcas e direitos pertencem aos seus respectivos donos.',
+      notAffiliated:
+        'Este app não é afiliado à Dire Wolf Digital nem aos detentores da marca Dune, e não conta com o patrocínio nem a aprovação deles.',
+      personalUse:
+        'As cartas que você montar aqui são para uso pessoal: jogar em casa, testar ideias e compartilhá-las com o seu grupo. Não são para vender nem para produzir comercialmente. Se você gosta do jogo, compre o original e apoie quem o fez.',
+      takedown:
+        'Se você tem direitos sobre algum destes materiais e quer que algo seja retirado, escreva pelo repositório e resolvemos.',
+      source: 'Código e contato',
+    },
     deckFooter: {
       deckGroup: 'Baralho',
       libraryGroup: 'Biblioteca',

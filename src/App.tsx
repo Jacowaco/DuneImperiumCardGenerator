@@ -49,7 +49,7 @@ import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
 import { Button, HintMark } from './ui/controls'
 import { Dialog } from './ui/Dialog'
-import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, FolderIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon, SaveIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
 import { IconPanel } from './ui/IconPanel'
 import { PrintPanel } from './ui/PrintPanel'
@@ -943,6 +943,17 @@ export function App() {
               <GroupTitle hint={t.deckFooter.libraryGroupHint}>
                 {t.deckFooter.libraryGroup}
               </GroupTitle>
+              {/*
+                Los dos diálogos y, debajo, el archivo de la biblioteca entera.
+
+                Exportar e importar viven acá y no adentro de los diálogos
+                porque son de **las dos listas a la vez**: el `.dunelib.json`
+                lleva iconos y facciones juntos. Puestos al pie de «Mi
+                biblioteca» en cada diálogo aparecían dos veces haciendo lo
+                mismo, y desde el de facciones el botón exportaba además los
+                iconos, que ahí no se ven. En el grupo que titula las dos, el
+                alcance del botón es el del grupo.
+              */}
               <div className="grid grid-cols-2 gap-2">
                 <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
                   <DiamondIcon />
@@ -951,6 +962,23 @@ export function App() {
                 <Button onClick={() => setDialog('factions')} className="px-2 text-xs">
                   <BannerIcon />
                   {t.deckFooter.factions}
+                </Button>
+                <Button
+                  onClick={exportLibrary}
+                  disabled={myIcons.length === 0 && myFactions.length === 0}
+                  title={t.libraryFile.exportTitle}
+                  className="px-2 text-xs"
+                >
+                  <SaveIcon />
+                  {t.libraryFile.export}
+                </Button>
+                <Button
+                  onClick={importLibrary}
+                  title={t.libraryFile.importTitle}
+                  className="px-2 text-xs"
+                >
+                  <FolderIcon />
+                  {t.libraryFile.import}
                 </Button>
               </div>
             </div>
@@ -965,8 +993,6 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <IconPanel
-              onExportLibrary={exportLibrary}
-              onImportLibrary={importLibrary}
               icons={deck.icons}
               library={myIcons}
               cards={cards}
@@ -987,8 +1013,6 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <FactionPanel
-              onExportLibrary={exportLibrary}
-              onImportLibrary={importLibrary}
               factions={deck.factions}
               library={myFactions}
               cards={cards}

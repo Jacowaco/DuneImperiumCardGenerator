@@ -276,9 +276,17 @@ seguir llevando el PNG adentro.
 Que viva en IndexedDB significa que se pierde al cambiar de máquina, al borrar
 los datos del sitio o al abrir la app en otro navegador. Un mazo se lleva lo
 que usa, pero eso no alcanza para mudarla: lo que todavía no usaste no está en
-ningún mazo. Para eso está **Exportar / Importar** al pie de la sección
-«Mi biblioteca», en los dos diálogos —la misma acción desde cualquiera de los
-dos, porque el archivo es uno solo—.
+ningún mazo. Para eso está **Exportar / Importar**, en el grupo «Biblioteca»
+del pie de la galería, debajo de los dos botones que abren los diálogos.
+
+Van ahí y no adentro de cada diálogo porque son de **las dos listas a la vez**:
+el archivo lleva iconos y facciones juntos. Al pie de «Mi biblioteca» en cada
+uno aparecían dos veces haciendo lo mismo, y desde el de facciones «Exportar»
+guardaba además los iconos, que ahí no se ven —y se deshabilitaba por no tener
+facciones aunque hubiera iconos que exportar—. En el grupo que titula a las dos,
+el alcance del botón es el del grupo. De paso el aviso verde de importado se ve:
+un `<dialog>` modal está en la capa de arriba, así que el aviso del preview
+quedaba tapado justo cuando era lo único que confirmaba que el botón hizo algo.
 
 `src/model/libraryFile.ts` define el formato: `.dunelib.json`, con
 `format: 'dune-imperium-library'`, versión 1, `icons[]` y `factions[]`. Es un
@@ -474,6 +482,7 @@ sale de ahí, porque lo que escasea es el alto y lo que sobra es el ancho.
 │              │                                     │ Imprim│Export  │
 │              │                                     │ Biblioteca:    │
 │              │                                     │ Iconos│Faccion │
+│              │                                     │ Export│Importa │
 └──────────────┴─────────────────────────────────────┴────────────────┘
 ```
 

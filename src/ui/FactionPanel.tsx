@@ -13,8 +13,8 @@ import { CONTENT, FACTION_BAND } from '../render/constants'
 import { useCardImage } from '../render/imageCache'
 import { fontString, layoutSmallCaps } from '../render/text'
 import { useFontsReady } from '../render/useFontsReady'
-import { Action, Button, Hint, Section } from './controls'
-import { CloseIcon, DownloadIcon, FolderIcon, SaveIcon, UploadIcon } from './icons'
+import { Action, Hint, Section } from './controls'
+import { CloseIcon, DownloadIcon, SaveIcon, UploadIcon } from './icons'
 
 /** El emblema alcanza para reconocer la facción; el que manda es el color. */
 const PREVIEW_HEIGHT = 32
@@ -42,9 +42,6 @@ type Props = {
   onLibraryChange: (factions: CustomFaction[]) => void
   onCopyToDeck: (faction: CustomFaction) => void
   onCopyToLibrary: (faction: CustomFaction) => void
-  /** La biblioteca entera a un archivo, y de vuelta. Ver `libraryFile.ts`. */
-  onExportLibrary: () => void
-  onImportLibrary: () => void
   onError: (message: string) => void
 }
 
@@ -64,8 +61,6 @@ export function FactionPanel({
   onLibraryChange,
   onCopyToDeck,
   onCopyToLibrary,
-  onExportLibrary,
-  onImportLibrary,
   onError,
 }: Props) {
   const t = useT()
@@ -179,24 +174,6 @@ export function FactionPanel({
             />
           ))}
         </Grid>
-
-        {/* Al pie de la biblioteca y no arriba: son de todo lo que hay en la
-            sección, y se usan mucho menos que copiar de un lado al otro. */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={onExportLibrary}
-            disabled={library.length === 0}
-            title={t.libraryFile.exportTitle}
-            className="px-2 text-xs"
-          >
-            <SaveIcon />
-            {t.libraryFile.export}
-          </Button>
-          <Button onClick={onImportLibrary} title={t.libraryFile.importTitle} className="px-2 text-xs">
-            <FolderIcon />
-            {t.libraryFile.import}
-          </Button>
-        </div>
       </Section>
 
       <input

@@ -6,8 +6,8 @@ import { DEFAULT_CUSTOM_ICON_NUMBER_COLOR, loadCustomIcon, type CustomIcon } fro
 import { customIconEntry } from '../model/iconLibrary'
 import { useLanguage } from '../model/language'
 import { CONTENT } from '../render/constants'
-import { Action, Button, Hint, Section } from './controls'
-import { CloseIcon, DownloadIcon, FolderIcon, MinusIcon, PlusIcon, SaveIcon, UploadIcon } from './icons'
+import { Action, Hint, Section } from './controls'
+import { CloseIcon, DownloadIcon, MinusIcon, PlusIcon, SaveIcon, UploadIcon } from './icons'
 
 /**
  * Cuánto se achica la carta para la previsualización: el icono nominal del
@@ -28,9 +28,6 @@ type Props = {
   onLibraryChange: (icons: CustomIcon[]) => void
   onCopyToDeck: (icon: CustomIcon) => void
   onCopyToLibrary: (icon: CustomIcon) => void
-  /** La biblioteca entera a un archivo, y de vuelta. Ver `libraryFile.ts`. */
-  onExportLibrary: () => void
-  onImportLibrary: () => void
   onError: (message: string) => void
 }
 
@@ -61,8 +58,6 @@ export function IconPanel({
   onLibraryChange,
   onCopyToDeck,
   onCopyToLibrary,
-  onExportLibrary,
-  onImportLibrary,
   onError,
 }: Props) {
   const t = useT()
@@ -280,24 +275,6 @@ export function IconPanel({
             </Tile>
           ))}
         </Grid>
-
-        {/* Al pie de la biblioteca y no arriba: son de todo lo que hay en la
-            sección, y se usan mucho menos que copiar de un lado al otro. */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={onExportLibrary}
-            disabled={library.length === 0}
-            title={t.libraryFile.exportTitle}
-            className="px-2 text-xs"
-          >
-            <SaveIcon />
-            {t.libraryFile.export}
-          </Button>
-          <Button onClick={onImportLibrary} title={t.libraryFile.importTitle} className="px-2 text-xs">
-            <FolderIcon />
-            {t.libraryFile.import}
-          </Button>
-        </div>
       </Section>
 
       <input

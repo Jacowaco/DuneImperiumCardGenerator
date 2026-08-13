@@ -47,7 +47,7 @@ import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
 import { Button } from './ui/controls'
 import { Dialog } from './ui/Dialog'
-import { BannerIcon, DiamondIcon, DownloadIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { BannerIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
 import { IconPanel } from './ui/IconPanel'
 import { PrintPanel } from './ui/PrintPanel'
@@ -492,6 +492,11 @@ export function App() {
     patchCard({ art: { ...card.art, transform } })
   }
 
+  const toggleArtLock = (locked: boolean) => {
+    if (!card.art) return
+    patchCard({ art: { ...card.art, locked } })
+  }
+
   const handleExport = async () => {
     const stage = stageRef.current
     if (!stage) return
@@ -596,6 +601,7 @@ export function App() {
                     onPick={() => fileInputRef.current?.click()}
                     onTransform={setTransform}
                     onClear={() => patchCard({ art: null })}
+                    onToggleLock={toggleArtLock}
                   />
                   <CardPanel card={card} onChange={patchCard} />
                 </>
@@ -655,6 +661,22 @@ export function App() {
             >
               {card.done ? t.doneBadge.done : t.doneBadge.markDone}
             </button>
+
+            {card.art && (
+              <button
+                onClick={() => toggleArtLock(!(card.art?.locked ?? false))}
+                title={card.art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
+                aria-pressed={card.art.locked}
+                className={`absolute top-4 right-4 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow transition-colors ${
+                  card.art.locked
+                    ? 'bg-zinc-600 text-zinc-50 hover:bg-zinc-500'
+                    : 'bg-zinc-950/70 text-zinc-400 hover:text-zinc-50'
+                }`}
+              >
+                {card.art.locked ? <LockIcon /> : <LockOpenIcon />}
+                {t.artPanel.frame}
+              </button>
+            )}
 
             {dragging && (
               <div className="pointer-events-none absolute inset-4 rounded-lg border-2 border-dashed border-sand-500" />

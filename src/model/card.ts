@@ -28,6 +28,8 @@ export type CardArt = {
   width: number
   height: number
   transform: ArtTransform
+  /** Congela el encuadre: ignora rueda, arrastre y el slider de zoom. */
+  locked?: boolean
 }
 
 /**

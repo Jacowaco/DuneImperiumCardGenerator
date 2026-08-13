@@ -189,6 +189,22 @@ export const ChevronDownIcon = () => (
   </Icon>
 )
 
+/** Encuadre bloqueado: no se mueve con la rueda ni el arrastre. */
+export const LockIcon = () => (
+  <Icon>
+    <path d="M4.75 7.5V5a3.25 3.25 0 0 1 6.5 0v2.5" />
+    <path d="M4 7.5h8v6h-8z" />
+  </Icon>
+)
+
+/** El mismo candado, abierto: el encuadre se puede tocar. */
+export const LockOpenIcon = () => (
+  <Icon>
+    <path d="M4.75 7.5V5a3.25 3.25 0 0 1 6.5 0" />
+    <path d="M4 7.5h8v6h-8z" />
+  </Icon>
+)
+
 /** Agarradera para arrastrar y reordenar una fila de lista. */
 export const GripIcon = () => (
   <Icon>

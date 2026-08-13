@@ -65,7 +65,7 @@ export function CardStage({
   useFontsReady()
 
   const handleWheel = (event: KonvaEventObject<WheelEvent>) => {
-    if (!card.art || !onArtChange) return
+    if (!card.art || !onArtChange || card.art.locked) return
     event.evt.preventDefault()
 
     const stage = event.target.getStage()
@@ -100,7 +100,7 @@ export function CardStage({
   }
 
   const handleDrag = (event: KonvaEventObject<DragEvent>) => {
-    if (!card.art || !onArtChange) return
+    if (!card.art || !onArtChange || card.art.locked) return
     onArtChange(
       clampArtTransform(
         { ...card.art.transform, x: event.target.x(), y: event.target.y() },
@@ -131,7 +131,7 @@ export function CardStage({
             <ArtImage
               art={card.art}
               stageScale={scale}
-              draggable={Boolean(onArtChange)}
+              draggable={Boolean(onArtChange) && !card.art.locked}
               onDrag={handleDrag}
             />
           )}

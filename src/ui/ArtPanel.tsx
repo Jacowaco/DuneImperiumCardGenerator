@@ -9,13 +9,14 @@ import {
 } from '../model/art'
 import type { ArtTransform, CardArt } from '../model/card'
 import { Button, Hint, Section } from './controls'
-import { ImageIcon } from './icons'
+import { ImageIcon, LockIcon, LockOpenIcon } from './icons'
 
 type Props = {
   art: CardArt | null
   onPick: () => void
   onTransform: (transform: ArtTransform) => void
   onClear: () => void
+  onToggleLock?: (locked: boolean) => void
 }
 
 // El zoom se mueve en escala logarítmica para que el slider se sienta parejo.
@@ -28,7 +29,7 @@ const toSlider = (art: CardArt, scale: number) =>
 const fromSlider = (art: CardArt, value: number) =>
   coverScale(art.width, art.height) * Math.exp(value * range(art))
 
-export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
+export function ArtPanel({ art, onPick, onTransform, onClear, onToggleLock }: Props) {
   const t = useT()
 
   return (
@@ -44,6 +45,7 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
           </Button>
         )}
       </div>
+
       {!art && <Hint>{t.artPanel.dragHint}</Hint>}
 
       <label className="flex flex-col gap-2">
@@ -58,7 +60,7 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
           min={0}
           max={1}
           step={0.001}
-          disabled={!art}
+          disabled={!art || art?.locked}
           value={art ? toSlider(art, art.transform.scale) : 0}
           onChange={(event) => {
             if (!art) return
@@ -87,17 +89,30 @@ export function ArtPanel({ art, onPick, onTransform, onClear }: Props) {
         />
       </label>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Button disabled={!art} onClick={() => art && onTransform(fitCover(art.width, art.height))}>
-          {t.artPanel.fit}
-        </Button>
-        <Button
-          disabled={!art}
-          onClick={() => art && onTransform(centerAt(art.width, art.height, art.transform.scale))}
-        >
-          {t.artPanel.center}
-        </Button>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <Button disabled={!art || art?.locked} onClick={() => art && onTransform(fitCover(art.width, art.height))}>
+            {t.artPanel.fit}
+          </Button>
+          <Button
+            disabled={!art || art?.locked}
+            onClick={() => art && onTransform(centerAt(art.width, art.height, art.transform.scale))}
+          >
+            {t.artPanel.center}
+          </Button>
+        </div>
+        {art && onToggleLock && (
+          <Button
+            onClick={() => onToggleLock(!(art?.locked ?? false))}
+            title={art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
+            aria-label={art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
+            className={art.locked ? 'bg-zinc-800 hover:bg-zinc-700' : ''}
+          >
+            {art.locked ? <LockIcon /> : <LockOpenIcon />}
+          </Button>
+        )}
       </div>
+      {art?.locked && <Hint>{t.artPanel.lockedHint}</Hint>}
     </Section>
   )
 }

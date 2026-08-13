@@ -687,8 +687,8 @@ export function App() {
                 Abajo, lo que el mazo tiene adentro, que se edita en diálogo. */}
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2 border-b border-zinc-800 pb-3">
-                <GroupTitle>{t.deckFooter.deckGroup}</GroupTitle>
                 <DeckFileControls
+                  title={t.deckFooter.deckGroup}
                   name={deck.name}
                   fileName={file?.name ?? null}
                   dirty={dirty}

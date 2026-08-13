@@ -6,6 +6,8 @@ import { Button } from './controls'
 import { EditIcon, FolderIcon, PlusIcon, SaveIcon } from './icons'
 
 type Props = {
+  /** Título del grupo, al costado del nombre. Ver abajo. */
+  title: string
   /** Nombre que eligió el usuario, o null si nunca lo tocó. */
   name: string | null
   /** Nombre del archivo abierto, o null si el mazo todavía no se guardó. */
@@ -25,6 +27,7 @@ type Props = {
  * busca, aunque se usen seguido.
  */
 export function DeckFileControls({
+  title,
   name,
   fileName,
   dirty,
@@ -59,9 +62,18 @@ export function DeckFileControls({
 
   return (
     <div className="flex flex-col gap-2">
-      {/* El punto ámbar dice que hay cambios sin guardar; el archivo completo,
+      {/* El nombre va en el renglón del título del grupo y no debajo: es el
+          nombre *de eso*, y así el pie se ahorra un renglón entero — que en
+          una pantalla baja es justo lo que escasea.
+
+          El punto ámbar dice que hay cambios sin guardar; el archivo completo,
           con extensión, va en el tooltip. */}
-      {editing ? (
+      <div className="flex min-w-0 items-center gap-2">
+        <h2 className="shrink-0 text-[11px] font-semibold tracking-[0.18em] text-sand-500 uppercase">
+          {title}
+        </h2>
+
+        {editing ? (
         <input
           autoFocus
           value={draft}
@@ -73,22 +85,25 @@ export function DeckFileControls({
             if (event.key === 'Escape') setEditing(false)
           }}
           placeholder={t.deckFooter.unsavedName}
-          className="w-full rounded border border-sand-500 bg-zinc-900 px-1.5 py-1 text-sm text-zinc-100 outline-none"
+          className="min-w-0 flex-1 rounded border border-sand-500 bg-zinc-900 px-1.5 py-1 text-sm text-zinc-100 outline-none"
         />
-      ) : (
+        ) : (
         <button
           type="button"
           onClick={startEdit}
           title={fileName ?? t.deckFooter.renameTitle}
-          className={`group flex min-w-0 items-center gap-1.5 rounded px-1 py-1 text-sm hover:bg-zinc-900 ${
+          className={`group flex min-w-0 flex-1 items-center gap-1.5 rounded px-1 py-1 text-sm hover:bg-zinc-900 ${
             displayName ? 'text-zinc-100' : 'text-zinc-500 italic'
           }`}
         >
           {dirty && <span className="size-1.5 shrink-0 rounded-full bg-amber-400" />}
           <span className="truncate">{displayName ?? t.deckFooter.unsavedName}</span>
-          <EditIcon />
+          <span className="ml-auto shrink-0 text-zinc-500">
+            <EditIcon />
+          </span>
         </button>
-      )}
+        )}
+      </div>
 
       {!native && (
         <span

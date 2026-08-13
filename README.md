@@ -1,23 +1,24 @@
 # Dune: Imperium Card Generator
 
-App para armar cartas custom de *Dune: Imperium*: subís una imagen, elegís
-facción, costo, iconos y texto de reglas, y exportás la carta lista para
-imprimir (o una hoja completa con varias cartas).
+An app for building custom *Dune: Imperium* cards: upload an image, pick a
+faction, cost, icons and rules text, and export the card ready to print (or a
+full sheet with several cards).
 
-**Probala online:** https://jacowaco.github.io/DuneImperiumCardGenerator/
+**Try it online:** https://jacowaco.github.io/DuneImperiumCardGenerator/
 
-## Correr en local
+## Running locally
 
 ```
 npm install
-npm run dev      # servidor de desarrollo
-npm run build    # typecheck + build de producción
+npm run dev      # development server
+npm run build    # typecheck + production build
 ```
 
-`npm run assets` regenera `src/assets/` desde `psd-exports/` (necesita Python
-+ Pillow) — sólo hace falta si se tocan los recursos del PSD.
+`npm run assets` regenerates `src/assets/` from `psd-exports/` (needs Python +
+Pillow) — only necessary when the PSD resources change.
 
-## Documentación
+## Documentation
 
-Las decisiones de diseño, las medidas del template y cómo verificar cambios
-están en [`CLAUDE.md`](CLAUDE.md).
+The design decisions, the template measurements and how to verify changes are
+in [`CLAUDE.md`](CLAUDE.md) (written in Spanish).
+

@@ -13,6 +13,12 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(version),
   },
   server: {
+    // Puerto propio de este proyecto, fijo: el 5173/5174 de siempre los usan
+    // otros juegos de la máquina. `strictPort` hace que falle en vez de
+    // correrse al siguiente libre — un servidor en otro puerto significa
+    // mirar la app equivocada.
+    port: 5188,
+    strictPort: true,
     watch: {
       // Si un archivo del proyecto está abierto en otro programa, Windows lo
       // bloquea y el watcher de Vite se cae con EBUSY, tirando abajo todo el

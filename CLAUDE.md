@@ -12,7 +12,7 @@ medidas, con el porqué de cada una.
 ## Cómo correrlo
 
 ```
-npm run dev      # servidor de desarrollo
+npm run dev      # servidor de desarrollo, en http://localhost:5188/
 npm run assets   # regenera src/assets/ desde psd-exports/ (necesita Python + Pillow)
 npm run build    # typecheck + build de producción
 ```

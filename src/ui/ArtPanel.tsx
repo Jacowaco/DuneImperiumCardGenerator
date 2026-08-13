@@ -46,15 +46,11 @@ export function ArtPanel({ art, onPick, onTransform, onClear, onToggleLock }: Pr
         )}
       </div>
 
-      {!art && <Hint>{t.artPanel.dragHint}</Hint>}
-
-      <label className="flex flex-col gap-2">
-        <span className="flex justify-between text-xs text-zinc-400">
-          <span>{t.artPanel.zoom}</span>
-          <span className="tabular-nums">
-            {art ? `${Math.round(art.transform.scale * 100)}%` : '—'}
-          </span>
-        </span>
+      {/* Etiqueta, barra y porcentaje en un solo renglón: en esta pantalla lo
+          que escasea es el alto. El porcentaje va con ancho fijo para que la
+          barra no se corra mientras se mueve. */}
+      <label className="flex items-center gap-3 text-xs text-zinc-400">
+        <span>{t.artPanel.zoom}</span>
         <input
           type="range"
           min={0}
@@ -85,8 +81,14 @@ export function ArtPanel({ art, onPick, onTransform, onClear, onToggleLock }: Pr
               ),
             )
           }}
-          className="accent-sand-500"
+          className="min-w-0 flex-1 accent-sand-500"
         />
+        {/* Sin imagen el control está deshabilitado y la barra queda en el
+            extremo izquierdo: 0% es lo que dice esa posición. Un guion se lee
+            como que algo falta. */}
+        <span className="w-10 text-right tabular-nums">
+          {art ? Math.round(art.transform.scale * 100) : 0}%
+        </span>
       </label>
 
       <div className="flex flex-col gap-2">

@@ -107,11 +107,11 @@ export function ContentPalette() {
         // este mazo, así que pesan más que revisar todo el catálogo del juego
         // para encontrarlos — y las expansiones aparte, para no tener que
         // mirar tooltip por tooltip cuando el mazo no las usa.
-        <div className="flex max-h-[38vh] flex-col gap-2 overflow-y-auto rounded-md bg-zinc-900 p-2">
+        <div className="flex max-h-[42vh] flex-col gap-2 overflow-y-auto rounded-md bg-zinc-900 p-2">
           {groups
             .filter((group) => group.ids.length > 0)
             .map((group) => (
-              <div key={group.label} className="flex flex-col gap-2">
+              <div key={group.label} className="flex flex-col gap-1">
                 <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
                   {group.label}
                 </p>
@@ -149,7 +149,11 @@ export function Grid({
   onDragEnd?: () => void
 }) {
   return (
-    <div className="grid grid-cols-6 gap-1">
+    // Nueve por fila y casi sin aire entre ellos: el catálogo entero son unas
+    // cuarenta y cinco piezas, y a seis por fila había que scrollear la grilla
+    // para llegar a influencia. Los iconos son siluetas de color plano, así
+    // que se siguen reconociendo chicos.
+    <div className="grid grid-cols-9 gap-0.5">
       {ids.map((icon) => (
         <button
           key={icon}
@@ -161,7 +165,7 @@ export function Grid({
             onDragStart?.(icon)
           }}
           onDragEnd={onDragEnd}
-          className={`flex aspect-square items-center justify-center rounded p-1 transition-colors hover:bg-zinc-700 ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`flex aspect-square items-center justify-center rounded p-0.5 transition-colors hover:bg-zinc-700 ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
         >
           <img
             src={library[icon].url}

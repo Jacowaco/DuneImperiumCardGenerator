@@ -106,7 +106,6 @@ type Strings = {
     changeImage: string
     chooseImage: string
     remove: string
-    dragHint: string
     zoom: string
     fit: string
     center: string
@@ -308,7 +307,6 @@ const STRINGS: Record<Language, Strings> = {
       changeImage: 'Cambiar imagen…',
       chooseImage: 'Elegir imagen…',
       remove: 'Quitar',
-      dragHint: 'También podés arrastrar un archivo sobre la carta.',
       zoom: 'Zoom',
       fit: 'Ajustar',
       center: 'Centrar',
@@ -536,7 +534,6 @@ const STRINGS: Record<Language, Strings> = {
       changeImage: 'Change image…',
       chooseImage: 'Choose image…',
       remove: 'Remove',
-      dragHint: 'You can also drag a file onto the card.',
       zoom: 'Zoom',
       fit: 'Fit',
       center: 'Center',
@@ -765,7 +762,6 @@ const STRINGS: Record<Language, Strings> = {
       changeImage: 'Trocar imagem…',
       chooseImage: 'Escolher imagem…',
       remove: 'Remover',
-      dragHint: 'Você também pode arrastar um arquivo sobre a carta.',
       zoom: 'Zoom',
       fit: 'Ajustar',
       center: 'Centralizar',

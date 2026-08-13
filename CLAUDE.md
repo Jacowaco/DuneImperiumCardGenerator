@@ -783,19 +783,16 @@ propias — un mazo así muestra en el pie de la galería el nombre del archivo,
 hasta que se edita.
 
 La 6 sumó `library?: CustomIcon[]` y la 8 sumó `factionLibrary?:
-CustomFaction[]`, los dos opcionales: las bibliotecas enteras del que guardó,
-no sólo lo que el mazo tiene disponible (eso lo siguen llevando
-`icons[]`/`factions[]`). Es lo que arma el toggle "Incluir biblioteca"
-al pie de la columna del mazo, junto a "Iconos…", "Facciones…" e
-"Imprimir…" —es del mazo entero y se usa cada tanto, no algo que se mire en
-cada guardado, así que no va en la `TopBar`—, sólo visible si hay algo en
-alguna de las dos bibliotecas para ofrecer, para compartir mazo y bibliotecas
-en un solo archivo sin que el guardado de todos los días —incluido el
-autoguardado— arrastre toda la biblioteca. El contador del toggle suma las dos
-listas.
+CustomFaction[]`, las bibliotecas enteras del que guardó. **Hoy sólo se leen.**
+Las escribía el toggle "Incluir biblioteca" del pie de la galería, que existía
+porque el archivo llevaba nada más que los iconos que las cartas usaban — era
+la única forma de mandar uno todavía sin usar. Ahora `icons[]`/`factions[]` son
+la lista entera del mazo y la biblioteca tiene su propio archivo, así que el
+toggle no agregaba nada que no se pudiera hacer mejor de otra forma y se fue;
+los archivos que traigan esos campos siguen abriendo igual.
 
-Al abrir, **a la biblioteca entra sólo eso**: lo que el que guardó eligió
-compartir (`adoptIcons` en `src/model/iconStore.ts`, `adoptFactions` en
+Al abrir, **a la biblioteca entra sólo eso**: lo que un archivo viejo traiga
+empaquetado (`adoptIcons` en `src/model/iconStore.ts`, `adoptFactions` en
 `src/model/factionStore.ts`). Los `icons[]`/`factions[]` del mazo se quedan en
 el mazo — se dibujan igual, y pasarlos a tu biblioteca es una copia que se pide
 desde el diálogo. Antes se adoptaba todo, y abrir el mazo de otro te llenaba la

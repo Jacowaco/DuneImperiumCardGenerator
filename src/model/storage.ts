@@ -45,10 +45,13 @@ type SavedFile = {
   icons: CustomIcon[]
   factions: CustomFaction[]
   /**
-   * Las bibliotecas enteras, y no sólo lo que las cartas usan — opcionales,
-   * para cuando el usuario elige compartir un solo archivo con mazo y
-   * bibliotecas juntos (el toggle "Incluir biblioteca" del pie de la
-   * galería). Ausentes en un guardado normal.
+   * Las bibliotecas enteras del que guardó. **Sólo se leen**: las escribía el
+   * toggle "Incluir biblioteca", que existía porque el archivo llevaba nada
+   * más que los iconos que las cartas usaban — era la única forma de mandar
+   * uno todavía sin usar. Hoy `icons[]`/`factions[]` son la lista entera del
+   * mazo, y para mudar la biblioteca está su propio archivo
+   * (`libraryFile.ts`), así que ya no se escriben; los archivos que las
+   * traigan siguen abriendo igual.
    */
   library?: CustomIcon[]
   factionLibrary?: CustomFaction[]
@@ -57,10 +60,7 @@ type SavedFile = {
 /** La versión 1 guardaba una sola carta. */
 type LegacyFile = { format: string; version?: number; card?: Card }
 
-export function serializeDeck(
-  deck: Deck,
-  options?: { library?: CustomIcon[]; factionLibrary?: CustomFaction[] },
-): string {
+export function serializeDeck(deck: Deck): string {
   const file: SavedFile = {
     format: 'dune-imperium-card',
     version: 8,
@@ -68,8 +68,6 @@ export function serializeDeck(
     cards: deck.cards,
     icons: deck.icons,
     factions: deck.factions,
-    library: options?.library,
-    factionLibrary: options?.factionLibrary,
   }
   return JSON.stringify(file, null, 2)
 }
@@ -144,14 +142,11 @@ function migrate(card: LegacyCard): Card {
   return card
 }
 
-export function downloadDeck(deck: Deck, library?: CustomIcon[], factionLibrary?: CustomFaction[]) {
+export function downloadDeck(deck: Deck) {
   // Un mazo de una sola carta se guarda con el nombre de esa carta; varios,
   // con un nombre genérico, porque no hay uno mejor que elegir.
   const name = deck.cards.length === 1 ? deck.cards[0].title.trim() || 'carta' : 'mazo'
-  downloadText(
-    serializeDeck(deck, { library, factionLibrary }),
-    `${fileSafe(name)}${FILE_EXTENSION}`,
-  )
+  downloadText(serializeDeck(deck), `${fileSafe(name)}${FILE_EXTENSION}`)
 }
 
 /**

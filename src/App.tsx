@@ -43,7 +43,7 @@ import { CardGallery } from './ui/CardGallery'
 import { ContentDragProvider } from './ui/contentDrag'
 import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
-import { Button, Toggle } from './ui/controls'
+import { Button } from './ui/controls'
 import { Dialog } from './ui/Dialog'
 import { BannerIcon, DiamondIcon, DownloadIcon, ImageIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
@@ -125,16 +125,12 @@ export function App() {
   const [future, setFuture] = useState<HistoryPoint[]>([])
   const coalesceRef = useRef<{ key: string; time: number } | null>(null)
 
-  // Los iconos propios son del usuario y no del mazo: una sola lista, guardada
-  // en el navegador y disponible en todos los mazos. El archivo del mazo se
-  // lleva adentro los que sus cartas usan, para seguir abriendo igual en otra
-  // máquina, pero la lista no se maneja desde ahí.
+  /**
+   * La biblioteca de iconos propios: los que subiste alguna vez, guardados en
+   * este navegador. **No es lo que se dibuja** —eso es `deck.icons`— sino el
+   * lugar de donde se copian a un mazo. Ver `iconStore.ts`.
+   */
   const [myIcons, setMyIcons] = useState<CustomIcon[]>([])
-  // El toggle del pie de la galería: si el próximo Guardar/Guardar como suma
-  // las bibliotecas enteras (iconos y facciones propias) al archivo, no sólo
-  // lo que las cartas usan.
-  const [includeLibrary, setIncludeLibrary] = useState(false)
-
   // Mismo patrón que los iconos propios: una lista del usuario, guardada en
   // el navegador y disponible en todos los mazos.
   const [myFactions, setMyFactions] = useState<CustomFaction[]>([])
@@ -453,12 +449,7 @@ export function App() {
   }
 
   const saveAs = async () => {
-    const saved = await saveDeckAs(
-      deck,
-      suggestedName(deck),
-      includeLibrary ? myIcons : undefined,
-      includeLibrary ? myFactions : undefined,
-    )
+    const saved = await saveDeckAs(deck, suggestedName(deck))
     openFile(saved)
     setDirty(false)
   }
@@ -468,12 +459,7 @@ export function App() {
   const handleSave = () =>
     file?.handle
       ? run(async () => {
-          const result = await saveDeck(
-            deck,
-            file.handle!,
-            includeLibrary ? myIcons : undefined,
-            includeLibrary ? myFactions : undefined,
-          )
+          const result = await saveDeck(deck, file.handle!)
 
           // Si el archivo ya no está, preguntar dónde guardar es lo único que
           // queda. Si lo que falta es el permiso, decirlo: abrir el diálogo en
@@ -708,15 +694,6 @@ export function App() {
                   onOpenFile={(picked) => void run(async () => loadDeck(await openDeckFromFile(picked)))}
                 />
               </div>
-              {(myIcons.length > 0 || myFactions.length > 0) && (
-                <span title={t.deckFooter.includeLibraryTooltip}>
-                  <Toggle
-                    label={t.deckFooter.includeLibrary(myIcons.length, myFactions.length)}
-                    checked={includeLibrary}
-                    onChange={setIncludeLibrary}
-                  />
-                </span>
-              )}
               <div className="grid grid-cols-3 gap-2">
                 <Button onClick={() => setDialog('icons')} className="px-2 text-xs">
                   <DiamondIcon />

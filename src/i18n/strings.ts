@@ -40,8 +40,6 @@ type Strings = {
     icons: string
     factions: string
     print: string
-    includeLibrary: (icons: number, factions: number) => string
-    includeLibraryTooltip: string
     exportAll: string
     exportingAll: string
   }
@@ -239,9 +237,6 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Iconos…',
       factions: 'Facciones…',
       print: 'Imprimir…',
-      includeLibrary: (icons, factions) => `Incluir biblioteca (${icons} iconos, ${factions} facciones)`,
-      includeLibraryTooltip:
-        'Suma al archivo tus bibliotecas enteras de iconos y facciones propias, no sólo los que usan estas cartas — así se puede abrir en otra computadora con las bibliotecas completas.',
       exportAll: 'Exportar PNGs…',
       exportingAll: 'Exportando…',
     },
@@ -466,9 +461,6 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Icons…',
       factions: 'Factions…',
       print: 'Print…',
-      includeLibrary: (icons, factions) => `Include library (${icons} icons, ${factions} factions)`,
-      includeLibraryTooltip:
-        'Bundles your whole custom icon and faction libraries into the file, not just the ones these cards use — so it opens on another computer with the full libraries.',
       exportAll: 'Export PNGs…',
       exportingAll: 'Exporting…',
     },
@@ -694,9 +686,6 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Ícones…',
       factions: 'Facções…',
       print: 'Imprimir…',
-      includeLibrary: (icons, factions) => `Incluir biblioteca (${icons} ícones, ${factions} facções)`,
-      includeLibraryTooltip:
-        'Inclui no arquivo as suas bibliotecas inteiras de ícones e facções próprias, não só os que estas cartas usam — assim ele abre em outro computador com as bibliotecas completas.',
       exportAll: 'Exportar PNGs…',
       exportingAll: 'Exportando…',
     },

@@ -144,25 +144,23 @@ export async function openDeckFromFile(file: File): Promise<OpenedDeck> {
 export async function saveDeckAs(
   deck: Deck,
   suggestedName: string,
-  library?: CustomIcon[],
-  factionLibrary?: CustomFaction[],
 ): Promise<{ handle: Handle | null; name: string }> {
   const show = picker().showSaveFilePicker
   if (!show || writesBlocked) {
-    downloadDeck(deck, library, factionLibrary)
+    downloadDeck(deck)
     return { handle: null, name: suggestedName }
   }
 
   const handle = await show({ suggestedName, types: FILE_TYPES })
 
   try {
-    await write(handle, deck, library, factionLibrary)
+    await write(handle, deck)
   } catch (cause) {
     if (!isUnwritable(cause)) throw cause
     // El diálogo lo dio pero la escritura no: este entorno no sirve para
     // sobrescribir. Queda el camino viejo, bajar una copia.
     writesBlocked = true
-    downloadDeck(deck, library, factionLibrary)
+    downloadDeck(deck)
     return { handle: null, name: suggestedName }
   }
   return { handle, name: handle.name }
@@ -176,16 +174,11 @@ export async function saveDeckAs(
  */
 export type SaveResult = 'saved' | 'denied' | 'missing'
 
-export async function saveDeck(
-  deck: Deck,
-  handle: Handle,
-  library?: CustomIcon[],
-  factionLibrary?: CustomFaction[],
-): Promise<SaveResult> {
+export async function saveDeck(deck: Deck, handle: Handle): Promise<SaveResult> {
   if (!(await ensureWritable(handle))) return 'denied'
 
   try {
-    await write(handle, deck, library, factionLibrary)
+    await write(handle, deck)
   } catch (cause) {
     if (!isUnwritable(cause)) throw cause
     return (cause as DOMException).name === 'NotFoundError' ? 'missing' : 'denied'
@@ -225,14 +218,9 @@ async function ensureWritable(handle: Handle) {
   }
 }
 
-async function write(
-  handle: Handle,
-  deck: Deck,
-  library?: CustomIcon[],
-  factionLibrary?: CustomFaction[],
-) {
+async function write(handle: Handle, deck: Deck) {
   const writable = await handle.createWritable()
-  await writable.write(serializeDeck(deck, { library, factionLibrary }))
+  await writable.write(serializeDeck(deck))
   await writable.close()
 }
 

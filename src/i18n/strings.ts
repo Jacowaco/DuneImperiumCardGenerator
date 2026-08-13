@@ -108,8 +108,24 @@ type Strings = {
     center: string
     dragZoomHint: string
     placeholder: string
+    frame: string
+    frameFree: string
+    frameLocked: string
+    lockedHint: string
   }
   iconPanel: {
+    deckTitle: string
+    deckHint: string
+    libraryTitle: string
+    libraryHint: string
+    emptyLibraryHint: string
+    usedIn: (cards: number) => string
+    unused: string
+    alreadyInDeck: string
+    toLibraryLabel: (label: string) => string
+    toDeckLabel: (label: string) => string
+    forgetLabel: (label: string) => string
+    confirmRemoveFromLibrary: (label: string) => string
     emptyHint: string
     nameLabel: (label: string) => string
     heightTitle: string
@@ -126,6 +142,18 @@ type Strings = {
     removeLabel: (label: string) => string
   }
   factionPanel: {
+    deckTitle: string
+    deckHint: string
+    libraryTitle: string
+    libraryHint: string
+    emptyLibraryHint: string
+    usedIn: (cards: number) => string
+    unused: string
+    alreadyInDeck: string
+    toLibraryLabel: (label: string) => string
+    toDeckLabel: (label: string) => string
+    forgetLabel: (label: string) => string
+    confirmRemoveFromLibrary: (label: string) => string
     emptyHint: string
     nameLabel: (label: string) => string
     colorTitle: string
@@ -274,8 +302,27 @@ const STRINGS: Record<Language, Strings> = {
       center: 'Centrar',
       dragZoomHint: 'Arrastrá la imagen sobre la carta para moverla; la rueda hace zoom.',
       placeholder: 'Arrastrá una imagen acá\no tocá para elegirla',
+      frame: 'Encuadre',
+      frameFree: 'Encuadre libre',
+      frameLocked: 'Encuadre bloqueado',
+      lockedHint: 'Encuadre bloqueado: desbloqueálo para mover o hacer zoom.',
     },
     iconPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Los que este mazo tiene disponibles: son los que ofrece el selector de las cajas y los que viajan adentro del archivo, así que el mazo se ve igual en otra máquina. El tamaño y el nombre son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Los que subiste alguna vez, guardados en este navegador. No viajan con el mazo y no se dibujan: es de donde copiar para no volver a subir lo mismo en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ningún icono en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerlo a otros mazos. Los mazos que ya lo tienen adentro no cambian. ¿Sacarlo?`,
       emptyHint:
         'Para reglas que el juego no trae. Quedan disponibles en todos tus mazos y aparecen al final del selector de iconos.',
       nameLabel: (label) => `Nombre de ${label}`,
@@ -294,6 +341,21 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Borrar ${label}`,
     },
     factionPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Las que este mazo tiene disponibles: son las que ofrece el selector de facción y las que viajan adentro del archivo. El nombre y el color son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Las que armaste alguna vez, guardadas en este navegador. No viajan con el mazo: es de donde copiar para no volver a subir el emblema en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ninguna facción en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerla a otros mazos. Los mazos que ya la tienen adentro no cambian. ¿Sacarla?`,
       emptyHint:
         'Para mazos con facciones que el juego no trae. Quedan disponibles en todos tus mazos, y generan solas los 4 rombos de "+1/-1 Influencia" de esa facción para usar en el contenido de una carta.',
       nameLabel: (label) => `Nombre de ${label}`,
@@ -455,8 +517,27 @@ const STRINGS: Record<Language, Strings> = {
       center: 'Center',
       dragZoomHint: 'Drag the image over the card to move it; the wheel zooms.',
       placeholder: 'Drag an image here\nor tap to choose one',
+      frame: 'Frame',
+      frameFree: 'Free frame',
+      frameLocked: 'Frame locked',
+      lockedHint: 'Frame locked: unlock it to move or zoom.',
     },
     iconPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Los que este mazo tiene disponibles: son los que ofrece el selector de las cajas y los que viajan adentro del archivo, así que el mazo se ve igual en otra máquina. El tamaño y el nombre son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Los que subiste alguna vez, guardados en este navegador. No viajan con el mazo y no se dibujan: es de donde copiar para no volver a subir lo mismo en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ningún icono en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerlo a otros mazos. Los mazos que ya lo tienen adentro no cambian. ¿Sacarlo?`,
       emptyHint:
         "For rules the game doesn't include. They stay available in all your decks and show up at the end of the icon picker.",
       nameLabel: (label) => `Name of ${label}`,
@@ -475,6 +556,21 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Delete ${label}`,
     },
     factionPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Las que este mazo tiene disponibles: son las que ofrece el selector de facción y las que viajan adentro del archivo. El nombre y el color son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Las que armaste alguna vez, guardadas en este navegador. No viajan con el mazo: es de donde copiar para no volver a subir el emblema en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ninguna facción en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerla a otros mazos. Los mazos que ya la tienen adentro no cambian. ¿Sacarla?`,
       emptyHint:
         "For decks with factions the game doesn't include. They stay available in all your decks, and their emblem alone generates the 4 \"+1/-1 Influence\" diamonds for that faction, ready to use as card content.",
       nameLabel: (label) => `Name of ${label}`,
@@ -637,8 +733,27 @@ const STRINGS: Record<Language, Strings> = {
       center: 'Centralizar',
       dragZoomHint: 'Arraste a imagem sobre a carta para movê-la; a roda faz zoom.',
       placeholder: 'Arraste uma imagem aqui\nou toque para escolher',
+      frame: 'Moldura',
+      frameFree: 'Moldura livre',
+      frameLocked: 'Moldura bloqueada',
+      lockedHint: 'Moldura bloqueada: desbloqueie-a para mover ou ampliar.',
     },
     iconPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Los que este mazo tiene disponibles: son los que ofrece el selector de las cajas y los que viajan adentro del archivo, así que el mazo se ve igual en otra máquina. El tamaño y el nombre son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Los que subiste alguna vez, guardados en este navegador. No viajan con el mazo y no se dibujan: es de donde copiar para no volver a subir lo mismo en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ningún icono en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerlo a otros mazos. Los mazos que ya lo tienen adentro no cambian. ¿Sacarlo?`,
       emptyHint:
         'Para regras que o jogo não traz. Ficam disponíveis em todos os seus baralhos e aparecem no final do seletor de ícones.',
       nameLabel: (label) => `Nome de ${label}`,
@@ -657,6 +772,21 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Excluir ${label}`,
     },
     factionPanel: {
+      deckTitle: 'En este mazo',
+      deckHint:
+        'Las que este mazo tiene disponibles: son las que ofrece el selector de facción y las que viajan adentro del archivo. El nombre y el color son de acá y no tocan la biblioteca.',
+      libraryTitle: 'Mi biblioteca',
+      libraryHint:
+        'Las que armaste alguna vez, guardadas en este navegador. No viajan con el mazo: es de donde copiar para no volver a subir el emblema en cada mazo.',
+      emptyLibraryHint: 'Todavía no guardaste ninguna facción en la biblioteca.',
+      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
+      unused: 'Sin usar',
+      alreadyInDeck: 'Ya está en el mazo',
+      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
+      toDeckLabel: (label) => `Traer ${label} a este mazo`,
+      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+      confirmRemoveFromLibrary: (label) =>
+        `«${label}» sale de tu biblioteca y no vas a poder traerla a otros mazos. Los mazos que ya la tienen adentro no cambian. ¿Sacarla?`,
       emptyHint:
         'Para baralhos com facções que o jogo não traz. Ficam disponíveis em todos os seus baralhos, e o emblema sozinho gera os 4 losangos de "+1/-1 Influência" dessa facção, prontos para usar como conteúdo de carta.',
       nameLabel: (label) => `Nome de ${label}`,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 import { describeError, useT } from '../i18n/strings'
 import { cardIconIds, type AnyFactionId, type Card } from '../model/card'
@@ -14,7 +14,7 @@ import { useCardImage } from '../render/imageCache'
 import { fontString, layoutSmallCaps } from '../render/text'
 import { useFontsReady } from '../render/useFontsReady'
 import { Action, Hint, Section } from './controls'
-import { UploadIcon } from './icons'
+import { DownloadIcon, SaveIcon, UploadIcon } from './icons'
 
 /** El emblema alcanza para reconocer la facción; el que manda es el color. */
 const PREVIEW_HEIGHT = 32
@@ -32,10 +32,16 @@ const BAND = {
 }
 
 type Props = {
+  /** Las del mazo abierto: las que el selector ofrece y la carta dibuja. */
   factions: CustomFaction[]
+  /** Las de este navegador, para copiar de un mazo a otro. */
+  library: CustomFaction[]
   /** Todas las cartas del mazo, para saber cuáles usan cada facción. */
   cards: Card[]
   onChange: (factions: CustomFaction[]) => void
+  onLibraryChange: (factions: CustomFaction[]) => void
+  onCopyToDeck: (faction: CustomFaction) => void
+  onCopyToLibrary: (faction: CustomFaction) => void
   onError: (message: string) => void
 }
 
@@ -43,16 +49,25 @@ type Props = {
  * Facciones propias: las que arma el usuario para mazos con facciones que el
  * juego no trae.
  *
- * **Son del usuario, no del mazo.** Mismo patrón que `IconPanel`: una sola
- * lista, guardada en el navegador (`factionStore.ts`) y disponible en todos
- * los mazos. Que el archivo del mazo se lleve adentro las que sus cartas usan
- * es cosa de `packFactions` al guardar, y acá no se ve.
+ * Dos listas y dos secciones, igual que `IconPanel` y por lo mismo: **en este
+ * mazo** es lo que se dibuja y viaja en el archivo, **mi biblioteca** es de
+ * este navegador y sólo sirve para copiar de un mazo a otro.
  */
-export function FactionPanel({ factions, cards, onChange, onError }: Props) {
+export function FactionPanel({
+  factions,
+  library,
+  cards,
+  onChange,
+  onLibraryChange,
+  onCopyToDeck,
+  onCopyToLibrary,
+  onError,
+}: Props) {
   const t = useT()
   const { language } = useLanguage()
   const inputRef = useRef<HTMLInputElement | null>(null)
   const usage = countUsage(cards)
+  const inDeck = new Set(factions.map((faction) => faction.id))
 
   const add = async (files: FileList | null) => {
     if (!files?.length) return
@@ -62,7 +77,12 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
       .filter((result): result is PromiseFulfilledResult<CustomFaction> => result.status === 'fulfilled')
       .map((result) => result.value)
 
-    if (loaded.length) onChange([...factions, ...loaded])
+    // Igual que un icono propio: subirla ya es decir que te importa, así que
+    // además de entrar al mazo queda guardada en la biblioteca.
+    if (loaded.length) {
+      onChange([...factions, ...loaded])
+      for (const faction of loaded) onCopyToLibrary(faction)
+    }
 
     const failed = results.find((result) => result.status === 'rejected')
     if (failed)
@@ -81,37 +101,81 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
     onChange(factions.filter((item) => item.id !== faction.id))
   }
 
+  const removeFromLibrary = (faction: CustomFaction) => {
+    if (!confirm(t.factionPanel.confirmRemoveFromLibrary(faction.label))) return
+    onLibraryChange(library.filter((item) => item.id !== faction.id))
+  }
+
   return (
-    <Section>
-      {factions.length === 0 && <Hint>{t.factionPanel.emptyHint}</Hint>}
+    <>
+      <Section title={t.factionPanel.deckTitle} hint={t.factionPanel.deckHint}>
+        {factions.length === 0 && <Hint>{t.factionPanel.emptyHint}</Hint>}
 
-      {/*
-        Un poco más anchas que la grilla de `IconPanel`, porque acá lo que se
-        decide es el color y un cuadradito de 20 px no deja verlo — pero no
-        más: el ancho que pide la ficha es el de la banda, que se lee igual
-        chica, así que entran tres por fila en el diálogo.
-      */}
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-2">
-        {factions.map((faction) => (
-          <FactionTile
-            key={faction.id}
-            faction={faction}
-            onUpdate={(patch) => update(faction.id, patch)}
-            onRemove={() => remove(faction)}
-          />
-        ))}
+        {/*
+          Un poco más anchas que la grilla de `IconPanel`, porque acá lo que se
+          decide es el color y un cuadradito de 20 px no deja verlo — pero no
+          más: el ancho que pide la ficha es el de la banda, que se lee igual
+          chica, así que entran tres por fila en el diálogo.
+        */}
+        <Grid>
+          {factions.map((faction) => (
+            <FactionTile
+              key={faction.id}
+              faction={faction}
+              note={
+                usage[faction.id]
+                  ? t.factionPanel.usedIn(usage[faction.id])
+                  : t.factionPanel.unused
+              }
+              action={
+                <Action
+                  label={t.factionPanel.toLibraryLabel(faction.label)}
+                  onClick={() => onCopyToLibrary(faction)}
+                >
+                  <SaveIcon />
+                </Action>
+              }
+              onUpdate={(patch) => update(faction.id, patch)}
+              removeLabel={t.factionPanel.removeLabel(faction.label)}
+              onRemove={() => remove(faction)}
+            />
+          ))}
 
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-700 p-2 text-xs font-medium text-zinc-400 transition-colors hover:border-sand-500 hover:bg-zinc-900/60 hover:text-sand-100"
-        >
-          <UploadIcon />
-          {t.factionPanel.upload}
-        </button>
-      </div>
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-700 p-2 text-xs font-medium text-zinc-400 transition-colors hover:border-sand-500 hover:bg-zinc-900/60 hover:text-sand-100"
+          >
+            <UploadIcon />
+            {t.factionPanel.upload}
+          </button>
+        </Grid>
+      </Section>
 
-      {/* Cómo funciona todo esto va en el "(i)" del título del diálogo: es de
-          la sección entera, no de lo que quedó abajo de la grilla. */}
+      <Section title={t.factionPanel.libraryTitle} hint={t.factionPanel.libraryHint}>
+        {library.length === 0 && <Hint>{t.factionPanel.emptyLibraryHint}</Hint>}
+
+        <Grid>
+          {library.map((faction) => (
+            <FactionTile
+              key={faction.id}
+              faction={faction}
+              note={inDeck.has(faction.id) ? t.factionPanel.alreadyInDeck : ''}
+              action={
+                <Action
+                  label={t.factionPanel.toDeckLabel(faction.label)}
+                  disabled={inDeck.has(faction.id)}
+                  onClick={() => onCopyToDeck(faction)}
+                >
+                  <DownloadIcon />
+                </Action>
+              }
+              removeLabel={t.factionPanel.forgetLabel(faction.label)}
+              onRemove={() => removeFromLibrary(faction)}
+            />
+          ))}
+        </Grid>
+      </Section>
+
       <input
         ref={inputRef}
         type="file"
@@ -123,13 +187,18 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
           event.target.value = ''
         }}
       />
-    </Section>
+    </>
   )
 }
 
+const Grid = ({ children }: { children: ReactNode }) => (
+  <div className="grid grid-cols-[repeat(auto-fill,minmax(176px,1fr))] gap-2">{children}</div>
+)
+
 /**
- * Una facción propia: cómo se ve y las dos cosas que se editan de ella, el
- * nombre y el color.
+ * Una facción: cómo se ve y, si es la del mazo, las dos cosas que se editan de
+ * ella —el nombre y el color—. Sin `onUpdate` es la ficha de la biblioteca,
+ * que se mira pero no se toca: para cambiarla, se la trae al mazo.
  *
  * Va en su propio componente porque el tinte de la banda es un hook
  * (`useTintedFactionBand`), y también porque cada ficha tiene el borrador del
@@ -137,11 +206,19 @@ export function FactionPanel({ factions, cards, onChange, onError }: Props) {
  */
 function FactionTile({
   faction,
+  note,
+  action,
   onUpdate,
+  removeLabel,
   onRemove,
 }: {
   faction: CustomFaction
-  onUpdate: (patch: Partial<CustomFaction>) => void
+  note: string
+  action: ReactNode
+  onUpdate?: (patch: Partial<CustomFaction>) => void
+  /** Sacarla del mazo y sacarla de la biblioteca no son lo mismo, y la ficha
+   *  es la misma: quién la usa dice qué está haciendo esa cruz. */
+  removeLabel: string
   onRemove: () => void
 }) {
   const t = useT()
@@ -165,31 +242,44 @@ function FactionTile({
 
       <BandPreview color={faction.color} label={faction.label} />
 
-      <input
-        value={faction.label}
-        aria-label={t.factionPanel.nameLabel(faction.label)}
-        onChange={(event) => onUpdate({ label: event.target.value })}
-        className="w-full min-w-0 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
-      />
+      {onUpdate ? (
+        <>
+          <input
+            value={faction.label}
+            aria-label={t.factionPanel.nameLabel(faction.label)}
+            onChange={(event) => onUpdate({ label: event.target.value })}
+            className="w-full min-w-0 rounded border border-zinc-700 bg-zinc-950 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-sand-500"
+          />
 
-      <div className="flex items-center gap-1.5">
-        <input
-          type="color"
-          value={faction.color}
-          title={t.factionPanel.colorTitle}
-          aria-label={t.factionPanel.colorLabel(faction.label)}
-          onChange={(event) => onUpdate({ color: event.target.value })}
-          className="h-8 min-w-0 flex-1 cursor-pointer rounded border border-zinc-700 bg-zinc-950 p-1 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-sm [&::-webkit-color-swatch]:border-0"
-        />
-        <HexField
-          value={faction.color}
-          label={t.factionPanel.hexLabel(faction.label)}
-          onChange={(color) => onUpdate({ color })}
-        />
+          <div className="flex items-center gap-1.5">
+            <input
+              type="color"
+              value={faction.color}
+              title={t.factionPanel.colorTitle}
+              aria-label={t.factionPanel.colorLabel(faction.label)}
+              onChange={(event) => onUpdate({ color: event.target.value })}
+              className="h-8 min-w-0 flex-1 cursor-pointer rounded border border-zinc-700 bg-zinc-950 p-1 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-sm [&::-webkit-color-swatch]:border-0"
+            />
+            <HexField
+              value={faction.color}
+              label={t.factionPanel.hexLabel(faction.label)}
+              onChange={(color) => onUpdate({ color })}
+            />
+          </div>
+        </>
+      ) : (
+        <p className="truncate text-xs text-zinc-300" title={faction.label}>
+          {faction.label}
+        </p>
+      )}
+
+      <div className="flex items-center gap-1">
+        <span className="min-w-0 flex-1 truncate text-[11px] text-zinc-500">{note}</span>
+        {action}
       </div>
 
       <div className="absolute top-1 right-1">
-        <Action label={t.factionPanel.removeLabel(faction.label)} onClick={onRemove}>
+        <Action label={removeLabel} onClick={onRemove}>
           ×
         </Action>
       </div>

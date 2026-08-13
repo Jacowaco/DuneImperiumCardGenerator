@@ -182,7 +182,8 @@ la copia, así que el mismo icono en dos mazos es el mismo icono y la biblioteca
 no se llena de duplicados.
 
 Eso es lo que sostiene la regla de arriba: **el render nunca ve la biblioteca**,
-sólo el mazo. Si el selector de las cajas ofreciera iconos de la biblioteca
+sólo el mazo. `App.tsx` arma el catálogo (`buildIconLibrary`) con `deck.icons`
+y nada más. Si el selector de las cajas ofreciera iconos de la biblioteca
 directamente, una carta podría dibujar algo que no está en el archivo — se
 vería bien acá y saldría con un hueco en cualquier otra máquina.
 
@@ -190,6 +191,23 @@ Las dos direcciones son copias explícitas y la copia es **de ida nomás**:
 cambiarle el tamaño a un icono en un mazo no toca la biblioteca. Al revés sería
 peor: editar un icono te cambiaría cartas ya terminadas de otro mazo sin que lo
 pidas. Subir uno sí lo guarda solo, porque subirlo ya es decir que te importa.
+Por eso las dos copias no se comportan igual: del mazo a la biblioteca **pisa**
+lo que hubiera con ese id (volver a guardarlo es decir "quedate con esta
+versión"), y de la biblioteca al mazo **no**, porque el mazo puede tener un
+tamaño ajustado para estas cartas.
+
+Los dos diálogos muestran las dos listas, una sección cada una, porque son dos
+cosas distintas y confundirlas se paga caro: borrar de la biblioteca es para
+siempre y en todos los mazos, borrar del mazo no. La ficha del mazo dice
+además en cuántas cartas se usa —o "sin usar"—, y la de la biblioteca marca si
+ya está en el mazo.
+
+`deck.icons` y `deck.factions` son **la lista del mazo**, no un resumen de lo
+que las cartas usan: se traen a mano, pueden estar sin usar todavía, y se
+guardan tal cual. Antes se recalculaban solas en cada cambio (`packIcons` /
+`packFactions`, ya borradas) y eso hacía imposible tener un icono listo para
+usar. Como son parte del mazo, se editan con `mutate` igual que una carta: se
+deshacen y marcan el archivo como sin guardar.
 
 IndexedDB y no localStorage porque ahí vive el autoguardado del mazo: unos
 pocos iconos de decenas de KB competirían por los ~5 MB del mismo cupo y lo
@@ -222,6 +240,16 @@ Cómo funciona el acomodo:
   difieren, el renglón queda descentrado.
 - Todo va centrado, horizontal y verticalmente — confirmado contra las cartas
   de `reference/cards/`.
+
+Una pieza de texto **vacía** se dibuja con la palabra «Texto» atenuada, y por
+eso `layoutContent` recibe la palabra de relleno como parámetro. Sin ella la
+pieza no dibuja nada, así que recién soltada en la caja no había de dónde
+agarrarla sobre la carta — que es justo cuando se la quiere mover. El relleno
+lo pide el editor y nadie más: la galería, las hojas de impresión y el export
+en lote no lo pasan, así que ven la carta igual que el PNG. El botón de
+exportar la carta abierta sí saca el PNG del stage del preview, y por eso lo
+apaga antes con `flushSync` (`placeholders` en `CardStage`): ocultar el relleno
+no alcanzaría, porque el lugar que ocupaba corre el resto del renglón.
 
 Las medidas de `CONTENT.text` salen de medir una carta impresa
 (`reference/cards/appropriate.png`): ahí el bloque está al 66% porque tiene
@@ -707,18 +735,22 @@ hasta que se edita.
 
 La 6 sumó `library?: CustomIcon[]` y la 8 sumó `factionLibrary?:
 CustomFaction[]`, los dos opcionales: las bibliotecas enteras del que guardó,
-no sólo lo que las cartas usan (eso lo siguen llevando `icons[]`/`factions[]`,
-vía `packIcons`/`packFactions`). Es lo que arma el toggle "Incluir biblioteca"
+no sólo lo que el mazo tiene disponible (eso lo siguen llevando
+`icons[]`/`factions[]`). Es lo que arma el toggle "Incluir biblioteca"
 al pie de la columna del mazo, junto a "Iconos…", "Facciones…" e
 "Imprimir…" —es del mazo entero y se usa cada tanto, no algo que se mire en
 cada guardado, así que no va en la `TopBar`—, sólo visible si hay algo en
 alguna de las dos bibliotecas para ofrecer, para compartir mazo y bibliotecas
 en un solo archivo sin que el guardado de todos los días —incluido el
-autoguardado— arrastre iconos o facciones que esa carta no usa. El contador
-del toggle suma las dos listas. Al abrir un archivo con `library`/
-`factionLibrary`, esos iconos y facciones se adoptan igual que los de
-`icons[]`/`factions[]` (`adoptIcons` en `src/model/iconStore.ts`,
-`adoptFactions` en `src/model/factionStore.ts`).
+autoguardado— arrastre toda la biblioteca. El contador del toggle suma las dos
+listas.
+
+Al abrir, **a la biblioteca entra sólo eso**: lo que el que guardó eligió
+compartir (`adoptIcons` en `src/model/iconStore.ts`, `adoptFactions` en
+`src/model/factionStore.ts`). Los `icons[]`/`factions[]` del mazo se quedan en
+el mazo — se dibujan igual, y pasarlos a tu biblioteca es una copia que se pide
+desde el diálogo. Antes se adoptaba todo, y abrir el mazo de otro te llenaba la
+biblioteca de iconos ajenos.
 
 El nombre del mazo (`deck.name`) es del usuario, no del archivo: se edita
 clickeando el nombre al pie de la galería (`DeckFileControls`) y no tiene por

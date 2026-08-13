@@ -86,18 +86,22 @@ export function Button({ variant = 'ghost', className = '', ...props }: ButtonPr
 export function Action({
   label,
   onClick,
+  disabled,
   children,
 }: {
   label: string
   onClick: () => void
-  children: string
+  disabled?: boolean
+  /** Una cruz, o un icono de `icons.tsx` cuando la acción no es quitar algo. */
+  children: ReactNode
 }) {
   return (
     <button
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-950/40 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+      disabled={disabled}
+      className="flex size-7 shrink-0 items-center justify-center rounded-md bg-zinc-950/40 text-sm font-medium text-zinc-200 transition-colors hover:bg-zinc-700 hover:text-zinc-50 disabled:pointer-events-none disabled:opacity-30"
     >
       {children}
     </button>

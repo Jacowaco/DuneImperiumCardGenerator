@@ -1,17 +1,8 @@
 import type { IconId } from '../assets/icons'
-import {
-  cardIconIds,
-  emptyCard,
-  PLAY_ROWS,
-  type AnyFactionId,
-  type Card,
-  type ContentPart,
-  type Faction,
-} from './card'
-import { isCustomFactionId, type CustomFaction } from './customFaction'
+import { emptyCard, PLAY_ROWS, type Card, type ContentPart, type Faction } from './card'
+import type { CustomFaction } from './customFaction'
 import type { CustomIcon } from './customIcon'
 import { AppError } from './errors'
-import { factionIdFromInfluenceIconId } from './factionArt'
 
 /**
  * El mazo se guarda como JSON plano. Las imágenes viajan adentro como data
@@ -23,10 +14,17 @@ export const FILE_EXTENSION = '.dune.json'
 const AUTOSAVE_KEY = 'dune-card-generator:card'
 
 /**
- * Lo que se guarda y lo que se edita: las cartas y los iconos propios.
+ * Lo que se guarda y lo que se edita: las cartas, y los iconos y facciones
+ * propios que este mazo tiene disponibles.
  *
  * Los iconos van al lado de las cartas y no adentro de cada una porque un mazo
  * con reglas custom los usa en varias, y así el PNG viaja una sola vez.
+ *
+ * Son **la lista del mazo**, no un resumen de lo que las cartas usan: se traen
+ * a mano desde la biblioteca (o se suben), pueden estar sin usar todavía, y
+ * son los que el selector de las cajas ofrece. Por eso el archivo los guarda
+ * tal como están — lo que se ve acá es exactamente lo que se va a ver al
+ * abrirlo en otra máquina.
  */
 export type Deck = {
   /** El nombre que ve el usuario, independiente del archivo: se edita desde la
@@ -59,42 +57,6 @@ type SavedFile = {
 /** La versión 1 guardaba una sola carta. */
 type LegacyFile = { format: string; version?: number; card?: Card }
 
-/**
- * Los iconos propios que el archivo tiene que llevar: los que alguna carta
- * nombra.
- *
- * La lista de iconos es del usuario y vive en el navegador
- * (`iconStore.ts`), no del mazo; el archivo se lleva una copia de lo que usa
- * para seguir siendo autocontenido —abrirlo en otra máquina tiene que verse
- * igual— sin arrastrar toda la biblioteca en cada mazo.
- */
-export function packIcons(cards: Card[], icons: CustomIcon[]): CustomIcon[] {
-  const used = new Set(cards.flatMap((card) => [...cardIconIds(card)]))
-  return icons.filter((icon) => used.has(icon.id))
-}
-
-/**
- * Las facciones propias que el archivo tiene que llevar: las que alguna
- * carta nombra, como banda (`card.factions`), como icono de agente
- * (`card.agentIcons`), o **sólo a través de uno de sus rombos de influencia
- * generados** en una caja de contenido, sin banda ni icono de agente. Ese
- * tercer caso importa: si se mirara nada más que las dos listas, guardar
- * descartaría una facción usada así, y al reabrir el rombo ya colocado se
- * volvería "icono borrado".
- */
-export function packFactions(cards: Card[], factions: CustomFaction[]): CustomFaction[] {
-  const used = new Set<AnyFactionId>()
-  for (const card of cards) {
-    for (const id of card.factions) if (isCustomFactionId(id)) used.add(id)
-    for (const id of card.agentIcons) if (isCustomFactionId(id)) used.add(id)
-    for (const id of cardIconIds(card)) {
-      const factionId = factionIdFromInfluenceIconId(id)
-      if (factionId) used.add(factionId)
-    }
-  }
-  return factions.filter((faction) => used.has(faction.id))
-}
-
 export function serializeDeck(
   deck: Deck,
   options?: { library?: CustomIcon[]; factionLibrary?: CustomFaction[] },
@@ -104,8 +66,8 @@ export function serializeDeck(
     version: 8,
     name: deck.name,
     cards: deck.cards,
-    icons: packIcons(deck.cards, deck.icons),
-    factions: packFactions(deck.cards, deck.factions),
+    icons: deck.icons,
+    factions: deck.factions,
     library: options?.library,
     factionLibrary: options?.factionLibrary,
   }

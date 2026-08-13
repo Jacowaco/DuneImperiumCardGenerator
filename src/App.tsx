@@ -8,11 +8,16 @@ import { exportPrintSheets } from './export/printSheet'
 import { describeError, stringsFor } from './i18n/strings'
 import { loadArtFromFile } from './model/art'
 import { emptyCard, type ArtTransform, type Card } from './model/card'
-import { mergeFactions, sameFactions, type CustomFaction } from './model/customFaction'
-import { mergeIcons, sameIcons, type CustomIcon } from './model/customIcon'
+import { mergeFactions, type CustomFaction } from './model/customFaction'
+import { mergeIcons, type CustomIcon } from './model/customIcon'
 import { warmFactionAgentIcons, warmFactionInfluenceIcons, warmFactionPickerBadges } from './model/factionArt'
 import { buildFactionLibrary, FactionLibraryProvider } from './model/factionLibrary'
-import { adoptFactions, syncFactionLibrary } from './model/factionStore'
+import {
+  adoptFactions,
+  listLibraryFactions,
+  saveLibraryFaction,
+  syncFactionLibrary,
+} from './model/factionStore'
 import {
   isCancelled,
   openDeck,
@@ -23,10 +28,10 @@ import {
   type OpenedDeck,
 } from './model/files'
 import { buildIconLibrary, IconLibraryProvider } from './model/iconLibrary'
-import { adoptIcons, syncLibrary } from './model/iconStore'
+import { adoptIcons, listLibraryIcons, saveLibraryIcon, syncLibrary } from './model/iconStore'
 import { LanguageProvider, useLanguageState } from './model/language'
 import { recallDeckFile, rememberDeckFile } from './model/recentFile'
-import { emptyDeck, loadAutosave, packFactions, packIcons, saveAutosave, type Deck } from './model/storage'
+import { emptyDeck, loadAutosave, saveAutosave, type Deck } from './model/storage'
 import { CardStage } from './render/CardStage'
 import { useFitScale } from './render/useFitScale'
 import { ArtPanel } from './ui/ArtPanel'
@@ -129,20 +134,12 @@ export function App() {
   const [myFactions, setMyFactions] = useState<CustomFaction[]>([])
 
   useEffect(() => {
-    // El mazo recuperado del autoguardado puede traer iconos que la biblioteca
-    // todavía no tiene: es la misma adopción que al abrir un archivo.
-    void adoptIcons(deck.icons).then(setMyIcons)
-    void adoptFactions(deck.factions).then(setMyFactions)
-    // Sólo al arrancar; después la biblioteca la mueve el panel.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // La biblioteca se lee una vez al arrancar; después la mueven los paneles.
+    void listLibraryIcons().then(setMyIcons)
+    void listLibraryFactions().then(setMyFactions)
   }, [])
 
   const { cards } = deck
-
-  // El catálogo que ven el render y los paneles: la biblioteca entera, más lo
-  // que traiga el mazo abierto y todavía no se haya adoptado.
-  const allIcons = useMemo(() => mergeIcons(deck.icons, myIcons), [deck.icons, myIcons])
-  const allFactions = useMemo(() => mergeFactions(deck.factions, myFactions), [deck.factions, myFactions])
 
   // Los rombos de influencia, la placa del selector y el icono de agente de
   // una facción propia se generan en canvas (`factionArt.ts`) y no están
@@ -153,47 +150,42 @@ export function App() {
   useEffect(() => {
     let alive = true
     void Promise.all([
-      warmFactionInfluenceIcons(allFactions),
-      warmFactionPickerBadges(allFactions),
-      warmFactionAgentIcons(allFactions),
+      warmFactionInfluenceIcons(deck.factions),
+      warmFactionPickerBadges(deck.factions),
+      warmFactionAgentIcons(deck.factions),
     ]).then(() => {
       if (alive) setFactionArtReady((count) => count + 1)
     })
     return () => {
       alive = false
     }
-  }, [allFactions])
+  }, [deck.factions])
 
+  /*
+    El catálogo que ven el render y los paneles es **el del mazo abierto**, no
+    la biblioteca: si el selector de las cajas ofreciera un icono que no está
+    en el archivo, la carta se vería bien acá y saldría con un hueco en
+    cualquier otra máquina. La biblioteca se toca sólo desde su diálogo, para
+    copiar en las dos direcciones.
+  */
   const factionLibrary = useMemo(
-    () => buildFactionLibrary(allFactions, language),
+    () => buildFactionLibrary(deck.factions, language),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allFactions, language, factionArtReady],
+    [deck.factions, language, factionArtReady],
   )
   const library = useMemo(
-    () => buildIconLibrary(allIcons, allFactions, language),
+    () => buildIconLibrary(deck.icons, deck.factions, language),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allIcons, allFactions, language, factionArtReady],
+    [deck.icons, deck.factions, language, factionArtReady],
   )
 
-  // El mazo carga los iconos y las facciones que sus cartas usan, para que
-  // guardar sea copiar el objeto y nada más. No es un cambio del usuario, así
-  // que van con `setDeck` y no con `mutate`: no pueden marcar el mazo como
-  // sin guardar.
-  useEffect(() => {
-    setDeck((current) => {
-      const packed = packIcons(current.cards, mergeIcons(current.icons, myIcons))
-      return sameIcons(current.icons, packed) ? current : { ...current, icons: packed }
-    })
-  }, [myIcons, cards])
+  // Los iconos y las facciones del mazo son parte del mazo, como cualquier
+  // carta: van por `mutate`, así que se deshacen y marcan el archivo como sin
+  // guardar. La biblioteca no —es del navegador— y baja a IndexedDB.
+  const setDeckIcons = (icons: CustomIcon[]) => mutate((current) => ({ ...current, icons }))
+  const setDeckFactions = (factions: CustomFaction[]) =>
+    mutate((current) => ({ ...current, factions }))
 
-  useEffect(() => {
-    setDeck((current) => {
-      const packed = packFactions(current.cards, mergeFactions(current.factions, myFactions))
-      return sameFactions(current.factions, packed) ? current : { ...current, factions: packed }
-    })
-  }, [myFactions, cards])
-
-  /** Todo cambio de la biblioteca pasa por acá: se edita y se baja a la base. */
   const updateIcons = (next: CustomIcon[]) => {
     void syncLibrary(myIcons, next)
     setMyIcons(next)
@@ -202,6 +194,36 @@ export function App() {
   const updateFactions = (next: CustomFaction[]) => {
     void syncFactionLibrary(myFactions, next)
     setMyFactions(next)
+  }
+
+  /**
+   * Del mazo a la biblioteca: una copia, con lo que se le haya editado acá.
+   * Pisa la que hubiera con el mismo id — volver a guardar un icono que ya
+   * tenías es justamente decir "quedate con esta versión".
+   */
+  const copyIconToLibrary = (icon: CustomIcon) => {
+    void saveLibraryIcon(icon)
+    setMyIcons((current) => mergeIcons(current, [icon]))
+  }
+
+  const copyFactionToLibrary = (faction: CustomFaction) => {
+    void saveLibraryFaction(faction)
+    setMyFactions((current) => mergeFactions(current, [faction]))
+  }
+
+  /**
+   * De la biblioteca al mazo. Al revés que arriba **no pisa**: la copia del
+   * mazo puede tener un tamaño ajustado para estas cartas, y traerla de nuevo
+   * no puede deshacer ese trabajo sin que lo pidan.
+   */
+  const copyIconToDeck = (icon: CustomIcon) => {
+    if (deck.icons.some((item) => item.id === icon.id)) return
+    setDeckIcons([...deck.icons, icon])
+  }
+
+  const copyFactionToDeck = (faction: CustomFaction) => {
+    if (deck.factions.some((item) => item.id === faction.id)) return
+    setDeckFactions([...deck.factions, faction])
   }
 
   // El índice puede quedar fuera de rango al abrir un mazo más corto.
@@ -369,12 +391,12 @@ export function App() {
     coalesceRef.current = null
     openFile({ handle: opened.handle, name: opened.name })
     setDirty(false)
-    // Los iconos y facciones que traiga el mazo pasan a ser tuyos: si no, un
-    // mazo que te pasaron los tendría sólo mientras esté abierto. Si además
-    // trae las bibliotecas empaquetadas, se adoptan junto con lo que usan las
-    // cartas.
-    void adoptIcons([...opened.deck.icons, ...opened.library]).then(setMyIcons)
-    void adoptFactions([...opened.deck.factions, ...opened.factionLibrary]).then(setMyFactions)
+    // A la biblioteca entra sólo lo que el que guardó eligió compartir con el
+    // toggle "Incluir biblioteca". Los iconos del mazo se quedan en el mazo:
+    // son suyos y se dibujan igual, y pasarlos a tu biblioteca es una copia
+    // que se pide desde el diálogo.
+    if (opened.library.length) void adoptIcons(opened.library).then(setMyIcons)
+    if (opened.factionLibrary.length) void adoptFactions(opened.factionLibrary).then(setMyFactions)
   }
 
   const newDeck = () => {
@@ -686,9 +708,13 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <IconPanel
-              icons={myIcons}
+              icons={deck.icons}
+              library={myIcons}
               cards={cards}
-              onChange={updateIcons}
+              onChange={setDeckIcons}
+              onLibraryChange={updateIcons}
+              onCopyToDeck={copyIconToDeck}
+              onCopyToLibrary={copyIconToLibrary}
               onError={setError}
             />
           </Dialog>
@@ -702,9 +728,13 @@ export function App() {
             onClose={() => setDialog(null)}
           >
             <FactionPanel
-              factions={myFactions}
+              factions={deck.factions}
+              library={myFactions}
               cards={cards}
-              onChange={updateFactions}
+              onChange={setDeckFactions}
+              onLibraryChange={updateFactions}
+              onCopyToDeck={copyFactionToDeck}
+              onCopyToLibrary={copyFactionToLibrary}
               onError={setError}
             />
           </Dialog>

@@ -9,8 +9,8 @@ import { CloseIcon } from './icons'
  * pantalla. Es el `<dialog>` nativo, así que Esc cierra y el fondo queda
  * inerte sin tener que manejarlo a mano.
  *
- * `onClose` es el evento nativo: cerrar de cualquier forma —Esc, la ×, el
- * fondo— pasa por ahí, y es un solo lugar donde apagar el estado en React.
+ * `onClose` es el evento nativo: cerrar de cualquier forma —la ×, Esc— pasa
+ * por ahí, y es un solo lugar donde apagar el estado en React.
  */
 export function Dialog({
   title,
@@ -44,9 +44,12 @@ export function Dialog({
     <dialog
       ref={ref}
       onClose={onClose}
-      // El backdrop es parte del propio <dialog>, así que un clic ahí llega
-      // con el dialog como target; los clics de adentro los tapan los hijos.
-      onClick={(event) => event.target === ref.current && ref.current?.close()}
+      // Un clic en el backdrop NO cierra, a propósito: el target de un `click`
+      // es el ancestro común del mousedown y el mouseup, así que apretar dentro
+      // —el pulgar de un slider, seleccionar el texto de un icono— y soltar
+      // afuera llega igual que un clic en el fondo, y no hay forma de
+      // distinguirlos. Adentro se edita arrastrando, así que se cerraba solo en
+      // medio del trabajo. Queda la × (y Esc, que es del <dialog> nativo).
       // El ancho se topa contra la pantalla: en un portátil chico, 640 px fijos
       // se irían del viewport y el diálogo nativo no tiene dónde ir.
       className={`m-auto max-w-[calc(100vw-2rem)] rounded-lg border border-zinc-800 bg-zinc-950 p-0 text-zinc-100 shadow-2xl shadow-black/60 backdrop:bg-black/60 ${

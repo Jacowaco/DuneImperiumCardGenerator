@@ -3,6 +3,10 @@ import { useT } from '../i18n/strings'
 /** El repo también es el canal de contacto: ahí se abren los issues. */
 const REPOSITORY = 'https://github.com/Jacowaco/DuneImperiumCardGenerator'
 
+/** El texto del enlace sale de la URL y no se escribe aparte: escrito dos veces,
+ *  cambiar el repo dejaba el visible apuntando a otro lado que el `href`. */
+const REPOSITORY_LABEL = REPOSITORY.replace(/^https:\/\//, '')
+
 /**
  * El descargo: esto es un proyecto de fans, sin fines de lucro, y las marcas
  * son de Dire Wolf y de los dueños de Dune.
@@ -35,7 +39,7 @@ export function AboutPanel() {
           rel="noreferrer"
           className="text-sand-500 underline transition-colors hover:text-sand-300"
         >
-          github.com/Jacowaco/DuneImperiumCardGenerator
+          {REPOSITORY_LABEL}
         </a>
       </p>
     </div>

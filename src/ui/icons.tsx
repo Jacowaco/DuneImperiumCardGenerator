@@ -205,6 +205,33 @@ export const LockOpenIcon = () => (
   </Icon>
 )
 
+/**
+ * Cerrar o quitar: la × de siempre, pero dibujada como el resto y no como el
+ * carácter «×», que en la fuente del sistema no alinea ni escala con los demás.
+ * La comparten cerrar un diálogo y quitar una fila o una imagen — es la misma
+ * idea, y lo que las distingue es el `aria-label` de cada botón.
+ */
+export const CloseIcon = () => (
+  <Icon>
+    <path d="M4.25 4.25 11.75 11.75M11.75 4.25 4.25 11.75" />
+  </Icon>
+)
+
+/** Duplicar una carta: dos hojas, la copia corrida sobre el original. */
+export const CopyIcon = () => (
+  <Icon>
+    <path d="M5.75 2.75h7.5v7.5" />
+    <path d="M2.75 5.75h7.5v7.5h-7.5z" />
+  </Icon>
+)
+
+/** Tilde de terminada: el sello de la galería y la casilla del pie. */
+export const CheckIcon = () => (
+  <Icon>
+    <path d="M3.25 8.5 6.25 11.5 12.75 5" />
+  </Icon>
+)
+
 /** Agarradera para arrastrar y reordenar una fila de lista. */
 export const GripIcon = () => (
   <Icon>

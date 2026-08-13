@@ -9,7 +9,7 @@ import {
 } from '../model/art'
 import type { ArtTransform, CardArt } from '../model/card'
 import { Button, Section } from './controls'
-import { ImageIcon, LockIcon, LockOpenIcon } from './icons'
+import { CloseIcon, ImageIcon, LockIcon, LockOpenIcon } from './icons'
 
 type Props = {
   art: CardArt | null
@@ -41,7 +41,7 @@ export function ArtPanel({ art, onPick, onTransform, onClear, onToggleLock }: Pr
         </Button>
         {art && (
           <Button onClick={onClear} title={t.artPanel.remove} aria-label={t.artPanel.remove}>
-            ×
+            <CloseIcon />
           </Button>
         )}
       </div>

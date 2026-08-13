@@ -78,7 +78,10 @@ export function TopBar({
 
         <div className="mx-1 h-5 w-px bg-zinc-800" />
 
-        <Button variant="primary" onClick={onExport} disabled={exporting}>
+        {/* «Exportar carta», no «Exportar PNG»: lo que lo distingue del botón
+            del pie del mazo es el alcance —esta carta contra el mazo entero—, y
+            no el formato, que va en el título. */}
+        <Button variant="primary" onClick={onExport} disabled={exporting} title={t.topBar.exportTitle}>
           <DownloadIcon />
           {exporting ? t.topBar.exporting : t.topBar.export}
         </Button>

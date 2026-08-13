@@ -7,7 +7,7 @@ import { customIconEntry } from '../model/iconLibrary'
 import { useLanguage } from '../model/language'
 import { CONTENT } from '../render/constants'
 import { Action, Button, Hint, Section } from './controls'
-import { DownloadIcon, FolderIcon, MinusIcon, PlusIcon, SaveIcon, UploadIcon } from './icons'
+import { CloseIcon, DownloadIcon, FolderIcon, MinusIcon, PlusIcon, SaveIcon, UploadIcon } from './icons'
 
 /**
  * Cuánto se achica la carta para la previsualización: el icono nominal del
@@ -228,7 +228,7 @@ export function IconPanel({
                   botón le comía el ancho al campo del tamaño. */}
               <div className="absolute top-1 right-1">
                 <Action label={t.iconPanel.removeLabel(icon.label)} onClick={() => remove(icon)}>
-                  ×
+                                    <CloseIcon />
                 </Action>
               </div>
             </Tile>
@@ -274,7 +274,7 @@ export function IconPanel({
                   label={t.iconPanel.forgetLabel(icon.label)}
                   onClick={() => removeFromLibrary(icon)}
                 >
-                  ×
+                                    <CloseIcon />
                 </Action>
               </div>
             </Tile>

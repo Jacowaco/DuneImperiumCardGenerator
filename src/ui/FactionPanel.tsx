@@ -14,7 +14,7 @@ import { useCardImage } from '../render/imageCache'
 import { fontString, layoutSmallCaps } from '../render/text'
 import { useFontsReady } from '../render/useFontsReady'
 import { Action, Button, Hint, Section } from './controls'
-import { DownloadIcon, FolderIcon, SaveIcon, UploadIcon } from './icons'
+import { CloseIcon, DownloadIcon, FolderIcon, SaveIcon, UploadIcon } from './icons'
 
 /** El emblema alcanza para reconocer la facción; el que manda es el color. */
 const PREVIEW_HEIGHT = 32
@@ -303,7 +303,7 @@ function FactionTile({
 
       <div className="absolute top-1 right-1">
         <Action label={removeLabel} onClick={onRemove}>
-          ×
+                    <CloseIcon />
         </Action>
       </div>
     </div>

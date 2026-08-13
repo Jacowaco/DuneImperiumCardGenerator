@@ -3,7 +3,7 @@ import { type ContentPart } from '../model/card'
 import { useIconLibrary } from '../model/iconLibrary'
 import { useContentDrag, type ContentBox } from './contentDrag'
 import { Action, Hint } from './controls'
-import { GripIcon, MinusIcon, PlusIcon } from './icons'
+import { CloseIcon, GripIcon, MinusIcon, PlusIcon } from './icons'
 import { PART_STYLES } from './ContentPalette'
 
 /**
@@ -209,7 +209,7 @@ export function ContentEditor({ box }: { box: ContentBox }) {
             )}
 
             <Action label={t.contentEditor.remove} onClick={() => remove(index)}>
-              ×
+                            <CloseIcon />
             </Action>
           </div>
         ))}

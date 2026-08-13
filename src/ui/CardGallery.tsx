@@ -6,7 +6,7 @@ import { useLanguage } from '../model/language'
 import { CARD_WIDTH } from '../render/constants'
 import { CardStage } from '../render/CardStage'
 import { Button } from './controls'
-import { PlusIcon } from './icons'
+import { CheckIcon, CloseIcon, CopyIcon, PlusIcon } from './icons'
 
 type Props = {
   cards: Card[]
@@ -103,22 +103,25 @@ export function CardGallery({
             {card.done && (
               <div
                 title={t.gallery.doneStamp}
-                className="pointer-events-none absolute -top-1.5 -left-1.5 flex size-6 items-center justify-center rounded-full border-2 border-zinc-950 bg-emerald-500 text-sm font-bold text-zinc-950 shadow"
+                className="pointer-events-none absolute -top-1.5 -left-1.5 flex size-6 items-center justify-center rounded-full border-2 border-zinc-950 bg-emerald-500 text-zinc-950 shadow [&_svg]:size-3.5 [&_svg]:stroke-[2.4]"
               >
-                ✓
+                <CheckIcon />
               </div>
             )}
 
-            <div className="absolute top-1 left-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {/* `focus-within` además de `group-hover`: sin eso el botón seguía
+                siendo enfocable con Tab estando en `opacity: 0`, o sea que el
+                teclado caía en un control invisible. */}
+            <div className="absolute top-1 left-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
               <ThumbnailAction label={t.gallery.duplicate} onClick={() => onDuplicate(index)}>
-                ⧉
+                <CopyIcon />
               </ThumbnailAction>
             </div>
 
             {cards.length > 1 && (
-              <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute top-1 right-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                 <ThumbnailAction label={t.gallery.remove} onClick={() => onRemove(index)}>
-                  ×
+                  <CloseIcon />
                 </ThumbnailAction>
               </div>
             )}
@@ -135,13 +138,13 @@ export function CardGallery({
               className="mt-1 flex w-full items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-zinc-900"
             >
               <span
-                className={`flex size-3.5 shrink-0 items-center justify-center rounded-[3px] border text-[9px] leading-none transition-colors ${
+                className={`flex size-3.5 shrink-0 items-center justify-center rounded-[3px] border transition-colors [&_svg]:size-2.5 [&_svg]:stroke-[2.6] ${
                   card.done
                     ? 'border-emerald-500 bg-emerald-500 text-zinc-950'
                     : 'border-zinc-700 text-transparent group-hover:border-zinc-500'
                 }`}
               >
-                ✓
+                <CheckIcon />
               </span>
               <span
                 className={`min-w-0 flex-1 truncate text-left text-[11px] ${
@@ -169,14 +172,14 @@ function ThumbnailAction({
 }: {
   label: string
   onClick: () => void
-  children: string
+  children: ReactNode
 }) {
   return (
     <button
       title={label}
       aria-label={label}
       onClick={onClick}
-      className="flex size-7 items-center justify-center rounded bg-zinc-900/85 text-base text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+      className="flex size-7 items-center justify-center rounded bg-zinc-900/85 text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
     >
       {children}
     </button>

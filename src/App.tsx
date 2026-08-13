@@ -48,7 +48,7 @@ import { DeckFileControls } from './ui/DeckFileControls'
 import { CardPanel } from './ui/CardPanel'
 import { Button } from './ui/controls'
 import { Dialog } from './ui/Dialog'
-import { BannerIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
+import { BannerIcon, CheckIcon, DiamondIcon, DownloadIcon, ImageIcon, LockIcon, LockOpenIcon, PrinterIcon, RulesIcon } from './ui/icons'
 import { FactionPanel } from './ui/FactionPanel'
 import { IconPanel } from './ui/IconPanel'
 import { PrintPanel } from './ui/PrintPanel'
@@ -493,8 +493,12 @@ export function App() {
     patchCard({ art: { ...card.art, transform } })
   }
 
+  // El mismo chequeo de `done` que `setTransform`: el candado también edita la
+  // carta, y la chapa que lo toca vive sobre el preview —afuera del `inert` del
+  // panel—, así que sin esto una carta terminada se seguía pudiendo tocar desde
+  // ahí, marcando el mazo como sin guardar y abriendo un paso de deshacer.
   const toggleArtLock = (locked: boolean) => {
-    if (!card.art) return
+    if (!card.art || card.done) return
     patchCard({ art: { ...card.art, locked } })
   }
 
@@ -661,10 +665,14 @@ export function App() {
                   : 'bg-zinc-950/70 text-zinc-400 hover:text-zinc-50'
               }`}
             >
+              {card.done && <CheckIcon />}
               {card.done ? t.doneBadge.done : t.doneBadge.markDone}
             </button>
 
-            {card.art && (
+            {/* No va con la carta terminada: es un control de edición, así que
+                se retira igual que el panel. Con la carta cerrada nada se mueve,
+                y que el encuadre además esté trabado no cambia nada. */}
+            {card.art && !card.done && (
               <button
                 onClick={() => toggleArtLock(!(card.art?.locked ?? false))}
                 title={card.art.locked ? t.artPanel.frameLocked : t.artPanel.frameFree}
@@ -742,10 +750,15 @@ export function App() {
                     <PrinterIcon />
                     {t.deckFooter.print}
                   </Button>
+                  {/* El título aclara el formato, que ya no está en la etiqueta:
+                      el nombre dice *qué* se exporta —el mazo, contra la carta
+                      abierta de la barra de arriba—, que es lo que se confundía
+                      cuando los dos decían «Exportar PNG(s)». */}
                   <Button
                     variant="primary"
                     onClick={() => void handleExportAllPng()}
                     disabled={cardsExporting}
+                    title={t.deckFooter.exportAllTitle}
                     className="px-2 text-xs"
                   >
                     <DownloadIcon />

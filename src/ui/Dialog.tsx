@@ -1,6 +1,8 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
+import { useT } from '../i18n/strings'
 import { HintMark } from './controls'
+import { CloseIcon } from './icons'
 
 /**
  * Diálogo modal para lo que se usa cada tanto y no merece ocupar lugar fijo en
@@ -33,6 +35,7 @@ export function Dialog({
   onClose: () => void
   children: ReactNode
 }) {
+  const t = useT()
   const ref = useRef<HTMLDialogElement | null>(null)
 
   useEffect(() => ref.current?.showModal(), [])
@@ -57,10 +60,11 @@ export function Dialog({
         </h2>
         <button
           onClick={() => ref.current?.close()}
-          aria-label="Cerrar"
-          className="size-6 rounded text-sm text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          title={t.dialogs.close}
+          aria-label={t.dialogs.close}
+          className="flex size-6 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
         >
-          ×
+          <CloseIcon />
         </button>
       </header>
 

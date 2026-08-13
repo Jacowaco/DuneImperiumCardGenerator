@@ -92,7 +92,7 @@ export function Action({
   label: string
   onClick: () => void
   disabled?: boolean
-  /** Una cruz, o un icono de `icons.tsx` cuando la acción no es quitar algo. */
+  /** Un icono de `icons.tsx` — `CloseIcon` para quitar, el que corresponda si no. */
   children: ReactNode
 }) {
   return (

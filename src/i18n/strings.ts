@@ -18,6 +18,12 @@ type Strings = {
     subtitle: string
     exporting: string
     export: string
+    /**
+     * El formato va en el título y no en la etiqueta: lo que distingue este
+     * botón del del pie del mazo es el alcance —esta carta contra el mazo
+     * entero—, y cuando los dos decían «Exportar PNG(s)» se confundían.
+     */
+    exportTitle: string
     defaultFileName: string
     language: string
     undo: string
@@ -26,7 +32,7 @@ type Strings = {
   tabs: { front: string; rules: string }
   doneBanner: { locked: string; unlock: string }
   doneBadge: { done: string; markDone: string; reopenTitle: string; markDoneTitle: string }
-  dialogs: { icons: string; factions: string; print: string; about: string }
+  dialogs: { icons: string; factions: string; print: string; about: string; close: string }
   /**
    * El descargo: esto es un proyecto de fans y las marcas son de otros. Va
    * entero acá y no en un `<p>` suelto del componente porque, como cualquier
@@ -57,8 +63,16 @@ type Strings = {
     print: string
     exportAll: string
     exportingAll: string
+    /** Igual que `topBar.exportTitle`: el formato, que ya no va en la etiqueta. */
+    exportAllTitle: string
   }
   gallery: {
+    /**
+     * «Cartas» y no «Mazo»: el pie de esta misma columna ya se titula «Mazo»
+     * —es el nombre del mazo y sus acciones de archivo—, y dos títulos iguales
+     * a media columna de distancia no distinguían nada. Acá arriba lo que se
+     * lista son las cartas.
+     */
     title: string
     newCardTitle: string
     newButton: string
@@ -220,8 +234,9 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      exporting: 'Exportando…',
-      export: 'Exportar PNG',
+      exporting: 'Exportando carta…',
+      export: 'Exportar carta',
+      exportTitle: 'Exportar la carta abierta como PNG',
       defaultFileName: 'carta',
       language: 'Idioma',
       undo: 'Deshacer (Ctrl+Z)',
@@ -233,7 +248,7 @@ const STRINGS: Record<Language, Strings> = {
       unlock: 'Desbloquear',
     },
     doneBadge: {
-      done: '✓ Terminada',
+      done: 'Terminada',
       markDone: 'Marcar terminada',
       reopenTitle: 'Terminada — clic para reabrir',
       markDoneTitle: 'Marcar como terminada',
@@ -243,6 +258,7 @@ const STRINGS: Record<Language, Strings> = {
       factions: 'Facciones propias',
       print: 'Imprimir el mazo',
       about: 'Acerca de',
+      close: 'Cerrar',
     },
     about: {
       fanMade:
@@ -274,11 +290,12 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Iconos…',
       factions: 'Facciones…',
       print: 'Imprimir…',
-      exportAll: 'Exportar PNGs…',
-      exportingAll: 'Exportando…',
+      exportAll: 'Exportar mazo…',
+      exportingAll: 'Exportando mazo…',
+      exportAllTitle: 'Exportar todas las cartas como PNGs sueltos, en un zip',
     },
     gallery: {
-      title: 'Mazo',
+      title: 'Cartas',
       newCardTitle: 'Carta nueva',
       newButton: 'Nueva carta',
       unnamed: 'Sin nombre',
@@ -465,8 +482,9 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      exporting: 'Exporting…',
-      export: 'Export PNG',
+      exporting: 'Exporting card…',
+      export: 'Export card',
+      exportTitle: 'Export the open card as a PNG',
       defaultFileName: 'card',
       language: 'Language',
       undo: 'Undo (Ctrl+Z)',
@@ -478,7 +496,7 @@ const STRINGS: Record<Language, Strings> = {
       unlock: 'Unlock',
     },
     doneBadge: {
-      done: '✓ Finished',
+      done: 'Finished',
       markDone: 'Mark finished',
       reopenTitle: 'Finished — click to reopen',
       markDoneTitle: 'Mark as finished',
@@ -488,6 +506,7 @@ const STRINGS: Record<Language, Strings> = {
       factions: 'Custom factions',
       print: 'Print the deck',
       about: 'About',
+      close: 'Close',
     },
     about: {
       fanMade:
@@ -518,11 +537,12 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Icons…',
       factions: 'Factions…',
       print: 'Print…',
-      exportAll: 'Export PNGs…',
-      exportingAll: 'Exporting…',
+      exportAll: 'Export deck…',
+      exportingAll: 'Exporting deck…',
+      exportAllTitle: 'Export every card as a loose PNG, inside a zip',
     },
     gallery: {
-      title: 'Deck',
+      title: 'Cards',
       newCardTitle: 'New card',
       newButton: 'New card',
       unnamed: 'Unnamed',
@@ -591,21 +611,21 @@ const STRINGS: Record<Language, Strings> = {
       frameLocked: 'Frame locked',
     },
     iconPanel: {
-      deckTitle: 'En este mazo',
+      deckTitle: 'In this deck',
       deckHint:
-        'Los que este mazo tiene disponibles: son los que ofrece el selector de las cajas y los que viajan adentro del archivo, así que el mazo se ve igual en otra máquina. El tamaño y el nombre son de acá y no tocan la biblioteca.',
-      libraryTitle: 'Mi biblioteca',
+        "The ones this deck has available: they are what the box picker offers and what travels inside the file, so the deck looks the same on another machine. The size and the name belong here and don't touch the library.",
+      libraryTitle: 'My library',
       libraryHint:
-        'Los que subiste alguna vez, guardados en este navegador. No viajan con el mazo y no se dibujan: es de donde copiar para no volver a subir lo mismo en cada mazo.',
-      emptyLibraryHint: 'Todavía no guardaste ningún icono en la biblioteca.',
-      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
-      unused: 'Sin usar',
-      alreadyInDeck: 'Ya está en el mazo',
-      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
-      toDeckLabel: (label) => `Traer ${label} a este mazo`,
-      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+        "The ones you uploaded at some point, saved in this browser. They don't travel with the deck and they aren't drawn: this is where you copy from, so you don't upload the same thing again in every deck.",
+      emptyLibraryHint: "You haven't saved any icon to the library yet.",
+      usedIn: (cards) => `In ${pluralCards(cards, 'en')}`,
+      unused: 'Unused',
+      alreadyInDeck: 'Already in the deck',
+      toLibraryLabel: (label) => `Save ${label} to my library`,
+      toDeckLabel: (label) => `Bring ${label} into this deck`,
+      forgetLabel: (label) => `Remove ${label} from my library`,
       confirmRemoveFromLibrary: (label) =>
-        `«${label}» sale de tu biblioteca y no vas a poder traerlo a otros mazos. Los mazos que ya lo tienen adentro no cambian. ¿Sacarlo?`,
+        `"${label}" leaves your library and you won't be able to bring it into other decks. Decks that already have it inside don't change. Remove it?`,
       emptyHint:
         "For rules the game doesn't include. They stay available in all your decks and show up at the end of the icon picker.",
       nameLabel: (label) => `Name of ${label}`,
@@ -624,21 +644,21 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Delete ${label}`,
     },
     factionPanel: {
-      deckTitle: 'En este mazo',
+      deckTitle: 'In this deck',
       deckHint:
-        'Las que este mazo tiene disponibles: son las que ofrece el selector de facción y las que viajan adentro del archivo. El nombre y el color son de acá y no tocan la biblioteca.',
-      libraryTitle: 'Mi biblioteca',
+        "The ones this deck has available: they are what the faction picker offers and what travels inside the file. The name and the colour belong here and don't touch the library.",
+      libraryTitle: 'My library',
       libraryHint:
-        'Las que armaste alguna vez, guardadas en este navegador. No viajan con el mazo: es de donde copiar para no volver a subir el emblema en cada mazo.',
-      emptyLibraryHint: 'Todavía no guardaste ninguna facción en la biblioteca.',
-      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
-      unused: 'Sin usar',
-      alreadyInDeck: 'Ya está en el mazo',
-      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
-      toDeckLabel: (label) => `Traer ${label} a este mazo`,
-      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+        "The ones you built at some point, saved in this browser. They don't travel with the deck: this is where you copy from, so you don't upload the emblem again in every deck.",
+      emptyLibraryHint: "You haven't saved any faction to the library yet.",
+      usedIn: (cards) => `In ${pluralCards(cards, 'en')}`,
+      unused: 'Unused',
+      alreadyInDeck: 'Already in the deck',
+      toLibraryLabel: (label) => `Save ${label} to my library`,
+      toDeckLabel: (label) => `Bring ${label} into this deck`,
+      forgetLabel: (label) => `Remove ${label} from my library`,
       confirmRemoveFromLibrary: (label) =>
-        `«${label}» sale de tu biblioteca y no vas a poder traerla a otros mazos. Los mazos que ya la tienen adentro no cambian. ¿Sacarla?`,
+        `"${label}" leaves your library and you won't be able to bring it into other decks. Decks that already have it inside don't change. Remove it?`,
       emptyHint:
         "For decks with factions the game doesn't include. They stay available in all your decks, and their emblem alone generates the 4 \"+1/-1 Influence\" diamonds for that faction, ready to use as card content.",
       nameLabel: (label) => `Name of ${label}`,
@@ -709,8 +729,9 @@ const STRINGS: Record<Language, Strings> = {
     topBar: {
       title: 'Dune: Imperium',
       subtitle: 'Card Generator',
-      exporting: 'Exportando…',
-      export: 'Exportar PNG',
+      exporting: 'Exportando carta…',
+      export: 'Exportar carta',
+      exportTitle: 'Exportar a carta aberta como PNG',
       defaultFileName: 'carta',
       language: 'Idioma',
       undo: 'Desfazer (Ctrl+Z)',
@@ -722,7 +743,7 @@ const STRINGS: Record<Language, Strings> = {
       unlock: 'Desbloquear',
     },
     doneBadge: {
-      done: '✓ Finalizada',
+      done: 'Finalizada',
       markDone: 'Marcar como finalizada',
       reopenTitle: 'Finalizada — clique para reabrir',
       markDoneTitle: 'Marcar como finalizada',
@@ -732,6 +753,7 @@ const STRINGS: Record<Language, Strings> = {
       factions: 'Facções próprias',
       print: 'Imprimir o baralho',
       about: 'Sobre',
+      close: 'Fechar',
     },
     about: {
       fanMade:
@@ -763,11 +785,12 @@ const STRINGS: Record<Language, Strings> = {
       icons: 'Ícones…',
       factions: 'Facções…',
       print: 'Imprimir…',
-      exportAll: 'Exportar PNGs…',
-      exportingAll: 'Exportando…',
+      exportAll: 'Exportar baralho…',
+      exportingAll: 'Exportando baralho…',
+      exportAllTitle: 'Exportar todas as cartas como PNGs soltos, dentro de um zip',
     },
     gallery: {
-      title: 'Baralho',
+      title: 'Cartas',
       newCardTitle: 'Carta nova',
       newButton: 'Nova carta',
       unnamed: 'Sem nome',
@@ -836,21 +859,21 @@ const STRINGS: Record<Language, Strings> = {
       frameLocked: 'Moldura bloqueada',
     },
     iconPanel: {
-      deckTitle: 'En este mazo',
+      deckTitle: 'Neste baralho',
       deckHint:
-        'Los que este mazo tiene disponibles: son los que ofrece el selector de las cajas y los que viajan adentro del archivo, así que el mazo se ve igual en otra máquina. El tamaño y el nombre son de acá y no tocan la biblioteca.',
-      libraryTitle: 'Mi biblioteca',
+        'Os que este baralho tem disponíveis: são os que o seletor das caixas oferece e os que viajam dentro do arquivo, então o baralho fica igual em outra máquina. O tamanho e o nome são daqui e não mexem na biblioteca.',
+      libraryTitle: 'Minha biblioteca',
       libraryHint:
-        'Los que subiste alguna vez, guardados en este navegador. No viajan con el mazo y no se dibujan: es de donde copiar para no volver a subir lo mismo en cada mazo.',
-      emptyLibraryHint: 'Todavía no guardaste ningún icono en la biblioteca.',
-      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
-      unused: 'Sin usar',
-      alreadyInDeck: 'Ya está en el mazo',
-      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
-      toDeckLabel: (label) => `Traer ${label} a este mazo`,
-      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+        'Os que você enviou alguma vez, salvos neste navegador. Não viajam com o baralho e não são desenhados: é de onde copiar para não enviar a mesma coisa em cada baralho.',
+      emptyLibraryHint: 'Você ainda não salvou nenhum ícone na biblioteca.',
+      usedIn: (cards) => `Em ${pluralCards(cards, 'pt')}`,
+      unused: 'Sem uso',
+      alreadyInDeck: 'Já está no baralho',
+      toLibraryLabel: (label) => `Salvar ${label} na minha biblioteca`,
+      toDeckLabel: (label) => `Trazer ${label} para este baralho`,
+      forgetLabel: (label) => `Tirar ${label} da minha biblioteca`,
       confirmRemoveFromLibrary: (label) =>
-        `«${label}» sale de tu biblioteca y no vas a poder traerlo a otros mazos. Los mazos que ya lo tienen adentro no cambian. ¿Sacarlo?`,
+        `«${label}» sai da sua biblioteca e você não vai poder trazê-lo para outros baralhos. Os baralhos que já o têm dentro não mudam. Tirar?`,
       emptyHint:
         'Para regras que o jogo não traz. Ficam disponíveis em todos os seus baralhos e aparecem no final do seletor de ícones.',
       nameLabel: (label) => `Nome de ${label}`,
@@ -869,21 +892,21 @@ const STRINGS: Record<Language, Strings> = {
       removeLabel: (label) => `Excluir ${label}`,
     },
     factionPanel: {
-      deckTitle: 'En este mazo',
+      deckTitle: 'Neste baralho',
       deckHint:
-        'Las que este mazo tiene disponibles: son las que ofrece el selector de facción y las que viajan adentro del archivo. El nombre y el color son de acá y no tocan la biblioteca.',
-      libraryTitle: 'Mi biblioteca',
+        'As que este baralho tem disponíveis: são as que o seletor de facção oferece e as que viajam dentro do arquivo. O nome e a cor são daqui e não mexem na biblioteca.',
+      libraryTitle: 'Minha biblioteca',
       libraryHint:
-        'Las que armaste alguna vez, guardadas en este navegador. No viajan con el mazo: es de donde copiar para no volver a subir el emblema en cada mazo.',
-      emptyLibraryHint: 'Todavía no guardaste ninguna facción en la biblioteca.',
-      usedIn: (cards) => `En ${pluralCards(cards, 'es')}`,
-      unused: 'Sin usar',
-      alreadyInDeck: 'Ya está en el mazo',
-      toLibraryLabel: (label) => `Guardar ${label} en mi biblioteca`,
-      toDeckLabel: (label) => `Traer ${label} a este mazo`,
-      forgetLabel: (label) => `Sacar ${label} de mi biblioteca`,
+        'As que você montou alguma vez, salvas neste navegador. Não viajam com o baralho: é de onde copiar para não enviar o emblema em cada baralho.',
+      emptyLibraryHint: 'Você ainda não salvou nenhuma facção na biblioteca.',
+      usedIn: (cards) => `Em ${pluralCards(cards, 'pt')}`,
+      unused: 'Sem uso',
+      alreadyInDeck: 'Já está no baralho',
+      toLibraryLabel: (label) => `Salvar ${label} na minha biblioteca`,
+      toDeckLabel: (label) => `Trazer ${label} para este baralho`,
+      forgetLabel: (label) => `Tirar ${label} da minha biblioteca`,
       confirmRemoveFromLibrary: (label) =>
-        `«${label}» sale de tu biblioteca y no vas a poder traerla a otros mazos. Los mazos que ya la tienen adentro no cambian. ¿Sacarla?`,
+        `«${label}» sai da sua biblioteca e você não vai poder trazê-la para outros baralhos. Os baralhos que já a têm dentro não mudam. Tirar?`,
       emptyHint:
         'Para baralhos com facções que o jogo não traz. Ficam disponíveis em todos os seus baralhos, e o emblema sozinho gera os 4 losangos de "+1/-1 Influência" dessa facção, prontos para usar como conteúdo de carta.',
       nameLabel: (label) => `Nome de ${label}`,

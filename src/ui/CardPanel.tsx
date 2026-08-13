@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AGENT_BADGE_URLS,
   AGENT_ICON_IDS,
@@ -62,6 +62,21 @@ export function CardPanel({ card, onChange }: Props) {
   const [picking, setPicking] = useState(false)
   const { custom, core, ix, immortality, influence } = groupIconIds(library)
   const customFactionIds = (Object.keys(factionLibrary) as AnyFactionId[]).filter(isCustomFactionId)
+
+  /*
+    El beneficio de compra es el último campo de la última sección, así que la
+    grilla se abre abajo de todo: medida, quedaba enteramente fuera del alto
+    visible del panel —cero píxeles a la vista, tanto en 1440 × 800 como en
+    1024 × 640—, y el clic parecía no hacer nada.
+
+    La paleta de las cajas no tiene el problema porque está `sticky` al pie; esta
+    es inline, así que hay que traerla a la vista a mano. `block: 'nearest'`
+    scrollea lo mínimo, y sólo cuando se abre — al cerrarse no se mueve nada.
+  */
+  const pickerRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    if (picking) pickerRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [picking])
 
   return (
     <>
@@ -207,7 +222,7 @@ export function CardPanel({ card, onChange }: Props) {
             </Field>
 
             {picking && (
-              <div className="flex flex-col gap-2 rounded-md bg-zinc-900 p-2">
+              <div ref={pickerRef} className="flex flex-col gap-2 rounded-md bg-zinc-900 p-2">
                 <button
                   type="button"
                   onClick={() => {

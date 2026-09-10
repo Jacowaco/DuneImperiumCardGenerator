@@ -341,6 +341,37 @@ exporta de a una vez y no se sobrescribe seguido como el mazo. Donde no está la
 File System Access API caen en bajar el archivo y en un `<input type=file>`,
 igual que el mazo.
 
+### El selector de iconos
+
+`src/ui/IconPicker.tsx` es **el único selector de iconos**, y lo usan los dos
+lugares donde se elige uno: la paleta de las cajas de contenido
+(`ContentPalette`) y el beneficio de compra (`CardPanel`). Antes eran dos
+escaleras iguales de cinco grupos con distinto `onPick`, y por eso el buscador
+—que es lo que se agregó— aparece en los dos sin escribirlo dos veces.
+
+Buscar es el camino rápido para armar cartas: el catálogo son unas cuarenta y
+cinco piezas más las propias, y encontrar "Punto de victoria" a ojo cuesta más
+que escribir tres letras. De ahí las tres decisiones del campo:
+
+- **Se enfoca solo al abrir y Enter agrega el primer resultado**, sin levantar
+  la mano del teclado. La búsqueda no se limpia después, así que dos Enter son
+  dos especias. Ese primer resultado va marcado con un anillo mientras haya
+  algo escrito, que es lo único que hace visible qué se lleva el Enter.
+- **Escape borra la búsqueda, y recién con el campo vacío cierra el selector.**
+  Lo primero que se quiere deshacer es el filtro.
+- **El tope de alto va en la grilla, no en el selector entero.** En la paleta
+  el catálogo scrollea adentro de `max-h-[42vh]`; si el `overflow` estuviera
+  arriba de todo, el buscador se iría hacia arriba justo mientras se lo usa.
+
+`src/model/iconSearch.ts` decide qué coincide: sin acentos y en minúscula de
+los dos lados, y **todas** las palabras tecleadas tienen que aparecer en
+cualquier orden, así que "pun vic" llega a "Punto de victoria". Compara contra
+la etiqueta en el idioma de la UI y, en los del juego, **también contra el
+id**: el id es el nombre en inglés (`victory-point`, `spice`), así que sirve de
+segundo nombre para el que aprendió las cartas en inglés y tiene la app en
+castellano. En los propios no, porque ahí el id es un `custom:` con azar
+adentro y sólo daría coincidencias que no se explican.
+
 ### Texto en las cajas de contenido
 
 El contenido de cada caja es una lista de `ContentPart` (`src/model/card.ts`):

@@ -252,6 +252,15 @@ export const FlipIcon = () => (
   </Icon>
 )
 
+/** La lupa del buscador de iconos. Es la excepción a "sólo en botones": acá
+ *  marca de qué es el campo, que sin ella sería una caja de texto más. */
+export const SearchIcon = () => (
+  <Icon>
+    <circle cx="7" cy="7" r="4.25" />
+    <path d="M10.25 10.25 13.25 13.25" />
+  </Icon>
+)
+
 /** Agarradera para arrastrar y reordenar una fila de lista. */
 export const GripIcon = () => (
   <Icon>

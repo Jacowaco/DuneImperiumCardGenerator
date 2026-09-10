@@ -17,11 +17,11 @@ import {
 } from '../model/card'
 import { isCustomFactionId } from '../model/customFaction'
 import { useFactionLibrary } from '../model/factionLibrary'
-import { groupIconIds, useIconLibrary } from '../model/iconLibrary'
+import { useIconLibrary } from '../model/iconLibrary'
 import { pick, useLanguage } from '../model/language'
 import { Field, MultiChoice, NumberField, Section, TextInput, Toggle } from './controls'
 import { ChevronDownIcon } from './icons'
-import { Grid } from './ContentPalette'
+import { IconPicker } from './IconPicker'
 
 /** Ninguna banda tiene arte para una posición 5: no hay dónde apilarla. */
 const MAX_FACTIONS = 4
@@ -63,7 +63,6 @@ export function CardPanel({ card, onChange }: Props) {
   const factionLibrary = useFactionLibrary()
   const benefit = card.purchaseBenefit ? library[card.purchaseBenefit] : undefined
   const [picking, setPicking] = useState(false)
-  const { custom, core, ix, immortality, influence } = groupIconIds(library)
   const customFactionIds = (Object.keys(factionLibrary) as AnyFactionId[]).filter(isCustomFactionId)
 
   /*
@@ -227,97 +226,30 @@ export function CardPanel({ card, onChange }: Props) {
             </Field>
 
             {picking && (
-              <div ref={pickerRef} className="flex flex-col gap-2 rounded-md bg-zinc-900 p-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChange({ purchaseBenefit: null })
-                    setPicking(false)
-                  }}
-                  className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
-                    card.purchaseBenefit === null
-                      ? 'bg-sand-500 font-medium text-zinc-950'
-                      : 'text-zinc-300 hover:bg-zinc-700'
-                  }`}
-                >
-                  {t.cardPanel.none}
-                </button>
-
-                {custom.length > 0 && (
-                  <>
-                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                      {t.contentEditor.custom}
-                    </p>
-                    <Grid
-                      ids={custom}
-                      library={library}
-                      onPick={(icon) => {
-                        onChange({ purchaseBenefit: icon })
-                        setPicking(false)
-                      }}
-                    />
-                  </>
-                )}
-
-                <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                  {t.contentEditor.core}
-                </p>
-                <Grid
-                  ids={core}
+              <div ref={pickerRef}>
+                <IconPicker
                   library={library}
                   onPick={(icon) => {
                     onChange({ purchaseBenefit: icon })
                     setPicking(false)
                   }}
-                />
-
-                {ix.length > 0 && (
-                  <>
-                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                      Rise of Ix
-                    </p>
-                    <Grid
-                      ids={ix}
-                      library={library}
-                      onPick={(icon) => {
-                        onChange({ purchaseBenefit: icon })
-                        setPicking(false)
-                      }}
-                    />
-                  </>
-                )}
-
-                {immortality.length > 0 && (
-                  <>
-                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                      Immortality
-                    </p>
-                    <Grid
-                      ids={immortality}
-                      library={library}
-                      onPick={(icon) => {
-                        onChange({ purchaseBenefit: icon })
-                        setPicking(false)
-                      }}
-                    />
-                  </>
-                )}
-
-                {influence.length > 0 && (
-                  <>
-                    <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                      {t.contentEditor.influence}
-                    </p>
-                    <Grid
-                      ids={influence}
-                      library={library}
-                      onPick={(icon) => {
-                        onChange({ purchaseBenefit: icon })
-                        setPicking(false)
-                      }}
-                    />
-                  </>
-                )}
+                  onClose={() => setPicking(false)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange({ purchaseBenefit: null })
+                      setPicking(false)
+                    }}
+                    className={`rounded px-2 py-1.5 text-left text-xs transition-colors ${
+                      card.purchaseBenefit === null
+                        ? 'bg-sand-500 font-medium text-zinc-950'
+                        : 'text-zinc-300 hover:bg-zinc-700'
+                    }`}
+                  >
+                    {t.cardPanel.none}
+                  </button>
+                </IconPicker>
               </div>
             )}
 

@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react'
 
 import { useT } from '../i18n/strings'
-import { iconPart, textPart, type AnyIconId } from '../model/card'
-import { groupIconIds, useIconLibrary, type IconLibrary } from '../model/iconLibrary'
+import { iconPart, textPart } from '../model/card'
+import { useIconLibrary } from '../model/iconLibrary'
 import { useContentDrag, type ContentBox } from './contentDrag'
 import { Choice } from './controls'
 import { BreakIcon, DiamondIcon, TextIcon } from './icons'
+import { IconPicker } from './IconPicker'
 
 /**
  * Un color por tipo de pieza, el mismo en la fila y en el botón que la agrega.
@@ -47,15 +48,6 @@ export function ContentPalette() {
   const { target, setTarget, add, setDragSource } = useContentDrag()
   const [picking, setPicking] = useState(false)
   const library = useIconLibrary()
-  const { custom, core, ix, immortality, influence } = groupIconIds(library)
-
-  const groups: { label: string; ids: AnyIconId[] }[] = [
-    { label: t.contentEditor.custom, ids: custom },
-    { label: t.contentEditor.core, ids: core },
-    { label: 'Rise of Ix', ids: ix },
-    { label: 'Immortality', ids: immortality },
-    { label: t.contentEditor.influence, ids: influence },
-  ]
 
   return (
     <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-zinc-800 bg-zinc-950 px-5 py-4">
@@ -103,78 +95,17 @@ export function ContentPalette() {
       {picking && (
         // La grilla se topa a media pantalla y scrollea adentro: pegada al pie
         // como está, el catálogo entero taparía las cajas que se están
-        // llenando. Los propios van primero — se agregaron a propósito para
-        // este mazo, así que pesan más que revisar todo el catálogo del juego
-        // para encontrarlos — y las expansiones aparte, para no tener que
-        // mirar tooltip por tooltip cuando el mazo no las usa.
-        <div className="flex max-h-[42vh] flex-col gap-2 overflow-y-auto rounded-md bg-zinc-900 p-2">
-          {groups
-            .filter((group) => group.ids.length > 0)
-            .map((group) => (
-              <div key={group.label} className="flex flex-col gap-1">
-                <p className="text-[11px] tracking-[0.18em] text-zinc-500 uppercase">
-                  {group.label}
-                </p>
-                <Grid
-                  ids={group.ids}
-                  library={library}
-                  onPick={(icon) => add(iconPart(icon))}
-                  onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
-                  onDragEnd={() => setDragSource(null)}
-                />
-              </div>
-            ))}
-        </div>
+        // llenando. El tope va en la grilla y no en el selector entero, para
+        // que el buscador no se vaya con el scroll.
+        <IconPicker
+          listClassName="max-h-[42vh] overflow-y-auto"
+          library={library}
+          onPick={(icon) => add(iconPart(icon))}
+          onClose={() => setPicking(false)}
+          onDragStart={(icon) => setDragSource({ kind: 'icon', icon })}
+          onDragEnd={() => setDragSource(null)}
+        />
       )}
-    </div>
-  )
-}
-
-/**
- * Grilla de iconos para elegir uno: se reusa tal cual en `CardPanel` para el
- * beneficio de compra, que no necesita arrastrar — ahí `onDragStart`/
- * `onDragEnd` quedan sin pasar.
- */
-export function Grid({
-  ids,
-  library,
-  onPick,
-  onDragStart,
-  onDragEnd,
-}: {
-  ids: AnyIconId[]
-  library: IconLibrary
-  onPick: (icon: AnyIconId) => void
-  onDragStart?: (icon: AnyIconId) => void
-  onDragEnd?: () => void
-}) {
-  return (
-    // Nueve por fila y casi sin aire entre ellos: el catálogo entero son unas
-    // cuarenta y cinco piezas, y a seis por fila había que scrollear la grilla
-    // para llegar a influencia. Los iconos son siluetas de color plano, así
-    // que se siguen reconociendo chicos.
-    <div className="grid grid-cols-9 gap-0.5">
-      {ids.map((icon) => (
-        <button
-          key={icon}
-          title={library[icon].label}
-          onClick={() => onPick(icon)}
-          draggable={onDragStart !== undefined}
-          onDragStart={(event) => {
-            event.dataTransfer.effectAllowed = 'copy'
-            onDragStart?.(icon)
-          }}
-          onDragEnd={onDragEnd}
-          className={`flex aspect-square items-center justify-center rounded p-0.5 transition-colors hover:bg-zinc-700 ${onDragStart ? 'cursor-grab active:cursor-grabbing' : ''}`}
-        >
-          <img
-            src={library[icon].url}
-            alt={library[icon].label}
-            draggable={false}
-            className="max-h-full max-w-full object-contain"
-          />
-        </button>
-      ))}
     </div>
   )
 }

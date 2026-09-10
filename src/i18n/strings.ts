@@ -252,6 +252,14 @@ type Strings = {
     bleedToggle: string
     bleedOnHint: string
     bleedOffHint: string
+    /**
+     * El dorso del mazo, intercalado detrás de cada hoja de frentes. Es una
+     * opción de esta impresión y no del mazo: el reverso es el mismo para
+     * todas las cartas del juego.
+     */
+    backsToggle: string
+    backsOnHint: string
+    backsOffHint: string
     buildingPdf: string
     downloadPdf: string
     pdfSizeHintBefore: string
@@ -525,6 +533,10 @@ const STRINGS: Record<Language, Strings> = {
         'Cada carta se dibuja 3 mm más grande de negro por lado y se corta sola: si la guillotina se corre, sale negro y no un filo blanco. Entran menos por hoja.',
       bleedOffHint:
         'Las cartas van pegadas y comparten el corte, así que un corte sirve para dos. Entran más por hoja, pero cualquier desvío se nota.',
+      backsToggle: 'Imprimir los reversos',
+      backsOnHint:
+        'Detrás de cada hoja de frentes va su hoja de dorsos, espejada para que cada reverso caiga sobre su carta. El PDF tiene el doble de páginas: hay que imprimirlo a doble faz, volteando por el borde largo.',
+      backsOffHint: 'Sale sólo el frente, una página por hoja.',
       buildingPdf: 'Armando el PDF…',
       downloadPdf: 'Bajar PDF para imprimir',
       pdfSizeHintBefore:
@@ -808,6 +820,10 @@ const STRINGS: Record<Language, Strings> = {
         "Each card is drawn 3 mm bigger in black on every side and cut on its own: if the guillotine drifts, it cuts into black instead of a white edge. Fewer fit per sheet.",
       bleedOffHint:
         'Cards are placed edge to edge and share the cut, so one cut serves two. More fit per sheet, but any drift shows.',
+      backsToggle: 'Print the card backs',
+      backsOnHint:
+        'Each sheet of fronts is followed by its sheet of backs, mirrored so every back lands on its own card. The PDF has twice the pages: print it double-sided, flipping on the long edge.',
+      backsOffHint: 'Fronts only, one page per sheet.',
       buildingPdf: 'Building the PDF…',
       downloadPdf: 'Download PDF to print',
       pdfSizeHintBefore:
@@ -1092,6 +1108,10 @@ const STRINGS: Record<Language, Strings> = {
         'Cada carta é desenhada 3 mm maior em preto de cada lado e cortada sozinha: se a guilhotina desviar, sai preto em vez de uma borda branca. Cabem menos por folha.',
       bleedOffHint:
         'As cartas ficam coladas e compartilham o corte, então um corte serve para duas. Cabem mais por folha, mas qualquer desvio aparece.',
+      backsToggle: 'Imprimir os versos',
+      backsOnHint:
+        'Atrás de cada folha de frentes vai a sua folha de versos, espelhada para que cada verso caia sobre a sua carta. O PDF tem o dobro de páginas: é preciso imprimir frente e verso, virando pela borda longa.',
+      backsOffHint: 'Só as frentes, uma página por folha.',
       buildingPdf: 'Montando o PDF…',
       downloadPdf: 'Baixar PDF para imprimir',
       pdfSizeHintBefore:
@@ -1377,6 +1397,10 @@ const STRINGS: Record<Language, Strings> = {
         'Chaque carte est dessinée 3 mm plus grande en noir de chaque côté et découpée seule : si le massicot dévie, il coupe dans le noir et non sur un liseré blanc. Il en tient moins par feuille.',
       bleedOffHint:
         'Les cartes sont collées et partagent la coupe, donc une coupe sert pour deux. Il en tient plus par feuille, mais le moindre écart se voit.',
+      backsToggle: 'Imprimer les dos',
+      backsOnHint:
+        'Chaque feuille de rectos est suivie de sa feuille de dos, en miroir pour que chaque dos tombe sur sa carte. Le PDF a deux fois plus de pages : il faut l’imprimer en recto verso, avec retournement sur le bord long.',
+      backsOffHint: 'Rectos seuls, une page par feuille.',
       buildingPdf: 'Création du PDF…',
       downloadPdf: 'Télécharger le PDF à imprimer',
       pdfSizeHintBefore:
@@ -1662,6 +1686,10 @@ const STRINGS: Record<Language, Strings> = {
         'Jede Karte wird an jeder Seite 3 mm größer in Schwarz gezeichnet und einzeln geschnitten: Verläuft die Schneidemaschine, schneidet sie ins Schwarze statt in eine weiße Kante. Es passen weniger pro Blatt.',
       bleedOffHint:
         'Die Karten liegen aneinander und teilen sich den Schnitt, ein Schnitt reicht also für zwei. Es passen mehr pro Blatt, aber jede Abweichung fällt auf.',
+      backsToggle: 'Kartenrückseiten drucken',
+      backsOnHint:
+        'Auf jedes Blatt mit Vorderseiten folgt sein Blatt mit Rückseiten, gespiegelt, damit jede Rückseite auf ihrer Karte landet. Das PDF hat doppelt so viele Seiten: beidseitig drucken, Wendung an der langen Kante.',
+      backsOffHint: 'Nur Vorderseiten, eine Seite pro Blatt.',
       buildingPdf: 'PDF wird gebaut…',
       downloadPdf: 'PDF zum Drucken herunterladen',
       pdfSizeHintBefore:
@@ -1947,6 +1975,10 @@ const STRINGS: Record<Language, Strings> = {
         'Ogni carta si disegna 3 mm più grande di nero per lato e si taglia da sola: se la taglierina si sposta, taglia nel nero e non su un filo bianco. Ne entrano meno per foglio.',
       bleedOffHint:
         'Le carte stanno attaccate e condividono il taglio, quindi un taglio serve per due. Ne entrano di più per foglio, ma qualsiasi scarto si vede.',
+      backsToggle: 'Stampare i dorsi',
+      backsOnHint:
+        'Dietro ogni foglio di fronti va il suo foglio di dorsi, specchiato perché ogni dorso cada sulla sua carta. Il PDF ha il doppio delle pagine: va stampato fronte-retro, con giro sul lato lungo.',
+      backsOffHint: 'Solo i fronti, una pagina per foglio.',
       buildingPdf: 'Creazione del PDF…',
       downloadPdf: 'Scarica il PDF da stampare',
       pdfSizeHintBefore:
@@ -2232,6 +2264,10 @@ const STRINGS: Record<Language, Strings> = {
         'Każda karta rysowana jest o 3 mm większa na czarno z każdej strony i cięta osobno: jeśli gilotyna zjedzie, tnie w czerń, a nie w białą krawędź. Mieści się ich mniej na arkusz.',
       bleedOffHint:
         'Karty leżą przy sobie i dzielą cięcie, więc jedno cięcie starcza na dwie. Mieści się ich więcej na arkusz, ale każde odchylenie widać.',
+      backsToggle: 'Drukuj rewersy',
+      backsOnHint:
+        'Za każdym arkuszem awersów idzie jego arkusz rewersów, odbity lustrzanie, żeby każdy rewers trafił na swoją kartę. PDF ma dwa razy więcej stron: trzeba drukować dwustronnie, z obrotem wzdłuż dłuższej krawędzi.',
+      backsOffHint: 'Tylko awersy, jedna strona na arkusz.',
       buildingPdf: 'Składanie PDF…',
       downloadPdf: 'Pobierz PDF do druku',
       pdfSizeHintBefore:
@@ -2515,6 +2551,10 @@ const STRINGS: Record<Language, Strings> = {
         'Každá karta se kreslí o 3 mm větší v černé na každé straně a řeže se samostatně: když se řezačka posune, řízne do černé a ne do bílé hrany. Vejde se jich na arch míň.',
       bleedOffHint:
         'Karty leží na sobě nalepené a sdílejí řez, takže jeden řez slouží dvěma. Vejde se jich na arch víc, ale každá odchylka je vidět.',
+      backsToggle: 'Tisknout rubové strany',
+      backsOnHint:
+        'Za každým archem líců následuje jeho arch rubů, zrcadlově, aby každý rub padl na svou kartu. PDF má dvakrát tolik stran: je potřeba tisknout oboustranně s obracením podél delší hrany.',
+      backsOffHint: 'Jen líce, jedna strana na arch.',
       buildingPdf: 'Skládám PDF…',
       downloadPdf: 'Stáhnout PDF k tisku',
       pdfSizeHintBefore:
@@ -2799,6 +2839,10 @@ const STRINGS: Record<Language, Strings> = {
         'Minden kártya oldalanként 3 mm-rel nagyobbra rajzolódik feketében, és külön vágódik: ha a vágógép elcsúszik, feketébe vág, nem fehér élbe. Laponként kevesebb fér el.',
       bleedOffHint:
         'A kártyák egymáshoz érnek és osztoznak a vágáson, így egy vágás kettőt szolgál ki. Laponként több fér el, de minden eltérés meglátszik.',
+      backsToggle: 'Kártyahátlapok nyomtatása',
+      backsOnHint:
+        'Minden előlapos lap mögé odakerül a hátlapos lapja, tükrözve, hogy minden hátlap a saját kártyájára essen. A PDF kétszer annyi oldalas: kétoldalasan kell nyomtatni, a hosszú él mentén fordítva.',
+      backsOffHint: 'Csak az előlapok, laponként egy oldal.',
       buildingPdf: 'PDF készítése…',
       downloadPdf: 'PDF letöltése nyomtatáshoz',
       pdfSizeHintBefore:
@@ -3083,6 +3127,10 @@ const STRINGS: Record<Language, Strings> = {
         'Каждая карта рисуется на 3 мм больше чёрным с каждой стороны и режется отдельно: если резак уйдёт, он врежется в чёрное, а не оставит белую кромку. На лист их влезает меньше.',
       bleedOffHint:
         'Карты лежат вплотную и делят рез, так что один рез служит двум. На лист их влезает больше, но любое отклонение видно.',
+      backsToggle: 'Печатать рубашки',
+      backsOnHint:
+        'За каждым листом лицевых сторон идёт его лист рубашек, зеркально, чтобы каждая рубашка легла на свою карту. В PDF вдвое больше страниц: печатать двусторонне, с переворотом по длинному краю.',
+      backsOffHint: 'Только лицевые стороны, по одной странице на лист.',
       buildingPdf: 'Собираю PDF…',
       downloadPdf: 'Скачать PDF для печати',
       pdfSizeHintBefore:
@@ -3367,6 +3415,10 @@ const STRINGS: Record<Language, Strings> = {
         'Кожна карта малюється на 3 мм більшою чорним з кожного боку й ріжеться окремо: якщо різак зійде, він вріжеться в чорне, а не лишить білу кромку. На аркуш їх влазить менше.',
       bleedOffHint:
         'Карти лежать впритул і ділять різ, тож один різ служить двом. На аркуш їх влазить більше, але будь-яке відхилення видно.',
+      backsToggle: 'Друкувати сорочки',
+      backsOnHint:
+        'За кожним аркушем лицьових боків іде його аркуш сорочок, дзеркально, щоб кожна сорочка лягла на свою карту. У PDF удвічі більше сторінок: друкувати двобічно, з перевертанням по довгому краю.',
+      backsOffHint: 'Лише лицьові боки, по одній сторінці на аркуш.',
       buildingPdf: 'Збираю PDF…',
       downloadPdf: 'Завантажити PDF для друку',
       pdfSizeHintBefore:
@@ -3651,6 +3703,10 @@ const STRINGS: Record<Language, Strings> = {
         'Всяка карта се рисува с 3 мм по-голяма в черно от всяка страна и се реже отделно: ако гилотината се измести, реже в черното, а не оставя бял кант. На лист се побират по-малко.',
       bleedOffHint:
         'Картите са долепени и делят реза, така че един рез служи за две. На лист се побират повече, но всяко отклонение си личи.',
+      backsToggle: 'Печат на гърбовете',
+      backsOnHint:
+        'След всеки лист с лица идва неговият лист с гърбове, огледално, за да падне всеки гръб върху своята карта. PDF-ът е с двойно повече страници: печата се двустранно, с обръщане по дългия ръб.',
+      backsOffHint: 'Само лицата, по една страница на лист.',
       buildingPdf: 'Сглобяване на PDF…',
       downloadPdf: 'Изтегляне на PDF за печат',
       pdfSizeHintBefore:

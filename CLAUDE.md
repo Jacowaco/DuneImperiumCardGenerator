@@ -49,6 +49,13 @@ icono se guarda recortado al contenido, porque se posicionan dinámicamente.
 Los nombres están en la lista `SYMBOLS` del script, en orden de lectura de la
 hoja — si se exporta una hoja nueva hay que actualizar esa lista.
 
+**3. Sueltos → `src/assets/`**
+La lista `SINGLE_ASSETS`, para lo que es del template pero **no es una capa de
+la carta**. Hoy sólo está `card-back.png`, el dorso del mazo. La distinción no
+es cosmética: `prepare()` precarga `layers/` entero antes de dibujar, y el
+dorso es más de 1 MB que la mayoría de las exportaciones no necesita — sólo lo
+usa la hoja de impresión, y sólo si se piden los reversos.
+
 Medidas útiles (todas en `src/render/constants.ts`, medidas de los PNG y del
 render de referencia, no estimadas):
 - `ART_RECT` — x 23, y 84, 704 × 626: el hueco de la imagen del jugador.
@@ -775,6 +782,7 @@ grilla siguen ocupando la celda entera.
   - [x] export en lote
   - [x] reordenar las cartas arrastrándolas, ejemplares por carta y sacar
         afuera sólo las terminadas
+  - [x] imprimir los reversos, para armar las cartas a doble faz
 - [ ] Fase 6 — empaquetado de escritorio
 
 ### Lo próximo
@@ -782,10 +790,11 @@ grilla siguen ocupando la celda entera.
 Lo que queda está trabado esperando arte del PSD — ver "Falta exportar" —, más
 el empaquetado de escritorio de la Fase 6.
 
-Lo más grande que se puede hacer sin arte nueva es el **reverso de carta**,
-para imprimir a doble faz: necesita una segunda cara en el modelo y páginas
-alternadas en el PDF, con la vuelta espejada para que al dar vuelta la hoja
-cada reverso caiga sobre su carta.
+La impresión a doble faz ya está (ver "Los reversos"), con el dorso del juego.
+Lo que no está es poder **cambiar ese dorso**: hoy es el PNG del template y
+nada más. Un dorso propio tendría que viajar en el mazo como los iconos
+propios, y recién ahí habría que decidir si es del mazo o de cada carta — en
+Dune: Imperium todas comparten el reverso, así que del mazo alcanza.
 
 ## Las hojas de impresión
 
@@ -841,6 +850,40 @@ Los dos modos son dos destinos distintos:
 
 En A3 y SRA3 el sangrado sale gratis —entran las mismas 16 cartas— porque lo que
 sobra es margen. En A4 cuesta un tercio de la hoja.
+
+### Los reversos
+
+El toggle «Imprimir los reversos» mete la hoja de dorsos **detrás de cada hoja
+de frentes**, no todas juntas al final: así el PDF sale en el orden que espera
+el dúplex de la impresora. Las hojas de papel siguen siendo las mismas; lo que
+se duplica son las páginas del PDF.
+
+**El dorso es uno solo para todo el juego**, así que no es un campo de `Card`
+ni del mazo: es una imagen del template, como el fondo negro. Por eso el toggle
+está en el diálogo de imprimir y no en la carta, y por eso el dorso se dibuja
+con un `drawImage` y no montando un `CardStage` — no hay nada que componer.
+
+La página de atrás va **espejada, y lo que se espeja es el acomodo, no la
+imagen**: el dorso se imprime como es y el que se da vuelta es el papel. El
+volteo asumido es el del borde largo, que es lo que hace cualquier impresora
+dúplex con papel vertical, y el hint del toggle lo dice porque elegir el otro
+deja todos los reversos cabeza abajo.
+
+Que el bloque de cartas esté **centrado** en la hoja es lo que hace que alcance
+con cambiar el índice de la celda (`mirrorIndex` en `paper.ts`) en vez de tener
+una cuenta de posiciones aparte: espejar una grilla centrada alrededor del
+centro del papel da las mismas coordenadas.
+
+Hace falta espejar **aunque el dorso sea siempre el mismo**, y eso es lo que
+no se ve venir: la última página puede tener una fila incompleta, y ahí las
+celdas ocupadas no son simétricas. Sin espejarlas, el reverso de la última fila
+cae sobre papel en blanco y la carta sale sin dorso. Medido en el PDF: con
+cinco cartas en A4 la última fila es `##.` en el frente y tiene que ser `.##`
+en el dorso.
+
+Con sangrado el dorso lo aprovecha igual que el frente, porque también tiene su
+borde negro sólido (~25 px, los mismos 2 mm), así que los 3 mm de negro que se
+pintan alrededor continúan el mismo color.
 
 ### Las marcas de corte
 

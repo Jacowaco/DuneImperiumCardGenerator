@@ -200,3 +200,20 @@ export const cardPosition = (index: number, layout: PageLayout, imposition: Impo
   x: layout.left + (index % imposition.columns) * imposition.pitchX,
   y: layout.top + Math.floor(index / imposition.columns) * imposition.pitchY,
 })
+
+/**
+ * La misma celda vista desde atrás: al dar vuelta la hoja por el borde largo
+ * —el volteo que hace cualquier impresora dúplex con papel vertical— las
+ * columnas se invierten y las filas quedan donde estaban.
+ *
+ * Que el bloque esté **centrado** en la hoja es lo que hace que el reverso de
+ * la columna 1 caiga justo sobre el frente de la última: espejar la grilla
+ * alrededor del centro del papel deja las mismas coordenadas. Por eso alcanza
+ * con cambiar el índice y no hay una cuenta de posiciones aparte.
+ *
+ * Hace falta aunque el dorso sea uno solo para todo el mazo: la última página
+ * puede tener una fila incompleta, y ahí las celdas ocupadas no son simétricas.
+ */
+export const mirrorIndex = (index: number, layout: PageLayout, imposition: Imposition) =>
+  Math.floor(index / imposition.columns) * imposition.columns +
+  (layout.columns - 1 - (index % imposition.columns))

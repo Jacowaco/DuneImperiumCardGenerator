@@ -1,8 +1,10 @@
+import cardBackUrl from '../assets/card-back.png'
 import { AppError } from '../model/errors'
 import { buildFactionLibrary } from '../model/factionLibrary'
 import { buildIconLibrary } from '../model/iconLibrary'
 import type { Language } from '../model/language'
 import type { Deck } from '../model/storage'
+import { cachedImage, loadImage } from '../render/imageCache'
 import { downloadBlob, release } from './download'
 import {
   BLEED,
@@ -11,6 +13,7 @@ import {
   layoutPage,
   MARK_GAP,
   MARK_WIDTH,
+  mirrorIndex,
   PAPERS,
   sheetCount,
   type Imposition,
@@ -37,6 +40,9 @@ import { createCardRenderer, prepare } from './renderCard'
  * - **Con sangrado** (imprenta): cada carta se dibuja 3 mm más grande de negro
  *   por lado y se corta sola. Entran menos, pero un corte corrido deja negro
  *   en vez de un filo blanco.
+ *
+ * Con los reversos prendidos, cada hoja de frentes lleva atrás su hoja de
+ * dorsos: son las mismas hojas de papel, con el doble de páginas en el PDF.
  */
 
 /**
@@ -44,9 +50,18 @@ import { createCardRenderer, prepare } from './renderCard'
  *
  * Con sangrado se pinta el negro de la carta antes de dibujarla: el borde de
  * la carta ya es negro sólido, así que la unión es invisible y el sangrado no
- * inventa ningún píxel.
+ * inventa ningún píxel. El dorso también tiene su borde negro, así que la
+ * cuenta le sirve igual.
  */
-export function drawSheet(cards: HTMLCanvasElement[], imposition: Imposition): HTMLCanvasElement {
+export function drawSheet(
+  cards: CanvasImageSource[],
+  imposition: Imposition,
+  /**
+   * Espeja la grilla para la cara de atrás. **Se espeja el acomodo, no la
+   * imagen**: el dorso se imprime como es y es el papel el que se da vuelta.
+   */
+  mirror = false,
+): HTMLCanvasElement {
   const layout = layoutPage(cards.length, imposition)
 
   const sheet = document.createElement('canvas')
@@ -61,7 +76,8 @@ export function drawSheet(cards: HTMLCanvasElement[], imposition: Imposition): H
   context.fillRect(0, 0, sheet.width, sheet.height)
 
   cards.forEach((card, index) => {
-    const { x, y } = cardPosition(index, layout, imposition)
+    const cell = mirror ? mirrorIndex(index, layout, imposition) : index
+    const { x, y } = cardPosition(cell, layout, imposition)
 
     if (imposition.bleed) {
       context.fillStyle = '#000000'
@@ -117,6 +133,8 @@ export type SheetOptions = {
   bleed: boolean
   /** Cuántas veces se imprime el mazo entero, además de las copias de cada carta. */
   copies: number
+  /** Intercalar la hoja de dorsos detrás de cada hoja de frentes. */
+  backs: boolean
   language: Language
   onProgress?: (done: number, total: number) => void
 }
@@ -133,11 +151,36 @@ export type SheetOptions = {
 export const sheetCards = <T extends { copies: number }>(cards: T[], copies: number): T[] =>
   cards.flatMap((card) => Array<T>(card.copies * copies).fill(card))
 
+/**
+ * El dorso del mazo, uno solo para todas las cartas: en Dune: Imperium el
+ * reverso no distingue una carta de otra, así que no es un campo de `Card` —
+ * es una capa más del template, como el fondo negro.
+ *
+ * Se dibuja con `drawImage` a mano y no montando un `CardStage`, que es lo que
+ * hace el frente, porque no hay nada que componer: es el PNG tal cual, del
+ * tamaño exacto de la carta.
+ *
+ * Por eso tampoco vive en `assets/layers/` ni lo precarga `prepare()`: son más
+ * de 1 MB que la mayoría de las exportaciones no necesita. Se carga acá, sólo
+ * cuando se piden los reversos, y la caché lo deja listo para las páginas que
+ * siguen.
+ */
+async function loadCardBack(): Promise<HTMLImageElement> {
+  await loadImage(cardBackUrl)
+  const back = cachedImage(cardBackUrl)
+  // La caché resuelve igual las imágenes que no cargan, para no dejar colgado
+  // un export por un icono. Acá sí hay que cortar: sin dorso, la hoja de atrás
+  // saldría en blanco y el papel ya estaría gastado.
+  if (!back) throw new AppError('sheet-canvas-failed')
+  return back
+}
+
 export async function exportPrintSheets(
   deck: Deck,
-  { paper, bleed, copies, language, onProgress }: SheetOptions,
+  { paper, bleed, copies, backs, language, onProgress }: SheetOptions,
 ): Promise<void> {
   await prepare(deck, language)
+  const back = backs ? await loadCardBack() : null
 
   const imposition = impose(paper, bleed)
   const cards = sheetCards(deck.cards, copies)
@@ -160,11 +203,22 @@ export async function exportPrintSheets(
 
       drawn.forEach(release)
       release(sheet)
+
+      // El dorso va enseguida del frente que le toca, no todos al final: así
+      // el PDF sale en el orden que espera el dúplex de la impresora.
+      if (back) {
+        const cells = Array<HTMLImageElement>(slice.length).fill(back)
+        const backSheet = drawSheet(cells, imposition, true)
+        await pdf.addPage(backSheet)
+        release(backSheet)
+      }
+
       onProgress?.(page + 1, pages)
     }
   } finally {
     renderer.dispose()
   }
 
-  downloadBlob(pdf.finish(), `cartas-${paper}${bleed ? '-sangrado' : ''}.pdf`)
+  const suffix = `${bleed ? '-sangrado' : ''}${backs ? '-doble-faz' : ''}`
+  downloadBlob(pdf.finish(), `cartas-${paper}${suffix}.pdf`)
 }

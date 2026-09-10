@@ -111,6 +111,7 @@ export function App() {
   // guarda en el archivo ni viaja con él.
   const [paper, setPaper] = useState<PaperId>('a4')
   const [bleed, setBleed] = useState(false)
+  const [backs, setBacks] = useState(false)
   const [copies, setCopies] = useState(1)
   /**
    * Dejar afuera las que todavía no están terminadas. Vale para las dos formas
@@ -685,7 +686,7 @@ export function App() {
     if (guardEmptyExport()) return
     setSheetExporting(true)
     try {
-      await exportPrintSheets(exportedDeck, { paper, bleed, copies, language })
+      await exportPrintSheets(exportedDeck, { paper, bleed, copies, backs, language })
     } catch (cause) {
       setError(describeError(cause, language, t.errors.sheetFailed))
     } finally {
@@ -1071,9 +1072,11 @@ export function App() {
               onlyDone={onlyDone}
               paper={paper}
               bleed={bleed}
+              backs={backs}
               copies={copies}
               onPaper={setPaper}
               onBleed={setBleed}
+              onBacks={setBacks}
               onCopies={setCopies}
               busy={sheetExporting}
               onExportSheets={() => void handleExportSheets()}

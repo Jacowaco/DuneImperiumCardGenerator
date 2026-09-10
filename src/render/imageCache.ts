@@ -59,6 +59,13 @@ export async function preloadImages(urls: Iterable<string>): Promise<void> {
 }
 
 /**
+ * La imagen ya cargada, para quien dibuja en un canvas a mano en vez de con
+ * Konva —la hoja de impresión y su dorso—. `undefined` si nunca cargó: la
+ * caché resuelve igual las que fallan, así que el llamador decide qué hacer.
+ */
+export const cachedImage = (url: string): HTMLImageElement | undefined => loaded.get(url)
+
+/**
  * La imagen si ya está en la caché, `undefined` mientras carga. Cuando llega
  * fuerza un re-render, que es lo que hace que el preview se complete solo.
  */

@@ -30,8 +30,9 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'psd-exports'
-LAYERS_OUT = ROOT / 'src' / 'assets' / 'layers'
-ICONS_OUT = ROOT / 'src' / 'assets' / 'icons'
+ASSETS_OUT = ROOT / 'src' / 'assets'
+LAYERS_OUT = ASSETS_OUT / 'layers'
+ICONS_OUT = ASSETS_OUT / 'icons'
 
 # Ranura donde va la banda de facción, justo debajo de la banda del nombre.
 FACTION_BAND_TOP = 90
@@ -53,6 +54,16 @@ LAYERS = {
     'play3.png': 'play-box-3.png',
     'reveal.png': 'reveal-box.png',
     'unload.png': 'unload.png',
+}
+
+# El dorso del mazo, uno solo para todas las cartas. Va a la raíz de assets/ y
+# no a layers/ porque **no es una capa de la carta**: `CardStage` nunca lo
+# dibuja y sólo lo usa la hoja de impresión, para la cara de atrás. La
+# distinción no es cosmética — el export precarga layers/ entero antes de
+# dibujar, y el dorso es un PNG de más de 1 MB que la mayoría de las
+# exportaciones no necesita.
+SINGLE_ASSETS = {
+    'Card Back.png': 'card-back.png',
 }
 
 FACTION_LAYERS = {
@@ -237,6 +248,11 @@ def fail(message):
 def copy_layer(source, target):
     Image.open(SRC / source).convert('RGBA').save(LAYERS_OUT / target)
     print(f'  capa     {target}')
+
+
+def copy_asset(source, target):
+    Image.open(SRC / source).convert('RGBA').save(ASSETS_OUT / target)
+    print(f'  asset    {target}')
 
 
 def align_faction_band(source, target):
@@ -452,6 +468,8 @@ def main():
 
     for source, target in LAYERS.items():
         copy_layer(source, target)
+    for source, target in SINGLE_ASSETS.items():
+        copy_asset(source, target)
     for source, target in FACTION_LAYERS.items():
         align_faction_band(source, target)
 

@@ -17,10 +17,12 @@ type Props = {
   onlyDone: boolean
   paper: PaperId
   bleed: boolean
+  backs: boolean
   copies: number
   busy: boolean
   onPaper: (paper: PaperId) => void
   onBleed: (bleed: boolean) => void
+  onBacks: (backs: boolean) => void
   onCopies: (copies: number) => void
   onExportSheets: () => void
 }
@@ -35,10 +37,12 @@ export function PrintPanel({
   onlyDone,
   paper,
   bleed,
+  backs,
   copies,
   busy,
   onPaper,
   onBleed,
+  onBacks,
   onCopies,
   onExportSheets,
 }: Props) {
@@ -89,6 +93,13 @@ export function PrintPanel({
       <Toggle label={t.printPanel.bleedToggle} checked={bleed} onChange={onBleed} />
 
       <Hint>{bleed ? t.printPanel.bleedOnHint : t.printPanel.bleedOffHint}</Hint>
+
+      {/* El reverso es uno solo para todo el juego, así que esto es una opción
+          de la impresión y no algo que se elija por carta. El número de hojas
+          de papel no cambia: lo que se duplica son las páginas del PDF. */}
+      <Toggle label={t.printPanel.backsToggle} checked={backs} onChange={onBacks} />
+
+      <Hint>{backs ? t.printPanel.backsOnHint : t.printPanel.backsOffHint}</Hint>
 
       <Button onClick={onExportSheets} disabled={busy}>
         <DownloadIcon />
